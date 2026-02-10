@@ -18,8 +18,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "string.h"
 #include "cmsis_os.h"
-#include "lwip.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -28,7 +28,6 @@
 #include <stdio.h>
 #include "cmd.h"
 #include "IMU.h"
-#include "eth_pose.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -63,8 +62,28 @@ double const pion180 = 0.01745329251;
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+#if defined ( __ICCARM__ ) /*!< IAR Compiler */
+#pragma location=0x30000000
+ETH_DMADescTypeDef  DMARxDscrTab[ETH_RX_DESC_CNT]; /* Ethernet Rx DMA Descriptors */
+#pragma location=0x30000080
+ETH_DMADescTypeDef  DMATxDscrTab[ETH_TX_DESC_CNT]; /* Ethernet Tx DMA Descriptors */
+
+#elif defined ( __CC_ARM )  /* MDK ARM Compiler */
+
+__attribute__((at(0x30000000))) ETH_DMADescTypeDef  DMARxDscrTab[ETH_RX_DESC_CNT]; /* Ethernet Rx DMA Descriptors */
+__attribute__((at(0x30000080))) ETH_DMADescTypeDef  DMATxDscrTab[ETH_TX_DESC_CNT]; /* Ethernet Tx DMA Descriptors */
+
+#elif defined ( __GNUC__ ) /* GNU Compiler */
+
+ETH_DMADescTypeDef DMARxDscrTab[ETH_RX_DESC_CNT] __attribute__((section(".RxDescripSection"))); /* Ethernet Rx DMA Descriptors */
+ETH_DMADescTypeDef DMATxDscrTab[ETH_TX_DESC_CNT] __attribute__((section(".TxDescripSection")));   /* Ethernet Tx DMA Descriptors */
+#endif
+
+ETH_TxPacketConfig TxConfig;
 
 COM_InitTypeDef BspCOMInit;
+
+ETH_HandleTypeDef heth;
 
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
@@ -78,7 +97,7 @@ UART_HandleTypeDef huart2;
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
-  .stack_size = 1028 * 8,
+  .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
@@ -92,7 +111,7 @@ const osThreadAttr_t control_att = {
 osThreadId_t remote_id;
 const osThreadAttr_t remote_att = {
   .name = "remote_t",
-  .stack_size = 1028*8,  // Reduced from 8224 - analysis shows 1200 bytes needed
+  .stack_size = 1028*6,  // Reduced from 8224 to 6168 to save heap - main loop needs ~2-3KB
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* USER CODE END PV */
@@ -106,6 +125,7 @@ static void MX_TIM4_Init(void);
 static void MX_TIM8_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_USART2_UART_Init(void);
+static void MX_ETH_Init(void);
 void StartDefaultTask(void *argument);
 
 /* USER CODE BEGIN PFP */
@@ -139,9 +159,15 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 }
 void TIM_init(void)
 {
-__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, NEUTRAL);
-__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, NEUTRAL);
-__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, NEUTRAL);
+// Initialize MD20A motor drivers: 0% duty cycle and forward direction
+__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 0);
+__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, 0);
+__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, 0);
+
+// Set all direction pins to forward (HIGH)
+HAL_GPIO_WritePin(DIR1_GPIO_Port, DIR1_Pin, GPIO_PIN_SET);
+HAL_GPIO_WritePin(DIR2_GPIO_Port, DIR2_Pin, GPIO_PIN_SET);
+HAL_GPIO_WritePin(DIR3_GPIO_Port, DIR3_Pin, GPIO_PIN_SET);
 
 HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
 HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
@@ -164,28 +190,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-  /* Configure MPU for Ethernet DMA buffers in RAM_D2 */
-  MPU_Region_InitTypeDef MPU_InitStruct = {0};
-  
-  /* Disable MPU */
-  HAL_MPU_Disable();
-  
-  /* Configure RAM_D2 (0x30000000-0x30048000, 288KB) as non-cacheable for Ethernet DMA */
-  MPU_InitStruct.Enable = MPU_REGION_ENABLE;
-  MPU_InitStruct.Number = MPU_REGION_NUMBER0;
-  MPU_InitStruct.BaseAddress = 0x30000000;
-  MPU_InitStruct.Size = MPU_REGION_SIZE_512KB;  /* 288KB rounds up to 512KB MPU region */
-  MPU_InitStruct.SubRegionDisable = 0x0;
-  MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL0;
-  MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
-  MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_ENABLE;
-  MPU_InitStruct.IsShareable = MPU_ACCESS_NOT_SHAREABLE;
-  MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;  /* Critical: disable cache for DMA */
-  MPU_InitStruct.IsBufferable = MPU_ACCESS_BUFFERABLE;
-  HAL_MPU_ConfigRegion(&MPU_InitStruct);
-  
-  /* Enable MPU with default background region for privileged access */
-  HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
+
   /* USER CODE END 1 */
 /* USER CODE BEGIN Boot_Mode_Sequence_0 */
 #if defined(DUAL_CORE_BOOT_SYNC_SEQUENCE)
@@ -247,6 +252,7 @@ Error_Handler();
   MX_TIM8_Init();
   MX_TIM3_Init();
   MX_USART2_UART_Init();
+  MX_ETH_Init();
   /* USER CODE BEGIN 2 */
   CMD_Init(&huart1);
   BNO_RVC_Init();
@@ -385,6 +391,55 @@ void SystemClock_Config(void)
 }
 
 /**
+  * @brief ETH Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_ETH_Init(void)
+{
+
+  /* USER CODE BEGIN ETH_Init 0 */
+
+  /* USER CODE END ETH_Init 0 */
+
+   static uint8_t MACAddr[6];
+
+  /* USER CODE BEGIN ETH_Init 1 */
+
+  /* USER CODE END ETH_Init 1 */
+  heth.Instance = ETH;
+  MACAddr[0] = 0x00;
+  MACAddr[1] = 0x80;
+  MACAddr[2] = 0xE1;
+  MACAddr[3] = 0x00;
+  MACAddr[4] = 0x00;
+  MACAddr[5] = 0x00;
+  heth.Init.MACAddr = &MACAddr[0];
+  heth.Init.MediaInterface = HAL_ETH_RMII_MODE;
+  heth.Init.TxDesc = DMATxDscrTab;
+  heth.Init.RxDesc = DMARxDscrTab;
+  heth.Init.RxBuffLen = 1536;
+
+  /* USER CODE BEGIN MACADDRESS */
+
+  /* USER CODE END MACADDRESS */
+
+  if (HAL_ETH_Init(&heth) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  memset(&TxConfig, 0 , sizeof(ETH_TxPacketConfig));
+  TxConfig.Attributes = ETH_TX_PACKETS_FEATURES_CSUM | ETH_TX_PACKETS_FEATURES_CRCPAD;
+  TxConfig.ChecksumCtrl = ETH_CHECKSUM_IPHDR_PAYLOAD_INSERT_PHDR_CALC;
+  TxConfig.CRCPadCtrl = ETH_CRC_PAD_INSERT;
+  /* USER CODE BEGIN ETH_Init 2 */
+
+  /* USER CODE END ETH_Init 2 */
+
+}
+
+/**
   * @brief TIM2 Initialization Function
   * @param None
   * @retval None
@@ -403,11 +458,11 @@ static void MX_TIM2_Init(void)
 
   /* USER CODE END TIM2_Init 1 */
   htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 83;
+  htim2.Init.Prescaler = 0;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 19999;
+  htim2.Init.Period = 7371;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
   {
     Error_Handler();
@@ -725,7 +780,15 @@ static void MX_GPIO_Init(void)
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
-
+  // Initialize MD20A direction pins as outputs (default HIGH for forward)
+  GPIO_InitStruct.Pin = DIR1_Pin | DIR2_Pin | DIR3_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  
+  // Set all to forward initially
+  HAL_GPIO_WritePin(GPIOA, DIR1_Pin | DIR2_Pin | DIR3_Pin, GPIO_PIN_SET);
   /* USER CODE END MX_GPIO_Init_2 */
 }
 
@@ -816,31 +879,22 @@ static void enc(double dt, double rpm[3])
 }
 #include "math.h"
 double yaw = 0,yawrate = 0,ax = 0,ay = 0,az = 0;
-
+static int counter = 0;
+static double twopion60 = 2*M_PI/60;
 void remote(void *argument)
 {
-	int tick = 50;
-	const TickType_t period = pdMS_TO_TICKS(tick); // 20 Hz
+	int tick = 10;
+	const TickType_t period = pdMS_TO_TICKS(tick); // 100 Hz
 	TickType_t lastWakeTime = xTaskGetTickCount();
 
     const float dt = (float)(period * portTICK_PERIOD_MS) * 1e-3f;
-
-	  /* init code for LWIP */
-    MX_LWIP_Init();
-	/* Initialize Ethernet POSE communication with Pi5 */
-	eth_pose_config_t eth_config = {
-	  .server_ip = "192.168.1.100",
-	  .server_port = 9000,
-	  .send_period_ms = 200  // 5 Hz
-	};
-	ETH_POSE_Init(&eth_config);
-	ETH_POSE_StartThread();
-
-    CMD_Send("hey\n");
-	uint16_t counter = 0;
+	
+    //CMD_Send("Remote task started\n");
+	uint16_t loop_cnt = 0;
 	for (;;)
 	{
 	    vTaskDelayUntil(&lastWakeTime, period);
+	    
 	    static double rpm[3] = {0};
 
 	    // Get IMU data with linear acceleration (gravity compensated)
@@ -848,54 +902,20 @@ void remote(void *argument)
 
 	    enc(dt,rpm);
 	    
-	    // Check for trajectory from Pi (overrides vd commands)
-	    trajectory_setpoint_t traj;
-	    if (ETH_POSE_GetTrajectory(&traj)) {
-	        // Use trajectory setpoint for controller
-	        xd[0] = traj.x_des;
-	        xd[1] = traj.y_des;
-	        xd[2] = traj.yaw_des;
-	        xd[3] = traj.vx_world;
-	        xd[4] = traj.vy_world;
-	        x[2] = yaw*pion180;
-	        Controller_Step(x, xd, vd, 1, dt);  // selector=1 for position control
-	    } else {
-	        // Use manual velocity commands
-	        vd[0] = vxd;
-	        vd[1] = vyd;
-	        vd[2] = yawrated;
-	        x[2] = yaw*pion180;
-	        Controller_Step(x, xd, vd, 0, dt);  // selector=0 for velocity control
-	    }
+	    // Use manual velocity commands
+	    vd[0] = vxd;
+	    vd[1] = vyd;
+	    vd[2] = yawrated;
+	    x[2] = yaw*pion180;
+	    Controller_Step(x, xd, vd, 0, dt);  // selector=0 for velocity control
 	    
 	    PWM(rpm,dt);
-	    
-	    // Update Ethernet POSE data
-	    robot_pose_t pose = {
-	        .x = x[0],
-	        .y = x[1],
-	        .yaw = x[2],
-	        .vx = vd[0],  // World frame velocities
-	        .vy = vd[1],
-	        .wz = yawrate,
-	        .timestamp_ms = osKernelGetTickCount()
-	    };
-	    ETH_POSE_UpdatePose(&pose);
 
-	    /*if (counter++%2==0)
-	    {
-	    	char buf[128];
-	    	double pitch_raw, roll_raw, ax_raw_dbg, ay_raw_dbg, az_raw_dbg;
-	    	BNO_RVC_GetDebug(&pitch_raw, &roll_raw, &ax_raw_dbg, &ay_raw_dbg, &az_raw_dbg);
-	    	snprintf(buf, sizeof(buf), "P:%.1f R:%.1f | Raw[%.2f,%.2f,%.2f] Lin[%.2f,%.2f,%.2f]\n", 
-	    	         pitch_raw, roll_raw, ax_raw_dbg, ay_raw_dbg, az_raw_dbg, ax, ay, az);
-	    	CMD_Send(buf);
-	    }*/
 
-	    /*if (counter++%(int)(0.1/dt) == 0)
+	    //if (counter++%100 == 0)
 	    {
-	    	printf("%.2f %.2f %.2f\n", rpm[0]*twopion60,rpm[1]*twopion60,rpm[2]*twopion60);
-	    }*/
+	    	//printf("%.2f %.2f %.2f\n", ax,ay,az);
+	    }
 
 	}
 }
@@ -938,12 +958,10 @@ int _write(int file, char *ptr, int len) {
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument)
 {
-  /* init code for LWIP */
-  MX_LWIP_Init();
   /* USER CODE BEGIN 5 */
-  /* Infinite loop */
-  for(;;)
+   for(;;)
   {
+
 	  BSP_LED_Toggle(LED_GREEN);
 	  osDelay(333);
   }

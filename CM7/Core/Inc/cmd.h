@@ -9,15 +9,12 @@ void CMD_Init(UART_HandleTypeDef *huart);
 bool CMD_StartTask(void);
 void CMD_Send(const char *s);
 
-#define NEUTRAL 2633
-#define SLOW    (NEUTRAL + 200)
-#define MED		(NEUTRAL + 450)
-#define MED1		(NEUTRAL + 550)
-#define MED2		(NEUTRAL + 650)
-#define MED3		(NEUTRAL + 750)
-#define VICTOR_RANGE 878
-#define MAXf    (NEUTRAL + VICTOR_RANGE)				// max is +878
-#define MAXb 	(NEUTRAL - VICTOR_RANGE)
+// MD20A motor driver with Saturn 5303 motors
+// PWM: 0-100% duty cycle (TIM2 ARR=7371)
+#define PWM_PERIOD 7371
+#define PWM_MIN 0
+#define PWM_MAX PWM_PERIOD
+#define PWM_RANGE PWM_PERIOD  // Full range for duty cycle
 
 extern volatile double speed[3];
 extern volatile double vxd;

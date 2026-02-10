@@ -28,7 +28,6 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "eth_pose.h"
 #include "cmd.h"
 
 extern TIM_HandleTypeDef htim2;
@@ -47,7 +46,7 @@ extern TIM_HandleTypeDef htim2;
 #endif
 
 #ifndef CMD_TASK_STACK_WORDS
-#define CMD_TASK_STACK_WORDS        512u  // 2048 bytes - needed for CMD_Printf 128-byte buffer + call stack
+#define CMD_TASK_STACK_WORDS        768u  // Increased to 3KB - printf with newlib reentrant needs more stack
 #endif
 
 #ifndef CMD_TASK_PRIO
@@ -410,7 +409,12 @@ void CMD_Send(const char *s)
 {
     if (!s_huart || !s) return;
 
-    if (s_txMutex) (void)xSemaphoreTake(s_txMutex, portMAX_DELAY);
+    // Use 100ms timeout instead of blocking forever to prevent deadlock
+    if (s_txMutex) {
+        if (xSemaphoreTake(s_txMutex, pdMS_TO_TICKS(100)) != pdTRUE) {
+            return;  // Timeout, skip this send
+        }
+    }
     (void)HAL_UART_Transmit(s_huart, (uint8_t*)s, (uint16_t)strlen(s), 100);
     if (s_txMutex) (void)xSemaphoreGive(s_txMutex);
 }
@@ -445,11 +449,6 @@ static void cmd_rotate(const char *args)
     if (end == args) return;
 
     yawrated = wd;
-    
-    // Automatically stop trajectory mode when manual control is used
-    if (ETH_POSE_GetTrajectoryMode()) {
-        ETH_POSE_SetTrajectoryMode(false);
-    }
 }
 static void cmd_dir(const char *args)
 {
@@ -463,11 +462,6 @@ static void cmd_dir(const char *args)
     direction = deg * pion180 + 0.261799;   // radians + 15deg offset
     vxd = vdes * cos(direction);
     vyd = vdes * sin(direction);
-    
-    // Automatically stop trajectory mode when manual control is used
-    if (ETH_POSE_GetTrajectoryMode()) {
-        ETH_POSE_SetTrajectoryMode(false);
-    }
 }
 
 static void cmd_slow(const char *args)
@@ -477,11 +471,6 @@ static void cmd_slow(const char *args)
     vdes = 0.3;
     vxd = vdes * cos(direction);
     vyd = vdes * sin(direction);
-    
-    // Automatically stop trajectory mode when manual control is used
-    if (ETH_POSE_GetTrajectoryMode()) {
-        ETH_POSE_SetTrajectoryMode(false);
-    }
 	//__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, SLOW);
 }
 static void cmd_med(const char *args)
@@ -491,11 +480,6 @@ static void cmd_med(const char *args)
     vdes = 0.6;
     vxd = vdes * cos(direction);
     vyd = vdes * sin(direction);
-    
-    // Automatically stop trajectory mode when manual control is used
-    if (ETH_POSE_GetTrajectoryMode()) {
-        ETH_POSE_SetTrajectoryMode(false);
-    }
 	//__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, MED);
 }
 
@@ -505,11 +489,6 @@ void cmd_stop(const char *args)
     CMD_Send("Stop\r\n");
     vxd = 0;
     vyd = 0;
-    
-    // Automatically stop trajectory mode when manual control is used
-    if (ETH_POSE_GetTrajectoryMode()) {
-        ETH_POSE_SetTrajectoryMode(false);
-    }
 	//__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, NEUTRAL);
 }
 
@@ -553,17 +532,6 @@ static void cmd_help(const char *args)
 
 static void cmd_traj(const char *args)
 {
-    // Parse argument: 1=start trajectory mode, 0=stop trajectory mode
-    int mode = 0;
-    if (args && *args) {
-        mode = atoi(args);
-    }
-    
-    if (mode == 1) {
-        ETH_POSE_SetTrajectoryMode(true);
-        CMD_Send("Trajectory mode STARTED\r\n");
-    } else {
-        ETH_POSE_SetTrajectoryMode(false);
-        CMD_Send("Trajectory mode STOPPED\r\n");
-    }
+    (void)args;
+    CMD_Send("Trajectory command removed\r\n");
 }
