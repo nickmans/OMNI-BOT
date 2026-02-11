@@ -1123,6 +1123,66 @@ Discarded input sections
  .debug_frame   0x00000000      0x268 ./Core/ThreadSafe/newlib_lock_glue.o
  .ARM.attributes
                 0x00000000       0x34 ./Core/ThreadSafe/newlib_lock_glue.o
+ .group         0x00000000        0xc ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .group         0x00000000        0xc ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .group         0x00000000        0xc ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .group         0x00000000        0xc ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .group         0x00000000        0xc ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .group         0x00000000        0xc ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .group         0x00000000        0xc ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .group         0x00000000        0xc ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .text          0x00000000        0x0 ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .data          0x00000000        0x0 ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .bss           0x00000000        0x0 ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .text.LAN8742_RegisterBusIO
+                0x00000000       0x64 ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .text.LAN8742_Init
+                0x00000000       0x9a ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .text.LAN8742_DeInit
+                0x00000000       0x3a ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .text.LAN8742_DisablePowerDownMode
+                0x00000000       0x5a ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .text.LAN8742_EnablePowerDownMode
+                0x00000000       0x5a ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .text.LAN8742_StartAutoNego
+                0x00000000       0x5a ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .text.LAN8742_GetLinkState
+                0x00000000      0x10e ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .text.LAN8742_SetLinkState
+                0x00000000       0x98 ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .text.LAN8742_EnableLoopbackMode
+                0x00000000       0x5a ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .text.LAN8742_DisableLoopbackMode
+                0x00000000       0x5a ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .text.LAN8742_EnableIT
+                0x00000000       0x5c ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .text.LAN8742_DisableIT
+                0x00000000       0x5e ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .text.LAN8742_ClearIT
+                0x00000000       0x38 ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .text.LAN8742_GetITStatus
+                0x00000000       0x4e ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .debug_info    0x00000000      0x5e4 ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .debug_abbrev  0x00000000      0x14c ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .debug_aranges
+                0x00000000       0x88 ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .debug_rnglists
+                0x00000000       0x64 ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .debug_macro   0x00000000       0x78 ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .debug_macro   0x00000000      0xaf0 ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .debug_macro   0x00000000       0x22 ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .debug_macro   0x00000000       0x8e ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .debug_macro   0x00000000       0x51 ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .debug_macro   0x00000000      0x103 ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .debug_macro   0x00000000       0x6a ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .debug_macro   0x00000000      0x1df ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .debug_macro   0x00000000      0x45e ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .debug_line    0x00000000      0x899 ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .debug_str     0x00000000     0x5d19 ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .comment       0x00000000       0x44 ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .debug_frame   0x00000000      0x20c ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
+ .ARM.attributes
+                0x00000000       0x34 ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
  .group         0x00000000        0xc ./Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo.o
  .group         0x00000000        0xc ./Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo.o
  .group         0x00000000        0xc ./Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo.o
@@ -7080,6 +7140,7 @@ LOAD ./Core/Src/syscalls.o
 LOAD ./Core/Src/sysmem.o
 LOAD ./Core/Startup/startup_stm32h755zitx.o
 LOAD ./Core/ThreadSafe/newlib_lock_glue.o
+LOAD ./Drivers/BSP/STM32H7xx_Nucleo/lan8742.o
 LOAD ./Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo.o
 LOAD ./Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal.o
 LOAD ./Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_cortex.o

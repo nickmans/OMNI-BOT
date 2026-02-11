@@ -18,8 +18,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "string.h"
 #include "cmsis_os.h"
+#include "lwip.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include "cmd.h"
 #include "IMU.h"
+#include "udp_client.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -62,28 +63,8 @@ double const pion180 = 0.01745329251;
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-#if defined ( __ICCARM__ ) /*!< IAR Compiler */
-#pragma location=0x30000000
-ETH_DMADescTypeDef  DMARxDscrTab[ETH_RX_DESC_CNT]; /* Ethernet Rx DMA Descriptors */
-#pragma location=0x30000080
-ETH_DMADescTypeDef  DMATxDscrTab[ETH_TX_DESC_CNT]; /* Ethernet Tx DMA Descriptors */
-
-#elif defined ( __CC_ARM )  /* MDK ARM Compiler */
-
-__attribute__((at(0x30000000))) ETH_DMADescTypeDef  DMARxDscrTab[ETH_RX_DESC_CNT]; /* Ethernet Rx DMA Descriptors */
-__attribute__((at(0x30000080))) ETH_DMADescTypeDef  DMATxDscrTab[ETH_TX_DESC_CNT]; /* Ethernet Tx DMA Descriptors */
-
-#elif defined ( __GNUC__ ) /* GNU Compiler */
-
-ETH_DMADescTypeDef DMARxDscrTab[ETH_RX_DESC_CNT] __attribute__((section(".RxDescripSection"))); /* Ethernet Rx DMA Descriptors */
-ETH_DMADescTypeDef DMATxDscrTab[ETH_TX_DESC_CNT] __attribute__((section(".TxDescripSection")));   /* Ethernet Tx DMA Descriptors */
-#endif
-
-ETH_TxPacketConfig TxConfig;
 
 COM_InitTypeDef BspCOMInit;
-
-ETH_HandleTypeDef heth;
 
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
@@ -97,7 +78,7 @@ UART_HandleTypeDef huart2;
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
-  .stack_size = 128 * 4,
+  .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
@@ -114,6 +95,12 @@ const osThreadAttr_t remote_att = {
   .stack_size = 1028*6,  // Reduced from 8224 to 6168 to save heap - main loop needs ~2-3KB
   .priority = (osPriority_t) osPriorityNormal,
 };
+osThreadId_t ethernet_id;
+const osThreadAttr_t ethernet_att = {
+  .name = "ethernet_t",
+  .stack_size = 1024 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -125,7 +112,6 @@ static void MX_TIM4_Init(void);
 static void MX_TIM8_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_USART2_UART_Init(void);
-static void MX_ETH_Init(void);
 void StartDefaultTask(void *argument);
 
 /* USER CODE BEGIN PFP */
@@ -252,7 +238,6 @@ Error_Handler();
   MX_TIM8_Init();
   MX_TIM3_Init();
   MX_USART2_UART_Init();
-  MX_ETH_Init();
   /* USER CODE BEGIN 2 */
   CMD_Init(&huart1);
   BNO_RVC_Init();
@@ -286,6 +271,7 @@ Error_Handler();
   /* USER CODE BEGIN RTOS_THREADS */
   CMD_StartTask();
   remote_id = osThreadNew(remote, NULL, &remote_att);
+  ethernet_id = osThreadNew(UDP_Client_Task, NULL, &ethernet_att);
   //control_id = osThreadNew(control, NULL, &control_att);
   //imu_id = osThreadNew(imu_task, NULL, &imu_att);
 
@@ -388,55 +374,6 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-}
-
-/**
-  * @brief ETH Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_ETH_Init(void)
-{
-
-  /* USER CODE BEGIN ETH_Init 0 */
-
-  /* USER CODE END ETH_Init 0 */
-
-   static uint8_t MACAddr[6];
-
-  /* USER CODE BEGIN ETH_Init 1 */
-
-  /* USER CODE END ETH_Init 1 */
-  heth.Instance = ETH;
-  MACAddr[0] = 0x00;
-  MACAddr[1] = 0x80;
-  MACAddr[2] = 0xE1;
-  MACAddr[3] = 0x00;
-  MACAddr[4] = 0x00;
-  MACAddr[5] = 0x00;
-  heth.Init.MACAddr = &MACAddr[0];
-  heth.Init.MediaInterface = HAL_ETH_RMII_MODE;
-  heth.Init.TxDesc = DMATxDscrTab;
-  heth.Init.RxDesc = DMARxDscrTab;
-  heth.Init.RxBuffLen = 1536;
-
-  /* USER CODE BEGIN MACADDRESS */
-
-  /* USER CODE END MACADDRESS */
-
-  if (HAL_ETH_Init(&heth) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  memset(&TxConfig, 0 , sizeof(ETH_TxPacketConfig));
-  TxConfig.Attributes = ETH_TX_PACKETS_FEATURES_CSUM | ETH_TX_PACKETS_FEATURES_CRCPAD;
-  TxConfig.ChecksumCtrl = ETH_CHECKSUM_IPHDR_PAYLOAD_INSERT_PHDR_CALC;
-  TxConfig.CRCPadCtrl = ETH_CRC_PAD_INSERT;
-  /* USER CODE BEGIN ETH_Init 2 */
-
-  /* USER CODE END ETH_Init 2 */
-
 }
 
 /**
@@ -886,6 +823,8 @@ void remote(void *argument)
 	int tick = 10;
 	const TickType_t period = pdMS_TO_TICKS(tick); // 100 Hz
 	TickType_t lastWakeTime = xTaskGetTickCount();
+  const TickType_t posePeriod = pdMS_TO_TICKS(200); // 5 Hz pose heartbeat
+  TickType_t lastPoseTick = xTaskGetTickCount();
 
     const float dt = (float)(period * portTICK_PERIOD_MS) * 1e-3f;
 	
@@ -910,6 +849,14 @@ void remote(void *argument)
 	    Controller_Step(x, xd, vd, 0, dt);  // selector=0 for velocity control
 	    
 	    PWM(rpm,dt);
+
+      // Push zero pose to Pi5 at 5 Hz to keep link alive and avoid stale data
+      TickType_t nowTick = xTaskGetTickCount();
+      if ((nowTick - lastPoseTick) >= posePeriod)
+      {
+      	UDP_Client_SendZeroPose();
+      	lastPoseTick = nowTick;
+      }
 
 
 	    //if (counter++%100 == 0)
@@ -958,6 +905,8 @@ int _write(int file, char *ptr, int len) {
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument)
 {
+  /* init code for LWIP */
+  MX_LWIP_Init();
   /* USER CODE BEGIN 5 */
    for(;;)
   {

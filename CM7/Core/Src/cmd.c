@@ -29,6 +29,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "cmd.h"
+#include "udp_client.h"
 
 extern TIM_HandleTypeDef htim2;
 /* ----------------------------- Config --------------------------------- */
@@ -532,6 +533,32 @@ static void cmd_help(const char *args)
 
 static void cmd_traj(const char *args)
 {
-    (void)args;
-    CMD_Send("Trajectory command removed\r\n");
+    if (!args)
+    {
+        CMD_Send("traj requires arg 0 or 1\r\n");
+        return;
+    }
+
+    char *end = NULL;
+    long value = strtol(args, &end, 10);
+    if (end == args)
+    {
+        CMD_Send("traj invalid arg\r\n");
+        return;
+    }
+
+    if (value == 1)
+    {
+        UDP_Client_RequestCmd(CMD_START_TRAJ);
+        CMD_Send("traj start\r\n");
+    }
+    else if (value == 0)
+    {
+        UDP_Client_RequestCmd(CMD_STOP_TRAJ);
+        CMD_Send("traj stop\r\n");
+    }
+    else
+    {
+        CMD_Send("traj arg must be 0 or 1\r\n");
+    }
 }

@@ -85,12 +85,7 @@ Middlewares/Third_Party/LwIP/api_lib.o: \
  ../../Middlewares/Third_Party/LwIP/src/include/lwip/priv/tcpip_priv.h \
  ../../Middlewares/Third_Party/LwIP/src/include/lwip/tcpip.h \
  ../../Middlewares/Third_Party/LwIP/src/include/lwip/timeouts.h \
- ../../Middlewares/Third_Party/LwIP/src/include/lwip/priv/tcp_priv.h \
- ../../Middlewares/Third_Party/LwIP/src/include/lwip/tcp.h \
- ../../Middlewares/Third_Party/LwIP/src/include/lwip/tcpbase.h \
- ../../Middlewares/Third_Party/LwIP/src/include/lwip/icmp.h \
- ../../Middlewares/Third_Party/LwIP/src/include/lwip/prot/icmp.h \
- ../../Middlewares/Third_Party/LwIP/src/include/lwip/prot/tcp.h
+ ../../Middlewares/Third_Party/LwIP/src/include/lwip/priv/tcp_priv.h
 ../../Middlewares/Third_Party/LwIP/src/include/lwip/opt.h:
 ../LWIP/Target/lwipopts.h:
 ../Core/Inc/main.h:
@@ -178,8 +173,3 @@ Middlewares/Third_Party/LwIP/api_lib.o: \
 ../../Middlewares/Third_Party/LwIP/src/include/lwip/tcpip.h:
 ../../Middlewares/Third_Party/LwIP/src/include/lwip/timeouts.h:
 ../../Middlewares/Third_Party/LwIP/src/include/lwip/priv/tcp_priv.h:
-../../Middlewares/Third_Party/LwIP/src/include/lwip/tcp.h:
-../../Middlewares/Third_Party/LwIP/src/include/lwip/tcpbase.h:
-../../Middlewares/Third_Party/LwIP/src/include/lwip/icmp.h:
-../../Middlewares/Third_Party/LwIP/src/include/lwip/prot/icmp.h:
-../../Middlewares/Third_Party/LwIP/src/include/lwip/prot/tcp.h:

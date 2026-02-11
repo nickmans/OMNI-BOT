@@ -50,7 +50,7 @@ Core/Src/cmd.o: ../Core/Src/cmd.c ../Core/Inc/main.h \
  ../../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h \
  ../../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h \
  ../../Middlewares/Third_Party/FreeRTOS/Source/include/task.h \
- ../Core/Inc/cmd.h
+ ../Core/Inc/cmd.h ../Core/Inc/udp_client.h
 ../Core/Inc/main.h:
 ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
 ../Core/Inc/stm32h7xx_hal_conf.h:
@@ -104,3 +104,4 @@ Core/Src/cmd.o: ../Core/Src/cmd.c ../Core/Inc/main.h \
 ../../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h:
 ../../Middlewares/Third_Party/FreeRTOS/Source/include/task.h:
 ../Core/Inc/cmd.h:
+../Core/Inc/udp_client.h:

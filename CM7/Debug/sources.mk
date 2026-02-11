@@ -28,5 +28,8 @@ Core/Startup \
 Core/ThreadSafe \
 Drivers/BSP/STM32H7xx_Nucleo \
 Drivers/STM32H7xx_HAL_Driver \
+LWIP/App \
+LWIP/Target \
 Middlewares/Third_Party/FreeRTOS \
+Middlewares/Third_Party/LwIP \
 
