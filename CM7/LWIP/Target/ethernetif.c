@@ -220,8 +220,16 @@ static void low_level_init(struct netif *netif)
   int32_t PHYLinkState = 0;
   ETH_MACConfigTypeDef MACConf = {0};
   /* Start ETH HAL Init */
+
+   uint8_t MACAddr[6] ;
   heth.Instance = ETH;
-  heth.Init.MACAddr = &EthMacAddr[0];
+  MACAddr[0] = 0x00;
+  MACAddr[1] = 0x80;
+  MACAddr[2] = 0xE1;
+  MACAddr[3] = 0x00;
+  MACAddr[4] = 0x00;
+  MACAddr[5] = 0x00;
+  heth.Init.MACAddr = &MACAddr[0];
   heth.Init.MediaInterface = HAL_ETH_RMII_MODE;
   heth.Init.TxDesc = DMATxDscrTab;
   heth.Init.RxDesc = DMARxDscrTab;
@@ -407,17 +415,6 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
   TxConfig.TxBuffer = Txbuffer;
   TxConfig.pData = p;
 
-  /* Flush D-Cache for each fragment before handing to DMA (H7 has D-Cache enabled). */
-  for (uint32_t j = 0; j < i; j++)
-  {
-    uintptr_t addr = (uintptr_t)Txbuffer[j].buffer;
-    uint32_t len = Txbuffer[j].len;
-    /* Align start to cache line (32 bytes) to avoid cleaning the wrong area. */
-    uintptr_t aligned = addr & ~((uintptr_t)0x1FU);
-    uint32_t clean_len = (uint32_t)((addr - aligned) + len + 31U) & ~31U;
-    SCB_CleanDCache_by_Addr((uint32_t *)aligned, clean_len);
-  }
-
   pbuf_ref(p);
 
   do
@@ -463,10 +460,6 @@ static struct pbuf * low_level_input(struct netif *netif)
   if(RxAllocStatus == RX_ALLOC_OK)
   {
     HAL_ETH_ReadData(&heth, (void **)&p);
-  }
-
-  if (p != NULL) {
-    printf("eth: received packet len=%d\r\n", p->tot_len);
   }
 
   return p;
@@ -681,6 +674,9 @@ void HAL_ETH_MspInit(ETH_HandleTypeDef* ethHandle)
     GPIO_InitStruct.Alternate = GPIO_AF11_ETH;
     HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
 
+    /* Peripheral interrupt init */
+    HAL_NVIC_SetPriority(ETH_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(ETH_IRQn);
   /* USER CODE BEGIN ETH_MspInit 1 */
 
   /* USER CODE END ETH_MspInit 1 */
@@ -717,6 +713,9 @@ void HAL_ETH_MspDeInit(ETH_HandleTypeDef* ethHandle)
     HAL_GPIO_DeInit(GPIOB, GPIO_PIN_13);
 
     HAL_GPIO_DeInit(GPIOG, GPIO_PIN_11|GPIO_PIN_13);
+
+    /* Peripheral interrupt Deinit*/
+    HAL_NVIC_DisableIRQ(ETH_IRQn);
 
   /* USER CODE BEGIN ETH_MspDeInit 1 */
 
@@ -809,17 +808,12 @@ void ethernet_link_thread(void* argument)
 
   struct netif *netif = (struct netif *) argument;
 /* USER CODE BEGIN ETH link init */
-
+  static int32_t last_PHYLinkState = -1;
 /* USER CODE END ETH link init */
 
   for(;;)
   {
   PHYLinkState = LAN8742_GetLinkState(&LAN8742);
-  static int32_t last_PHYLinkState = -1;
-  if (PHYLinkState != last_PHYLinkState) {
-    printf("PHY link state: %d\r\n", (int)PHYLinkState);
-    last_PHYLinkState = PHYLinkState;
-  }
 
   if(netif_is_link_up(netif) && (PHYLinkState <= LAN8742_STATUS_LINK_DOWN))
   {
