@@ -6,10 +6,10 @@
 // Definitions for globals declared in controller.h
 double k_p = 0.5;          // position P gain in body frame (small correction only)
 double aumax_body = 0.5;   // max translational accel in body frame (m/s^2)
-double umax = 8;        // max wheel speed (rad/s)
-double aumax = 0.3/0.09; // max wheel angular accel (rad/s^2)
-double jerkmax = 50*0.05; // max wheel angular jerk (rad/s^3)
-double wmax = 1;         // max yaw rate (rad/s)
+double umax = 11; // max wheel speed = 100 rpm
+double aumax = 1/0.075; // max wheel angular accel (rad/s^2)
+double jerkmax = 200*0.01; // max wheel angular jerk (rad/s^3)
+double wmax = 2;         // max yaw rate (rad/s)
 double dwmax = 1;        // max yaw accel (rad/s^2)
 
 #ifndef M_PI
@@ -293,6 +293,12 @@ void Controller_Step(const double           x[3],
     speed[0] = u_cmd[0];
     speed[1] = u_cmd[1];
     speed[2] = u_cmd[2];
+    /*static int counttter = 0;
+    if (counttter++>50)
+    {
+        printf("Control: %.2f %.2f %.2f\n",u_cmd[0],u_cmd[1],u_cmd[2]);
+        counttter = 0;
+    }*/
 
     // update persistent state
     du_prev[0] = du[0];

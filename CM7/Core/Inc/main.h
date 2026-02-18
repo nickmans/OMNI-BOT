@@ -66,12 +66,20 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define M1curr_Pin GPIO_PIN_0
+#define M1curr_GPIO_Port GPIOC
 #define PWM1_Pin GPIO_PIN_0
 #define PWM1_GPIO_Port GPIOA
 #define IMU_RX_Pin GPIO_PIN_3
 #define IMU_RX_GPIO_Port GPIOA
+#define M2curr_Pin GPIO_PIN_4
+#define M2curr_GPIO_Port GPIOA
+#define M3curr_Pin GPIO_PIN_5
+#define M3curr_GPIO_Port GPIOA
 #define ENC1_1_Pin GPIO_PIN_6
 #define ENC1_1_GPIO_Port GPIOA
+#define BATT_V_Pin GPIO_PIN_1
+#define BATT_V_GPIO_Port GPIOB
 #define IMU_INT_PIN_Pin GPIO_PIN_15
 #define IMU_INT_PIN_GPIO_Port GPIOE
 #define IMU_INT_PIN_EXTI_IRQn EXTI15_10_IRQn
@@ -98,12 +106,20 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN Private defines */
 // MD20A motor driver direction pins
-#define DIR1_Pin GPIO_PIN_4
-#define DIR1_GPIO_Port GPIOA
-#define DIR2_Pin GPIO_PIN_5
-#define DIR2_GPIO_Port GPIOA
-#define DIR3_Pin GPIO_PIN_6
-#define DIR3_GPIO_Port GPIOA
+#define DIR1_Pin GPIO_PIN_10
+#define DIR1_GPIO_Port GPIOE
+#define DIR2_Pin GPIO_PIN_11
+#define DIR2_GPIO_Port GPIOE
+#define DIR3_Pin GPIO_PIN_12
+#define DIR3_GPIO_Port GPIOE
+
+// Pololu HP MOSFET ON pins (motor power enable)
+#define MOTOR_ON1_Pin GPIO_PIN_8
+#define MOTOR_ON1_GPIO_Port GPIOG
+#define MOTOR_ON2_Pin GPIO_PIN_9
+#define MOTOR_ON2_GPIO_Port GPIOG
+#define MOTOR_ON3_Pin GPIO_PIN_10
+#define MOTOR_ON3_GPIO_Port GPIOG
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

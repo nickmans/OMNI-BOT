@@ -7,10 +7,12 @@
 C_SRCS += \
 ../Core/Src/IMU.c \
 ../Core/Src/PWM.c \
+../Core/Src/battery_monitor.c \
 ../Core/Src/cmd.c \
 ../Core/Src/controller.c \
 ../Core/Src/freertos.c \
 ../Core/Src/main.c \
+../Core/Src/state_estimator.c \
 ../Core/Src/stm32h7xx_hal_msp.c \
 ../Core/Src/stm32h7xx_it.c \
 ../Core/Src/syscalls.c \
@@ -20,10 +22,12 @@ C_SRCS += \
 OBJS += \
 ./Core/Src/IMU.o \
 ./Core/Src/PWM.o \
+./Core/Src/battery_monitor.o \
 ./Core/Src/cmd.o \
 ./Core/Src/controller.o \
 ./Core/Src/freertos.o \
 ./Core/Src/main.o \
+./Core/Src/state_estimator.o \
 ./Core/Src/stm32h7xx_hal_msp.o \
 ./Core/Src/stm32h7xx_it.o \
 ./Core/Src/syscalls.o \
@@ -33,10 +37,12 @@ OBJS += \
 C_DEPS += \
 ./Core/Src/IMU.d \
 ./Core/Src/PWM.d \
+./Core/Src/battery_monitor.d \
 ./Core/Src/cmd.d \
 ./Core/Src/controller.d \
 ./Core/Src/freertos.d \
 ./Core/Src/main.d \
+./Core/Src/state_estimator.d \
 ./Core/Src/stm32h7xx_hal_msp.d \
 ./Core/Src/stm32h7xx_it.d \
 ./Core/Src/syscalls.d \
@@ -51,7 +57,7 @@ Core/Src/%.o Core/Src/%.su Core/Src/%.cyclo: ../Core/Src/%.c Core/Src/subdir.mk
 clean: clean-Core-2f-Src
 
 clean-Core-2f-Src:
-	-$(RM) ./Core/Src/IMU.cyclo ./Core/Src/IMU.d ./Core/Src/IMU.o ./Core/Src/IMU.su ./Core/Src/PWM.cyclo ./Core/Src/PWM.d ./Core/Src/PWM.o ./Core/Src/PWM.su ./Core/Src/cmd.cyclo ./Core/Src/cmd.d ./Core/Src/cmd.o ./Core/Src/cmd.su ./Core/Src/controller.cyclo ./Core/Src/controller.d ./Core/Src/controller.o ./Core/Src/controller.su ./Core/Src/freertos.cyclo ./Core/Src/freertos.d ./Core/Src/freertos.o ./Core/Src/freertos.su ./Core/Src/main.cyclo ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/main.su ./Core/Src/stm32h7xx_hal_msp.cyclo ./Core/Src/stm32h7xx_hal_msp.d ./Core/Src/stm32h7xx_hal_msp.o ./Core/Src/stm32h7xx_hal_msp.su ./Core/Src/stm32h7xx_it.cyclo ./Core/Src/stm32h7xx_it.d ./Core/Src/stm32h7xx_it.o ./Core/Src/stm32h7xx_it.su ./Core/Src/syscalls.cyclo ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/syscalls.su ./Core/Src/sysmem.cyclo ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/sysmem.su ./Core/Src/udp_client.cyclo ./Core/Src/udp_client.d ./Core/Src/udp_client.o ./Core/Src/udp_client.su
+	-$(RM) ./Core/Src/IMU.cyclo ./Core/Src/IMU.d ./Core/Src/IMU.o ./Core/Src/IMU.su ./Core/Src/PWM.cyclo ./Core/Src/PWM.d ./Core/Src/PWM.o ./Core/Src/PWM.su ./Core/Src/battery_monitor.cyclo ./Core/Src/battery_monitor.d ./Core/Src/battery_monitor.o ./Core/Src/battery_monitor.su ./Core/Src/cmd.cyclo ./Core/Src/cmd.d ./Core/Src/cmd.o ./Core/Src/cmd.su ./Core/Src/controller.cyclo ./Core/Src/controller.d ./Core/Src/controller.o ./Core/Src/controller.su ./Core/Src/freertos.cyclo ./Core/Src/freertos.d ./Core/Src/freertos.o ./Core/Src/freertos.su ./Core/Src/main.cyclo ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/main.su ./Core/Src/state_estimator.cyclo ./Core/Src/state_estimator.d ./Core/Src/state_estimator.o ./Core/Src/state_estimator.su ./Core/Src/stm32h7xx_hal_msp.cyclo ./Core/Src/stm32h7xx_hal_msp.d ./Core/Src/stm32h7xx_hal_msp.o ./Core/Src/stm32h7xx_hal_msp.su ./Core/Src/stm32h7xx_it.cyclo ./Core/Src/stm32h7xx_it.d ./Core/Src/stm32h7xx_it.o ./Core/Src/stm32h7xx_it.su ./Core/Src/syscalls.cyclo ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/syscalls.su ./Core/Src/sysmem.cyclo ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/sysmem.su ./Core/Src/udp_client.cyclo ./Core/Src/udp_client.d ./Core/Src/udp_client.o ./Core/Src/udp_client.su
 
 .PHONY: clean-Core-2f-Src
 

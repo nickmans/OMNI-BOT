@@ -33,6 +33,24 @@
 
 /* Within 'USER CODE' section, code will be kept by default at each generation */
 /* USER CODE BEGIN 0 */
+// FreeRTOS hooks for error reporting
+#include <stdio.h>
+#include "FreeRTOS.h"
+#include "task.h"
+
+void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName)
+{
+  printf("[ERROR] Stack overflow in task: %s\r\n", pcTaskName);
+  // Optionally halt or blink LED here
+  while(1); // Halt system
+}
+
+void vApplicationMallocFailedHook(void)
+{
+  printf("[ERROR] Heap allocation failed!\r\n");
+  // Optionally halt or blink LED here
+  while(1); // Halt system
+}
 
 /* USER CODE END 0 */
 
@@ -42,8 +60,9 @@
 /* Time to block waiting for transmissions to finish */
 #define ETHIF_TX_TIMEOUT (2000U)
 /* USER CODE BEGIN OS_THREAD_STACK_SIZE_WITH_RTOS */
-/* Stack size of the interface thread */
-#define INTERFACE_THREAD_STACK_SIZE ( 350 )
+/* Stack size of the interface thread (in bytes) */
+/* Increased from 350 to avoid STACK OVERFLOW in EthIf task */
+#define INTERFACE_THREAD_STACK_SIZE ( 8192U )
 /* USER CODE END OS_THREAD_STACK_SIZE_WITH_RTOS */
 /* Network interface name */
 #define IFNAME0 's'
@@ -921,9 +940,24 @@ void HAL_ETH_RxLinkCallback(void **pStart, void **pEnd, uint8_t *buff, uint16_t 
 
   /* Update the total length of all the buffers of the chain. Each pbuf in the chain should have its tot_len
    * set to its own length, plus the length of all the following pbufs in the chain. */
-  for (p = *ppStart; p != NULL; p = p->next)
+  /* Compute total length for the whole chained packet and set each pbuf's tot_len
+   * to the length of this pbuf plus all following pbufs. Doing this incrementally
+   * on each callback caused previously accumulated (and growing) tot_len values. */
+  if (*ppStart)
   {
-    p->tot_len += Length;
+    uint32_t total_len = 0U;
+    /* First compute the packet total */
+    for (p = *ppStart; p != NULL; p = p->next)
+    {
+      total_len += p->len;
+    }
+
+    /* Then assign tot_len for each pbuf: remaining length from this pbuf to packet end */
+    for (p = *ppStart; p != NULL; p = p->next)
+    {
+      p->tot_len = total_len;
+      total_len -= p->len;
+    }
   }
 
   /* Invalidate D-Cache for the exact RX span so CPU reads fresh data. */

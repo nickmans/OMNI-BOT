@@ -1,0 +1,2 @@
+../Core/Src/battery_monitor.c:8:6:BatteryMonitor_Init	4	static
+../Core/Src/battery_monitor.c:13:7:BatteryMonitor_ReadVoltage_V	32	static

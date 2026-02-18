@@ -27,7 +27,9 @@ extern struct netif gnetif;
 #define UDP_CMD_RETRY_COUNT         3u
 #define UDP_CMD_RETRY_INTERVAL_MS   100u
 #define UDP_RX_BUFFER_SIZE          1500u
+#ifndef UDP_MAX_TRAJ_KNOTS
 #define UDP_MAX_TRAJ_KNOTS          64u
+#endif
 
 typedef struct __attribute__((packed))
 {
@@ -40,16 +42,7 @@ typedef struct __attribute__((packed))
     uint32_t crc32;
 } MessageHeader;
 
-typedef struct __attribute__((packed))
-{
-    uint32_t pose_t_ms;
-    float x;
-    float y;
-    float yaw;
-    float vx;
-    float vy;
-    float wz;
-} PosePayload;
+
 
 typedef struct __attribute__((packed))
 {
@@ -97,6 +90,7 @@ static TrajectoryHeader s_last_traj_hdr;
 static TrajectoryKnot s_last_traj_knots[UDP_MAX_TRAJ_KNOTS];
 static volatile uint16_t s_last_traj_count = 0;
 static volatile bool s_last_traj_valid = false;
+static volatile uint32_t s_last_traj_seq = 0;
 
 static bool time_elapsed(uint32_t now, uint32_t start, uint32_t interval_ms)
 {
@@ -206,6 +200,9 @@ static void handle_received_message(const MessageHeader *hdr, const uint8_t *pay
 {
     if (hdr->msg_type == MSG_TYPE_TRAJ)
     {
+        taskENTER_CRITICAL();
+        s_last_traj_seq = hdr->seq;
+        taskEXIT_CRITICAL();
         handle_traj_message(payload, payload_len);
     }
     else if (hdr->msg_type == MSG_TYPE_CMD)
@@ -304,7 +301,7 @@ static void send_pose_payload(const PosePayload *pose)
     udp_send_nonblocking(buffer, sizeof(buffer));
 }
 
-static void queue_pose(const PosePayload *pose)
+void queue_pose(const PosePayload *pose)
 {
     if (!pose)
     {
@@ -341,6 +338,14 @@ static void send_cmd_to_pi5(uint16_t cmd_id, uint32_t seq)
     pack_message(MSG_TYPE_CMD, seq, &payload, sizeof(payload), buffer);
 
     udp_send_nonblocking(buffer, sizeof(buffer));
+
+    if (cmd_id == CMD_START_RESTART_ROS2) {
+        // This command signals the Pi5 to start or restart the ROS2 stack
+        printf("ROS2 stack start/restart command sent\r\n");
+    } else if (cmd_id == CMD_SHUTDOWN_PI5) {
+        // This command signals the Pi5 to run its shutdown script
+        printf("Pi5 shutdown command sent\r\n");
+    }
 }
 
 static int udp_bind_socket(int sock)
@@ -410,7 +415,13 @@ void UDP_Client_RequestCmd(CommandID cmd_id)
     taskEXIT_CRITICAL();
 }
 
-bool UDP_Client_CopyLatestTraj(void *out_buf, uint32_t buf_len, uint16_t *out_knots, float *out_dt, uint16_t *out_flags)
+bool UDP_Client_CopyLatestTraj(void *out_buf,
+                              uint32_t buf_len,
+                              uint16_t *out_knots,
+                              float *out_dt,
+                              uint16_t *out_flags,
+                              uint32_t *out_traj_t0_ms,
+                              uint32_t *out_traj_seq)
 {
     if (!out_buf || buf_len == 0)
     {
@@ -448,6 +459,14 @@ bool UDP_Client_CopyLatestTraj(void *out_buf, uint32_t buf_len, uint16_t *out_kn
     if (out_flags)
     {
         *out_flags = s_last_traj_hdr.flags;
+    }
+    if (out_traj_t0_ms)
+    {
+        *out_traj_t0_ms = s_last_traj_hdr.traj_t0_ms;
+    }
+    if (out_traj_seq)
+    {
+        *out_traj_seq = s_last_traj_seq;
     }
     taskEXIT_CRITICAL();
 
@@ -509,11 +528,21 @@ void UDP_Client_Task(void *argument)
                    ip4_addr1(&gnetif.ip_addr), ip4_addr2(&gnetif.ip_addr), ip4_addr3(&gnetif.ip_addr), ip4_addr4(&gnetif.ip_addr),
                    ip4_addr1(&gnetif.gw), ip4_addr2(&gnetif.gw), ip4_addr3(&gnetif.gw), ip4_addr4(&gnetif.gw));
 
-            if (link_up)
-            {
-                err_t arp_err = etharp_gratuitous(&gnetif);
-                printf("netif gratuitous ARP sent (err=%d)\r\n", (int)arp_err);
-            }
+                if (link_up)
+                {
+                    err_t arp_err = etharp_gratuitous(&gnetif);
+                    printf("netif gratuitous ARP sent (err=%d)\r\n", (int)arp_err);
+
+                    /* Log FreeRTOS stack high-water marks to help find overflows */
+                    TaskHandle_t cur = xTaskGetCurrentTaskHandle();
+                    if (cur != NULL)
+                    {
+                        // Removed stack highwater printfs
+                    }
+
+                    TaskHandle_t tcp = xTaskGetHandle("tcpip_thread");
+                    // Removed stack highwater printfs
+                }
 
             last_link_up = link_up;
         }

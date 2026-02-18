@@ -162,8 +162,8 @@ void BNO_RVC_UpdateMain(double *yaw_out, double *yawrate_out,
   const double az_linear = (double)imu.az_mps2 - gz;
   
   // Write to output variables
-  if (yaw_out) *yaw_out = (double)imu.yaw_deg;
-  if (yawrate_out) *yawrate_out = (double)imu.yawrate_rad_s;
+  if (yaw_out) *yaw_out = -(double)imu.yaw_deg;
+  if (yawrate_out) *yawrate_out = -(double)imu.yawrate_rad_s;
   if (ax_out) *ax_out = ax_linear;
   if (ay_out) *ay_out = ay_linear;
   if (az_out) *az_out = az_linear;

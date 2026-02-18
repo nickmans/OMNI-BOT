@@ -28,4 +28,14 @@ void Controller_Step( const double           x[3],
 					 int selector,
 					 double dt);
 
+void StateEstimator_Update(const double w_rad_s[3],
+                           double dt_s,
+                           double imu_yaw_rad,
+                           double pose_out[3]);
+
+void StateEstimator_Reset(double x0_m, double y0_m, double yaw0_rad);
+void StateEstimator_ZeroImuYaw(double imu_yaw_rad);
+void StateEstimator_GetPose(double pose_out[3]);
+
+
 #endif

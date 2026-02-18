@@ -21,6 +21,8 @@ C:/Users/Loren/Documents/H7code/OMNI-BOT/Middlewares/Third_Party/FreeRTOS/Source
 C:/Users/Loren/Documents/H7code/OMNI-BOT/Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2319:12:xTaskGetTickCountFromISR	1
 C:/Users/Loren/Documents/H7code/OMNI-BOT/Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2350:13:uxTaskGetNumberOfTasks	1
 C:/Users/Loren/Documents/H7code/OMNI-BOT/Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2358:7:pcTaskGetName	3
+C:/Users/Loren/Documents/H7code/OMNI-BOT/Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2372:16:prvSearchForNameWithinSingleList	10
+C:/Users/Loren/Documents/H7code/OMNI-BOT/Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2440:15:xTaskGetHandle	8
 C:/Users/Loren/Documents/H7code/OMNI-BOT/Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2505:14:uxTaskGetSystemState	4
 C:/Users/Loren/Documents/H7code/OMNI-BOT/Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2609:12:xTaskCatchUpTicks	2
 C:/Users/Loren/Documents/H7code/OMNI-BOT/Middlewares/Third_Party/FreeRTOS/Source/tasks.c:2707:12:xTaskIncrementTick	12

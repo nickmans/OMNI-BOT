@@ -116,6 +116,9 @@ static void cmd_help(const char *args);
 static void cmd_dir(const char *args);
 static void cmd_rotate(const char *args);
 static void cmd_traj(const char *args);
+static void cmd_traj2(const char *args);
+static void cmd_shutdown(const char *args);
+static void cmd_wtest(const char *args);
 
 /* -------------------------- Command table ----------------------------- */
 /*
@@ -132,7 +135,10 @@ static const cmd_entry_t s_cmdTable[] =
 	{ 5, "Medium",  "Move Wheel Mediumly",  cmd_med  },
 	{ 6, "dir",  "dir + #",  cmd_dir  },
 	{ 7, "w",  "w + #",  cmd_rotate  },
-	{ 8, "traj",  "traj 1=start 0=stop",  cmd_traj  },
+    { 8, "traj",  "traj 1=start 0=stop",  cmd_traj  },
+    { 9, "traj2", "traj2 2=start/restart ros2", cmd_traj2 },
+    { 10, "shutdown", "shutdown pi5", cmd_shutdown },
+    { 11, "wtest", "wtest <wheel:1..3> <rpm> | wtest off", cmd_wtest },
 
 };
 static const size_t s_cmdTableCount = sizeof(s_cmdTable) / sizeof(s_cmdTable[0]);
@@ -343,16 +349,24 @@ static void CMD_ProcessLine(char *line)
     if (*s) { *s++ = '\0'; }
     char *args = CMD_Trim(s);
 
-    const cmd_entry_t *e = CMD_FindByName(cmd);
-    if (e && e->fn)
+    // Special handling: if command is 'traj' and argument is '2', call cmd_traj2
+    if (strcmp(cmd, "traj") == 0 && args && strcmp(args, "2") == 0)
     {
-        e->fn(args[0] ? args : NULL);
+        cmd_traj2(args);
     }
     else
     {
+        const cmd_entry_t *e = CMD_FindByName(cmd);
+        if (e && e->fn)
+        {
+            e->fn(args[0] ? args : NULL);
+        }
+        else
+        {
 #if CMD_PRINT_UNKNOWN
-        CMD_Printf("ERR unknown cmd '%s'\r\n", cmd);
+            CMD_Printf("ERR unknown cmd '%s'\r\n", cmd);
 #endif
+        }
     }
 #else
 #if CMD_PRINT_UNKNOWN
@@ -439,6 +453,10 @@ volatile double speed[3] = {0};
 volatile double vxd = 0;
 volatile double vyd = 0;
 volatile double yawrated = 0;
+volatile uint8_t traj_mode = 0;
+volatile uint8_t wheel_test_mode = 0;
+volatile int8_t wheel_test_index = 0;
+volatile double wheel_test_target_rpm = 38.2;
 double vdes = 0;
 static void cmd_rotate(const char *args)
 {
@@ -531,6 +549,8 @@ static void cmd_help(const char *args)
     }
 }
 
+// ...existing code...
+// Implementation for cmd_traj
 static void cmd_traj(const char *args)
 {
     if (!args)
@@ -549,11 +569,13 @@ static void cmd_traj(const char *args)
 
     if (value == 1)
     {
+        traj_mode = 1u;
         UDP_Client_RequestCmd(CMD_START_TRAJ);
         CMD_Send("traj start\r\n");
     }
     else if (value == 0)
     {
+        traj_mode = 0u;
         UDP_Client_RequestCmd(CMD_STOP_TRAJ);
         CMD_Send("traj stop\r\n");
     }
@@ -561,4 +583,98 @@ static void cmd_traj(const char *args)
     {
         CMD_Send("traj arg must be 0 or 1\r\n");
     }
+}
+
+// Implementation for cmd_traj2
+static void cmd_traj2(const char *args)
+{
+    if (!args)
+    {
+        CMD_Send("traj2 requires arg 2\r\n");
+        return;
+    }
+
+    char *end = NULL;
+    long value = strtol(args, &end, 10);
+    if (end == args)
+    {
+        CMD_Send("traj2 invalid arg\r\n");
+        return;
+    }
+
+    if (value == 2)
+    {
+        UDP_Client_RequestCmd(CMD_START_RESTART_ROS2);
+        CMD_Send("traj2 start/restart ros2\r\n");
+    }
+    else
+    {
+        CMD_Send("traj2 arg must be 2\r\n");
+    }
+}
+
+static void cmd_shutdown(const char *args)
+{
+    (void)args;
+    UDP_Client_RequestCmd(CMD_SHUTDOWN_PI5);
+    CMD_Send("shutdown request sent to pi5\r\n");
+}
+
+static void cmd_wtest(const char *args)
+{
+    if (!args)
+    {
+        CMD_Send("wtest usage: wtest <wheel:1..3> <rpm> | wtest off\r\n");
+        return;
+    }
+
+    while (isspace((unsigned char)*args)) { args++; }
+
+    if (strcmp(args, "off") == 0)
+    {
+        wheel_test_mode = 0u;
+        speed[0] = 0.0;
+        speed[1] = 0.0;
+        speed[2] = 0.0;
+        CMD_Send("wtest off\r\n");
+        return;
+    }
+
+    char *end = NULL;
+    long wheel = strtol(args, &end, 10);
+    if (end == args)
+    {
+        CMD_Send("wtest invalid wheel index\r\n");
+        return;
+    }
+
+    while (isspace((unsigned char)*end)) { end++; }
+
+    char *end_rpm = NULL;
+    double target_rpm = strtod(end, &end_rpm);
+    if (end_rpm == end)
+    {
+        CMD_Send("wtest invalid rpm\r\n");
+        return;
+    }
+
+    if (wheel < 1 || wheel > 3)
+    {
+        CMD_Send("wtest wheel must be 1..3\r\n");
+        return;
+    }
+
+    wheel_test_index = (int8_t)(wheel - 1);
+    wheel_test_target_rpm = target_rpm;
+    wheel_test_mode = 1u;
+
+    // Keep all body velocity commands at zero while running wheel test mode.
+    traj_mode = 0u;
+    vxd = 0.0;
+    vyd = 0.0;
+    yawrated = 0.0;
+
+    CMD_Printf("wtest on wheel=%ld target=%.2f rpm\r\n",
+               wheel,
+               wheel_test_target_rpm);
 }
