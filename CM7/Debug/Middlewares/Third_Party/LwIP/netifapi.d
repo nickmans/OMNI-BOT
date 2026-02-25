@@ -1,5 +1,5 @@
 Middlewares/Third_Party/LwIP/netifapi.o: \
- C:/Users/Loren/Documents/H7code/OMNI-BOT/Middlewares/Third_Party/LwIP/src/api/netifapi.c \
+ ../../Middlewares/Third_Party/LwIP/src/api/netifapi.c \
  ../../Middlewares/Third_Party/LwIP/src/include/lwip/opt.h \
  ../LWIP/Target/lwipopts.h ../Core/Inc/main.h \
  ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h \

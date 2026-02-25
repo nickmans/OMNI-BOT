@@ -487,7 +487,7 @@ static void cmd_slow(const char *args)
 {
     (void)args;
     CMD_Send("Slow\r\n");
-    vdes = 0.3;
+    vdes = 0.4;
     vxd = vdes * cos(direction);
     vyd = vdes * sin(direction);
 	//__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, SLOW);
@@ -496,7 +496,7 @@ static void cmd_med(const char *args)
 {
     (void)args;
     CMD_Send("Medium\r\n");
-    vdes = 0.6;
+    vdes = 0.78;
     vxd = vdes * cos(direction);
     vyd = vdes * sin(direction);
 	//__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, MED);

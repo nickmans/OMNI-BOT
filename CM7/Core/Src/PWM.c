@@ -6,6 +6,7 @@
 extern TIM_HandleTypeDef htim2;
 
 static const double DB_RPM       = 5.0;
+static const double DIR_DB_RPM   = 3.0;
 
 // MD20A with Saturn 5303 planetary gearmotor specs
 static const double Kp = 3.6, Ki = 12.0;
@@ -27,7 +28,7 @@ static const double sixtyon2pi = 9.54929658551;
 static const double ERR_FAST_RPM = 18.0;
 static const double KP_FAST_MULT = 1.35;
 static const double KI_FAST_MULT = 1.60;
-static const double BREAKAWAY_RPM = 14.0;
+static const double BREAKAWAY_RPM = 20.0;
 static const double NEG_INTEG_CAP_RATIO = 0.50;
 
 // Helper function to set motor direction via GPIO
@@ -43,8 +44,8 @@ static inline void set_motor_dir(int motor_idx, int direction)
 
 static inline int sign_with_deadband(double x, double deadband)
 {
-    if (x >  deadband) return +1;
-    if (x < -deadband) return -1;
+    if (x >=  deadband) return +1;
+    if (x <= -deadband) return -1;
     return 0; // inside deadband
 }
 
@@ -91,7 +92,7 @@ void PWM(double rpm[3], double dt)
         if (sp_rpm[i] > rpm_limit) sp_rpm[i] = rpm_limit;
         if (sp_rpm[i] < -rpm_limit) sp_rpm[i] = -rpm_limit;
 
-        const int req_dir = sign_with_deadband(sp_rpm[i], DB_RPM); // -1/0/+1
+        const int req_dir = sign_with_deadband(sp_rpm[i], DIR_DB_RPM); // -1/0/+1
         int new_dir = dir_state[i];
 
         if (req_dir == 0)
@@ -122,7 +123,7 @@ void PWM(double rpm[3], double dt)
 
         // Determine what sign the setpoint wants (if outside deadband)
         const double sp = sp_rpm[i];
-        const int want_dir = (fabs(sp) > DB_RPM) ? (sp >= 0.0 ? +1 : -1) : chosen_dir;
+        const int want_dir = (fabs(sp) >= DIR_DB_RPM) ? (sp >= 0.0 ? +1 : -1) : chosen_dir;
 
         // If the setpoint wants opposite sign but we haven't flipped yet -> coast at zero
         double sp_mag = fabs(sp);

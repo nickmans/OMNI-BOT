@@ -1,0 +1,1682 @@
+ARM GAS  /tmp/ccIbULwI.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 1
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"sys_arch.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.file 1 "../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c"
+  19              		.section	.text.sys_mbox_new,"ax",%progbits
+  20              		.align	1
+  21              		.global	sys_mbox_new
+  22              		.syntax unified
+  23              		.thumb
+  24              		.thumb_func
+  26              	sys_mbox_new:
+  27              	.LVL0:
+  28              	.LFB365:
+   1:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*
+   2:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  * Copyright (c) 2001-2003 Swedish Institute of Computer Science.
+   3:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  * All rights reserved.
+   4:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  *
+   5:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  * Redistribution and use in source and binary forms, with or without modification,
+   6:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  * are permitted provided that the following conditions are met:
+   7:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  *
+   8:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  * 1. Redistributions of source code must retain the above copyright notice,
+   9:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  *    this list of conditions and the following disclaimer.
+  10:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  * 2. Redistributions in binary form must reproduce the above copyright notice,
+  11:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  *    this list of conditions and the following disclaimer in the documentation
+  12:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  *    and/or other materials provided with the distribution.
+  13:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  * 3. The name of the author may not be used to endorse or promote products
+  14:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  *    derived from this software without specific prior written permission.
+  15:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  *
+  16:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
+  17:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+  18:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+  19:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+  20:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+  21:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  22:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  23:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+  24:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+  25:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  * OF SUCH DAMAGE.
+  26:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  *
+  27:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  * This file is part of the lwIP TCP/IP stack.
+  28:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  *
+  29:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  * Author: Adam Dunkels <adam@sics.se>
+  30:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  *
+ARM GAS  /tmp/ccIbULwI.s 			page 2
+
+
+  31:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****  */
+  32:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+  33:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /* lwIP includes. */
+  34:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #include "lwip/debug.h"
+  35:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #include "lwip/def.h"
+  36:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #include "lwip/sys.h"
+  37:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #include "lwip/mem.h"
+  38:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #include "lwip/stats.h"
+  39:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+  40:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if !NO_SYS
+  41:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+  42:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #include "cmsis_os.h"
+  43:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+  44:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if defined(LWIP_PROVIDE_ERRNO)
+  45:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** int errno;
+  46:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+  47:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+  48:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*-----------------------------------------------------------------------------------*/
+  49:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** //  Creates an empty mailbox.
+  50:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** err_t sys_mbox_new(sys_mbox_t *mbox, int size)
+  51:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** {
+  29              		.loc 1 51 1 view -0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 0
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              		.loc 1 51 1 is_stmt 0 view .LVU1
+  34 0000 10B5     		push	{r4, lr}
+  35              	.LCFI0:
+  36              		.cfi_def_cfa_offset 8
+  37              		.cfi_offset 4, -8
+  38              		.cfi_offset 14, -4
+  39 0002 0446     		mov	r4, r0
+  40 0004 0846     		mov	r0, r1
+  41              	.LVL1:
+  52:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if (osCMSIS < 0x20000U)
+  53:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   osMessageQDef(QUEUE, size, void *);
+  54:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   *mbox = osMessageCreate(osMessageQ(QUEUE), NULL);
+  55:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #else
+  56:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   *mbox = osMessageQueueNew(size, sizeof(void *), NULL);
+  42              		.loc 1 56 3 is_stmt 1 view .LVU2
+  43              		.loc 1 56 11 is_stmt 0 view .LVU3
+  44 0006 0022     		movs	r2, #0
+  45 0008 0421     		movs	r1, #4
+  46              	.LVL2:
+  47              		.loc 1 56 11 view .LVU4
+  48 000a FFF7FEFF 		bl	osMessageQueueNew
+  49              	.LVL3:
+  50              		.loc 1 56 9 discriminator 1 view .LVU5
+  51 000e 2060     		str	r0, [r4]
+  57:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+  58:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if SYS_STATS
+  59:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   ++lwip_stats.sys.mbox.used;
+  60:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   if(lwip_stats.sys.mbox.max < lwip_stats.sys.mbox.used)
+  61:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   {
+  62:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     lwip_stats.sys.mbox.max = lwip_stats.sys.mbox.used;
+  63:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   }
+  64:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif /* SYS_STATS */
+ARM GAS  /tmp/ccIbULwI.s 			page 3
+
+
+  65:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   if(*mbox == NULL)
+  52              		.loc 1 65 3 is_stmt 1 view .LVU6
+  53              		.loc 1 65 5 is_stmt 0 view .LVU7
+  54 0010 08B1     		cbz	r0, .L3
+  66:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     return ERR_MEM;
+  67:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+  68:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   return ERR_OK;
+  55              		.loc 1 68 10 view .LVU8
+  56 0012 0020     		movs	r0, #0
+  57              	.L2:
+  69:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** }
+  58              		.loc 1 69 1 view .LVU9
+  59 0014 10BD     		pop	{r4, pc}
+  60              	.LVL4:
+  61              	.L3:
+  66:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     return ERR_MEM;
+  62              		.loc 1 66 12 view .LVU10
+  63 0016 4FF0FF30 		mov	r0, #-1
+  64 001a FBE7     		b	.L2
+  65              		.cfi_endproc
+  66              	.LFE365:
+  68              		.section	.text.sys_mbox_free,"ax",%progbits
+  69              		.align	1
+  70              		.global	sys_mbox_free
+  71              		.syntax unified
+  72              		.thumb
+  73              		.thumb_func
+  75              	sys_mbox_free:
+  76              	.LVL5:
+  77              	.LFB366:
+  70:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+  71:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*-----------------------------------------------------------------------------------*/
+  72:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*
+  73:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   Deallocates a mailbox. If there are messages still present in the
+  74:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   mailbox when the mailbox is deallocated, it is an indication of a
+  75:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   programming error in lwIP and the developer should be notified.
+  76:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** */
+  77:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** void sys_mbox_free(sys_mbox_t *mbox)
+  78:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** {
+  78              		.loc 1 78 1 is_stmt 1 view -0
+  79              		.cfi_startproc
+  80              		@ args = 0, pretend = 0, frame = 0
+  81              		@ frame_needed = 0, uses_anonymous_args = 0
+  82              		.loc 1 78 1 is_stmt 0 view .LVU12
+  83 0000 10B5     		push	{r4, lr}
+  84              	.LCFI1:
+  85              		.cfi_def_cfa_offset 8
+  86              		.cfi_offset 4, -8
+  87              		.cfi_offset 14, -4
+  88 0002 0446     		mov	r4, r0
+  79:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if (osCMSIS < 0x20000U)
+  80:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   if(osMessageWaiting(*mbox))
+  81:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #else
+  82:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   if(osMessageQueueGetCount(*mbox))
+  89              		.loc 1 82 3 is_stmt 1 view .LVU13
+  90              		.loc 1 82 6 is_stmt 0 view .LVU14
+  91 0004 0068     		ldr	r0, [r0]
+ARM GAS  /tmp/ccIbULwI.s 			page 4
+
+
+  92              	.LVL6:
+  93              		.loc 1 82 6 view .LVU15
+  94 0006 FFF7FEFF 		bl	osMessageQueueGetCount
+  95              	.LVL7:
+  83:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+  84:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   {
+  85:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     /* Line for breakpoint.  Should never break here! */
+  86:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     portNOP();
+  96              		.loc 1 86 14 is_stmt 1 view .LVU16
+  87:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if SYS_STATS
+  88:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     lwip_stats.sys.mbox.err++;
+  89:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif /* SYS_STATS */
+  90:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+  91:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   }
+  92:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if (osCMSIS < 0x20000U)
+  93:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   osMessageDelete(*mbox);
+  94:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #else
+  95:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   osMessageQueueDelete(*mbox);
+  97              		.loc 1 95 3 view .LVU17
+  98 000a 2068     		ldr	r0, [r4]
+  99 000c FFF7FEFF 		bl	osMessageQueueDelete
+ 100              	.LVL8:
+  96:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+  97:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if SYS_STATS
+  98:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   --lwip_stats.sys.mbox.used;
+  99:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif /* SYS_STATS */
+ 100:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** }
+ 101              		.loc 1 100 1 is_stmt 0 view .LVU18
+ 102 0010 10BD     		pop	{r4, pc}
+ 103              		.loc 1 100 1 view .LVU19
+ 104              		.cfi_endproc
+ 105              	.LFE366:
+ 107              		.section	.text.sys_mbox_post,"ax",%progbits
+ 108              		.align	1
+ 109              		.global	sys_mbox_post
+ 110              		.syntax unified
+ 111              		.thumb
+ 112              		.thumb_func
+ 114              	sys_mbox_post:
+ 115              	.LVL9:
+ 116              	.LFB367:
+ 101:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 102:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*-----------------------------------------------------------------------------------*/
+ 103:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** //   Posts the "msg" to the mailbox.
+ 104:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** void sys_mbox_post(sys_mbox_t *mbox, void *data)
+ 105:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** {
+ 117              		.loc 1 105 1 is_stmt 1 view -0
+ 118              		.cfi_startproc
+ 119              		@ args = 0, pretend = 0, frame = 8
+ 120              		@ frame_needed = 0, uses_anonymous_args = 0
+ 121              		.loc 1 105 1 is_stmt 0 view .LVU21
+ 122 0000 10B5     		push	{r4, lr}
+ 123              	.LCFI2:
+ 124              		.cfi_def_cfa_offset 8
+ 125              		.cfi_offset 4, -8
+ 126              		.cfi_offset 14, -4
+ 127 0002 82B0     		sub	sp, sp, #8
+ARM GAS  /tmp/ccIbULwI.s 			page 5
+
+
+ 128              	.LCFI3:
+ 129              		.cfi_def_cfa_offset 16
+ 130 0004 0446     		mov	r4, r0
+ 131 0006 0191     		str	r1, [sp, #4]
+ 106:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if (osCMSIS < 0x20000U)
+ 107:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   while(osMessagePut(*mbox, (uint32_t)data, osWaitForever) != osOK);
+ 108:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #else
+ 109:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   while(osMessageQueuePut(*mbox, &data, 0, osWaitForever) != osOK);
+ 132              		.loc 1 109 3 is_stmt 1 view .LVU22
+ 133              	.LVL10:
+ 134              	.L8:
+ 135              		.loc 1 109 59 discriminator 1 view .LVU23
+ 136              		.loc 1 109 9 is_stmt 0 discriminator 1 view .LVU24
+ 137 0008 4FF0FF33 		mov	r3, #-1
+ 138 000c 0022     		movs	r2, #0
+ 139 000e 01A9     		add	r1, sp, #4
+ 140 0010 2068     		ldr	r0, [r4]
+ 141 0012 FFF7FEFF 		bl	osMessageQueuePut
+ 142              	.LVL11:
+ 143              		.loc 1 109 59 discriminator 1 view .LVU25
+ 144 0016 0028     		cmp	r0, #0
+ 145 0018 F6D1     		bne	.L8
+ 110:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+ 111:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** }
+ 146              		.loc 1 111 1 view .LVU26
+ 147 001a 02B0     		add	sp, sp, #8
+ 148              	.LCFI4:
+ 149              		.cfi_def_cfa_offset 8
+ 150              		@ sp needed
+ 151 001c 10BD     		pop	{r4, pc}
+ 152              		.loc 1 111 1 view .LVU27
+ 153              		.cfi_endproc
+ 154              	.LFE367:
+ 156              		.section	.text.sys_mbox_trypost,"ax",%progbits
+ 157              		.align	1
+ 158              		.global	sys_mbox_trypost
+ 159              		.syntax unified
+ 160              		.thumb
+ 161              		.thumb_func
+ 163              	sys_mbox_trypost:
+ 164              	.LVL12:
+ 165              	.LFB368:
+ 112:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 113:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 114:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*-----------------------------------------------------------------------------------*/
+ 115:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** //   Try to post the "msg" to the mailbox.
+ 116:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** err_t sys_mbox_trypost(sys_mbox_t *mbox, void *msg)
+ 117:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** {
+ 166              		.loc 1 117 1 is_stmt 1 view -0
+ 167              		.cfi_startproc
+ 168              		@ args = 0, pretend = 0, frame = 8
+ 169              		@ frame_needed = 0, uses_anonymous_args = 0
+ 170              		.loc 1 117 1 is_stmt 0 view .LVU29
+ 171 0000 00B5     		push	{lr}
+ 172              	.LCFI5:
+ 173              		.cfi_def_cfa_offset 4
+ 174              		.cfi_offset 14, -4
+ARM GAS  /tmp/ccIbULwI.s 			page 6
+
+
+ 175 0002 83B0     		sub	sp, sp, #12
+ 176              	.LCFI6:
+ 177              		.cfi_def_cfa_offset 16
+ 178 0004 0191     		str	r1, [sp, #4]
+ 118:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   err_t result;
+ 179              		.loc 1 118 3 is_stmt 1 view .LVU30
+ 119:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if (osCMSIS < 0x20000U)
+ 120:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   if(osMessagePut(*mbox, (uint32_t)msg, 0) == osOK)
+ 121:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #else
+ 122:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   if(osMessageQueuePut(*mbox, &msg, 0, 0) == osOK)
+ 180              		.loc 1 122 3 view .LVU31
+ 181              		.loc 1 122 6 is_stmt 0 view .LVU32
+ 182 0006 0023     		movs	r3, #0
+ 183 0008 1A46     		mov	r2, r3
+ 184 000a 01A9     		add	r1, sp, #4
+ 185              	.LVL13:
+ 186              		.loc 1 122 6 view .LVU33
+ 187 000c 0068     		ldr	r0, [r0]
+ 188              	.LVL14:
+ 189              		.loc 1 122 6 view .LVU34
+ 190 000e FFF7FEFF 		bl	osMessageQueuePut
+ 191              	.LVL15:
+ 192              		.loc 1 122 5 discriminator 1 view .LVU35
+ 193 0012 10B9     		cbnz	r0, .L14
+ 194              	.L11:
+ 195              	.LVL16:
+ 123:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+ 124:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   {
+ 125:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     result = ERR_OK;
+ 126:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   }
+ 127:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   else
+ 128:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   {
+ 129:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     // could not post, queue must be full
+ 130:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     result = ERR_MEM;
+ 131:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 132:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if SYS_STATS
+ 133:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     lwip_stats.sys.mbox.err++;
+ 134:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif /* SYS_STATS */
+ 135:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   }
+ 136:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 137:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   return result;
+ 196              		.loc 1 137 3 is_stmt 1 view .LVU36
+ 138:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** }
+ 197              		.loc 1 138 1 is_stmt 0 view .LVU37
+ 198 0014 03B0     		add	sp, sp, #12
+ 199              	.LCFI7:
+ 200              		.cfi_remember_state
+ 201              		.cfi_def_cfa_offset 4
+ 202              		@ sp needed
+ 203 0016 5DF804FB 		ldr	pc, [sp], #4
+ 204              	.LVL17:
+ 205              	.L14:
+ 206              	.LCFI8:
+ 207              		.cfi_restore_state
+ 130:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 208              		.loc 1 130 12 view .LVU38
+ 209 001a 4FF0FF30 		mov	r0, #-1
+ARM GAS  /tmp/ccIbULwI.s 			page 7
+
+
+ 210 001e F9E7     		b	.L11
+ 211              		.cfi_endproc
+ 212              	.LFE368:
+ 214              		.section	.text.sys_mbox_trypost_fromisr,"ax",%progbits
+ 215              		.align	1
+ 216              		.global	sys_mbox_trypost_fromisr
+ 217              		.syntax unified
+ 218              		.thumb
+ 219              		.thumb_func
+ 221              	sys_mbox_trypost_fromisr:
+ 222              	.LVL18:
+ 223              	.LFB369:
+ 139:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 140:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 141:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*-----------------------------------------------------------------------------------*/
+ 142:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** //   Try to post the "msg" to the mailbox.
+ 143:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** err_t sys_mbox_trypost_fromisr(sys_mbox_t *mbox, void *msg)
+ 144:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** {
+ 224              		.loc 1 144 1 is_stmt 1 view -0
+ 225              		.cfi_startproc
+ 226              		@ args = 0, pretend = 0, frame = 0
+ 227              		@ frame_needed = 0, uses_anonymous_args = 0
+ 228              		.loc 1 144 1 is_stmt 0 view .LVU40
+ 229 0000 08B5     		push	{r3, lr}
+ 230              	.LCFI9:
+ 231              		.cfi_def_cfa_offset 8
+ 232              		.cfi_offset 3, -8
+ 233              		.cfi_offset 14, -4
+ 145:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   return sys_mbox_trypost(mbox, msg);
+ 234              		.loc 1 145 3 is_stmt 1 view .LVU41
+ 235              		.loc 1 145 10 is_stmt 0 view .LVU42
+ 236 0002 FFF7FEFF 		bl	sys_mbox_trypost
+ 237              	.LVL19:
+ 146:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** }
+ 238              		.loc 1 146 1 view .LVU43
+ 239 0006 08BD     		pop	{r3, pc}
+ 240              		.cfi_endproc
+ 241              	.LFE369:
+ 243              		.section	.text.sys_arch_mbox_fetch,"ax",%progbits
+ 244              		.align	1
+ 245              		.global	sys_arch_mbox_fetch
+ 246              		.syntax unified
+ 247              		.thumb
+ 248              		.thumb_func
+ 250              	sys_arch_mbox_fetch:
+ 251              	.LVL20:
+ 252              	.LFB370:
+ 147:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 148:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*-----------------------------------------------------------------------------------*/
+ 149:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*
+ 150:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   Blocks the thread until a message arrives in the mailbox, but does
+ 151:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   not block the thread longer than "timeout" milliseconds (similar to
+ 152:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   the sys_arch_sem_wait() function). The "msg" argument is a result
+ 153:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   parameter that is set by the function (i.e., by doing "*msg =
+ 154:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   ptr"). The "msg" parameter maybe NULL to indicate that the message
+ 155:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   should be dropped.
+ 156:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ARM GAS  /tmp/ccIbULwI.s 			page 8
+
+
+ 157:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   The return values are the same as for the sys_arch_sem_wait() function:
+ 158:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   Number of milliseconds spent waiting or SYS_ARCH_TIMEOUT if there was a
+ 159:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   timeout.
+ 160:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 161:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   Note that a function with a similar name, sys_mbox_fetch(), is
+ 162:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   implemented by lwIP.
+ 163:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** */
+ 164:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** u32_t sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout)
+ 165:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** {
+ 253              		.loc 1 165 1 is_stmt 1 view -0
+ 254              		.cfi_startproc
+ 255              		@ args = 0, pretend = 0, frame = 0
+ 256              		@ frame_needed = 0, uses_anonymous_args = 0
+ 257              		.loc 1 165 1 is_stmt 0 view .LVU45
+ 258 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 259              	.LCFI10:
+ 260              		.cfi_def_cfa_offset 24
+ 261              		.cfi_offset 3, -24
+ 262              		.cfi_offset 4, -20
+ 263              		.cfi_offset 5, -16
+ 264              		.cfi_offset 6, -12
+ 265              		.cfi_offset 7, -8
+ 266              		.cfi_offset 14, -4
+ 267 0002 0646     		mov	r6, r0
+ 268 0004 0F46     		mov	r7, r1
+ 269 0006 1546     		mov	r5, r2
+ 166:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if (osCMSIS < 0x20000U)
+ 167:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   osEvent event;
+ 168:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   uint32_t starttime = osKernelSysTick();
+ 169:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #else
+ 170:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   osStatus_t status;
+ 270              		.loc 1 170 3 is_stmt 1 view .LVU46
+ 171:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   uint32_t starttime = osKernelGetTickCount();
+ 271              		.loc 1 171 3 view .LVU47
+ 272              		.loc 1 171 24 is_stmt 0 view .LVU48
+ 273 0008 FFF7FEFF 		bl	osKernelGetTickCount
+ 274              	.LVL21:
+ 275              		.loc 1 171 24 view .LVU49
+ 276 000c 0446     		mov	r4, r0
+ 277              	.LVL22:
+ 172:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+ 173:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   if(timeout != 0)
+ 278              		.loc 1 173 3 is_stmt 1 view .LVU50
+ 279              		.loc 1 173 5 is_stmt 0 view .LVU51
+ 280 000e 6DB1     		cbz	r5, .L18
+ 174:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   {
+ 175:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if (osCMSIS < 0x20000U)
+ 176:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     event = osMessageGet (*mbox, timeout);
+ 177:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 178:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     if(event.status == osEventMessage)
+ 179:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     {
+ 180:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****       *msg = (void *)event.value.v;
+ 181:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****       return (osKernelSysTick() - starttime);
+ 182:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     }
+ 183:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #else
+ 184:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     status = osMessageQueueGet(*mbox, msg, 0, timeout);
+ 281              		.loc 1 184 5 is_stmt 1 view .LVU52
+ARM GAS  /tmp/ccIbULwI.s 			page 9
+
+
+ 282              		.loc 1 184 14 is_stmt 0 view .LVU53
+ 283 0010 2B46     		mov	r3, r5
+ 284 0012 0022     		movs	r2, #0
+ 285 0014 3946     		mov	r1, r7
+ 286 0016 3068     		ldr	r0, [r6]
+ 287              	.LVL23:
+ 288              		.loc 1 184 14 view .LVU54
+ 289 0018 FFF7FEFF 		bl	osMessageQueueGet
+ 290              	.LVL24:
+ 185:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     if (status == osOK)
+ 291              		.loc 1 185 5 is_stmt 1 view .LVU55
+ 292              		.loc 1 185 8 is_stmt 0 view .LVU56
+ 293 001c 10B1     		cbz	r0, .L22
+ 186:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     {
+ 187:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****       return (osKernelGetTickCount() - starttime);
+ 188:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     }
+ 189:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+ 190:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     else
+ 191:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     {
+ 192:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****       return SYS_ARCH_TIMEOUT;
+ 294              		.loc 1 192 14 view .LVU57
+ 295 001e 4FF0FF30 		mov	r0, #-1
+ 296              	.LVL25:
+ 297              	.L17:
+ 193:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     }
+ 194:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   }
+ 195:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   else
+ 196:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   {
+ 197:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if (osCMSIS < 0x20000U)
+ 198:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     event = osMessageGet (*mbox, osWaitForever);
+ 199:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     *msg = (void *)event.value.v;
+ 200:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     return (osKernelSysTick() - starttime);
+ 201:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #else
+ 202:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     osMessageQueueGet(*mbox, msg, 0, osWaitForever );
+ 203:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     return (osKernelGetTickCount() - starttime);
+ 204:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+ 205:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   }
+ 206:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** }
+ 298              		.loc 1 206 1 view .LVU58
+ 299 0022 F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 300              	.LVL26:
+ 301              	.L22:
+ 187:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     }
+ 302              		.loc 1 187 7 is_stmt 1 view .LVU59
+ 187:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     }
+ 303              		.loc 1 187 15 is_stmt 0 view .LVU60
+ 304 0024 FFF7FEFF 		bl	osKernelGetTickCount
+ 305              	.LVL27:
+ 187:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     }
+ 306              		.loc 1 187 38 discriminator 1 view .LVU61
+ 307 0028 001B     		subs	r0, r0, r4
+ 187:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     }
+ 308              		.loc 1 187 38 view .LVU62
+ 309 002a FAE7     		b	.L17
+ 310              	.LVL28:
+ 311              	.L18:
+ 202:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     return (osKernelGetTickCount() - starttime);
+ARM GAS  /tmp/ccIbULwI.s 			page 10
+
+
+ 312              		.loc 1 202 5 is_stmt 1 view .LVU63
+ 313 002c 4FF0FF33 		mov	r3, #-1
+ 314 0030 0022     		movs	r2, #0
+ 315 0032 3946     		mov	r1, r7
+ 316 0034 3068     		ldr	r0, [r6]
+ 317              	.LVL29:
+ 202:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     return (osKernelGetTickCount() - starttime);
+ 318              		.loc 1 202 5 is_stmt 0 view .LVU64
+ 319 0036 FFF7FEFF 		bl	osMessageQueueGet
+ 320              	.LVL30:
+ 203:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+ 321              		.loc 1 203 5 is_stmt 1 view .LVU65
+ 203:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+ 322              		.loc 1 203 13 is_stmt 0 view .LVU66
+ 323 003a FFF7FEFF 		bl	osKernelGetTickCount
+ 324              	.LVL31:
+ 203:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+ 325              		.loc 1 203 36 discriminator 1 view .LVU67
+ 326 003e 001B     		subs	r0, r0, r4
+ 203:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+ 327              		.loc 1 203 36 view .LVU68
+ 328 0040 EFE7     		b	.L17
+ 329              		.cfi_endproc
+ 330              	.LFE370:
+ 332              		.section	.text.sys_arch_mbox_tryfetch,"ax",%progbits
+ 333              		.align	1
+ 334              		.global	sys_arch_mbox_tryfetch
+ 335              		.syntax unified
+ 336              		.thumb
+ 337              		.thumb_func
+ 339              	sys_arch_mbox_tryfetch:
+ 340              	.LVL32:
+ 341              	.LFB371:
+ 207:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 208:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*-----------------------------------------------------------------------------------*/
+ 209:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*
+ 210:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   Similar to sys_arch_mbox_fetch, but if message is not ready immediately, we'll
+ 211:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   return with SYS_MBOX_EMPTY.  On success, 0 is returned.
+ 212:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** */
+ 213:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** u32_t sys_arch_mbox_tryfetch(sys_mbox_t *mbox, void **msg)
+ 214:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** {
+ 342              		.loc 1 214 1 is_stmt 1 view -0
+ 343              		.cfi_startproc
+ 344              		@ args = 0, pretend = 0, frame = 0
+ 345              		@ frame_needed = 0, uses_anonymous_args = 0
+ 346              		.loc 1 214 1 is_stmt 0 view .LVU70
+ 347 0000 08B5     		push	{r3, lr}
+ 348              	.LCFI11:
+ 349              		.cfi_def_cfa_offset 8
+ 350              		.cfi_offset 3, -8
+ 351              		.cfi_offset 14, -4
+ 215:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if (osCMSIS < 0x20000U)
+ 216:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   osEvent event;
+ 217:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 218:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   event = osMessageGet (*mbox, 0);
+ 219:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 220:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   if(event.status == osEventMessage)
+ARM GAS  /tmp/ccIbULwI.s 			page 11
+
+
+ 221:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   {
+ 222:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     *msg = (void *)event.value.v;
+ 223:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #else
+ 224:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   if (osMessageQueueGet(*mbox, msg, 0, 0) == osOK)
+ 352              		.loc 1 224 3 is_stmt 1 view .LVU71
+ 353              		.loc 1 224 7 is_stmt 0 view .LVU72
+ 354 0002 0023     		movs	r3, #0
+ 355 0004 1A46     		mov	r2, r3
+ 356 0006 0068     		ldr	r0, [r0]
+ 357              	.LVL33:
+ 358              		.loc 1 224 7 view .LVU73
+ 359 0008 FFF7FEFF 		bl	osMessageQueueGet
+ 360              	.LVL34:
+ 361              		.loc 1 224 6 discriminator 1 view .LVU74
+ 362 000c 00B9     		cbnz	r0, .L27
+ 363              	.L23:
+ 225:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   {
+ 226:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+ 227:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     return ERR_OK;
+ 228:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   }
+ 229:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   else
+ 230:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   {
+ 231:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     return SYS_MBOX_EMPTY;
+ 232:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   }
+ 233:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** }
+ 364              		.loc 1 233 1 view .LVU75
+ 365 000e 08BD     		pop	{r3, pc}
+ 366              	.L27:
+ 231:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   }
+ 367              		.loc 1 231 12 view .LVU76
+ 368 0010 4FF0FF30 		mov	r0, #-1
+ 369 0014 FBE7     		b	.L23
+ 370              		.cfi_endproc
+ 371              	.LFE371:
+ 373              		.section	.text.sys_mbox_valid,"ax",%progbits
+ 374              		.align	1
+ 375              		.global	sys_mbox_valid
+ 376              		.syntax unified
+ 377              		.thumb
+ 378              		.thumb_func
+ 380              	sys_mbox_valid:
+ 381              	.LVL35:
+ 382              	.LFB372:
+ 234:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*----------------------------------------------------------------------------------*/
+ 235:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** int sys_mbox_valid(sys_mbox_t *mbox)
+ 236:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** {
+ 383              		.loc 1 236 1 is_stmt 1 view -0
+ 384              		.cfi_startproc
+ 385              		@ args = 0, pretend = 0, frame = 0
+ 386              		@ frame_needed = 0, uses_anonymous_args = 0
+ 387              		@ link register save eliminated.
+ 237:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   if (*mbox == SYS_MBOX_NULL)
+ 388              		.loc 1 237 3 view .LVU78
+ 389              		.loc 1 237 7 is_stmt 0 view .LVU79
+ 390 0000 0368     		ldr	r3, [r0]
+ 391              		.loc 1 237 6 view .LVU80
+ 392 0002 0BB1     		cbz	r3, .L31
+ARM GAS  /tmp/ccIbULwI.s 			page 12
+
+
+ 238:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     return 0;
+ 239:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   else
+ 240:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     return 1;
+ 393              		.loc 1 240 12 view .LVU81
+ 394 0004 0120     		movs	r0, #1
+ 395              	.LVL36:
+ 241:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** }
+ 396              		.loc 1 241 1 view .LVU82
+ 397 0006 7047     		bx	lr
+ 398              	.LVL37:
+ 399              	.L31:
+ 238:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     return 0;
+ 400              		.loc 1 238 12 view .LVU83
+ 401 0008 0020     		movs	r0, #0
+ 402              	.LVL38:
+ 238:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     return 0;
+ 403              		.loc 1 238 12 view .LVU84
+ 404 000a 7047     		bx	lr
+ 405              		.cfi_endproc
+ 406              	.LFE372:
+ 408              		.section	.text.sys_mbox_set_invalid,"ax",%progbits
+ 409              		.align	1
+ 410              		.global	sys_mbox_set_invalid
+ 411              		.syntax unified
+ 412              		.thumb
+ 413              		.thumb_func
+ 415              	sys_mbox_set_invalid:
+ 416              	.LVL39:
+ 417              	.LFB373:
+ 242:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*-----------------------------------------------------------------------------------*/
+ 243:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** void sys_mbox_set_invalid(sys_mbox_t *mbox)
+ 244:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** {
+ 418              		.loc 1 244 1 is_stmt 1 view -0
+ 419              		.cfi_startproc
+ 420              		@ args = 0, pretend = 0, frame = 0
+ 421              		@ frame_needed = 0, uses_anonymous_args = 0
+ 422              		@ link register save eliminated.
+ 245:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   *mbox = SYS_MBOX_NULL;
+ 423              		.loc 1 245 3 view .LVU86
+ 424              		.loc 1 245 9 is_stmt 0 view .LVU87
+ 425 0000 0023     		movs	r3, #0
+ 426 0002 0360     		str	r3, [r0]
+ 246:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** }
+ 427              		.loc 1 246 1 view .LVU88
+ 428 0004 7047     		bx	lr
+ 429              		.cfi_endproc
+ 430              	.LFE373:
+ 432              		.section	.text.sys_sem_new,"ax",%progbits
+ 433              		.align	1
+ 434              		.global	sys_sem_new
+ 435              		.syntax unified
+ 436              		.thumb
+ 437              		.thumb_func
+ 439              	sys_sem_new:
+ 440              	.LVL40:
+ 441              	.LFB374:
+ 247:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ARM GAS  /tmp/ccIbULwI.s 			page 13
+
+
+ 248:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*-----------------------------------------------------------------------------------*/
+ 249:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** //  Creates a new semaphore. The "count" argument specifies
+ 250:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** //  the initial state of the semaphore.
+ 251:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** err_t sys_sem_new(sys_sem_t *sem, u8_t count)
+ 252:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** {
+ 442              		.loc 1 252 1 is_stmt 1 view -0
+ 443              		.cfi_startproc
+ 444              		@ args = 0, pretend = 0, frame = 0
+ 445              		@ frame_needed = 0, uses_anonymous_args = 0
+ 446              		.loc 1 252 1 is_stmt 0 view .LVU90
+ 447 0000 38B5     		push	{r3, r4, r5, lr}
+ 448              	.LCFI12:
+ 449              		.cfi_def_cfa_offset 16
+ 450              		.cfi_offset 3, -16
+ 451              		.cfi_offset 4, -12
+ 452              		.cfi_offset 5, -8
+ 453              		.cfi_offset 14, -4
+ 454 0002 0446     		mov	r4, r0
+ 455 0004 0D46     		mov	r5, r1
+ 253:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if (osCMSIS < 0x20000U)
+ 254:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   osSemaphoreDef(SEM);
+ 255:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   *sem = osSemaphoreCreate (osSemaphore(SEM), 1);
+ 256:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #else
+ 257:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   *sem = osSemaphoreNew(UINT16_MAX, count, NULL);
+ 456              		.loc 1 257 3 is_stmt 1 view .LVU91
+ 457              		.loc 1 257 10 is_stmt 0 view .LVU92
+ 458 0006 0022     		movs	r2, #0
+ 459 0008 4FF6FF70 		movw	r0, #65535
+ 460              	.LVL41:
+ 461              		.loc 1 257 10 view .LVU93
+ 462 000c FFF7FEFF 		bl	osSemaphoreNew
+ 463              	.LVL42:
+ 464              		.loc 1 257 8 discriminator 1 view .LVU94
+ 465 0010 2060     		str	r0, [r4]
+ 258:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+ 259:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 260:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   if(*sem == NULL)
+ 466              		.loc 1 260 3 is_stmt 1 view .LVU95
+ 467              		.loc 1 260 5 is_stmt 0 view .LVU96
+ 468 0012 38B1     		cbz	r0, .L35
+ 261:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   {
+ 262:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if SYS_STATS
+ 263:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     ++lwip_stats.sys.sem.err;
+ 264:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif /* SYS_STATS */
+ 265:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     return ERR_MEM;
+ 266:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   }
+ 267:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 268:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   if(count == 0)	// Means it can't be taken
+ 469              		.loc 1 268 3 is_stmt 1 view .LVU97
+ 470              		.loc 1 268 5 is_stmt 0 view .LVU98
+ 471 0014 0DB1     		cbz	r5, .L38
+ 269:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   {
+ 270:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if (osCMSIS < 0x20000U)
+ 271:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     osSemaphoreWait(*sem, 0);
+ 272:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #else
+ 273:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     osSemaphoreAcquire(*sem, 0);
+ 274:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+ARM GAS  /tmp/ccIbULwI.s 			page 14
+
+
+ 275:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   }
+ 276:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 277:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if SYS_STATS
+ 278:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   ++lwip_stats.sys.sem.used;
+ 279:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   if (lwip_stats.sys.sem.max < lwip_stats.sys.sem.used) {
+ 280:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     lwip_stats.sys.sem.max = lwip_stats.sys.sem.used;
+ 281:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   }
+ 282:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif /* SYS_STATS */
+ 283:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 284:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   return ERR_OK;
+ 472              		.loc 1 284 10 view .LVU99
+ 473 0016 0020     		movs	r0, #0
+ 474              	.L34:
+ 285:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** }
+ 475              		.loc 1 285 1 view .LVU100
+ 476 0018 38BD     		pop	{r3, r4, r5, pc}
+ 477              	.LVL43:
+ 478              	.L38:
+ 273:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+ 479              		.loc 1 273 5 is_stmt 1 view .LVU101
+ 480 001a 0021     		movs	r1, #0
+ 481 001c FFF7FEFF 		bl	osSemaphoreAcquire
+ 482              	.LVL44:
+ 284:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** }
+ 483              		.loc 1 284 10 is_stmt 0 view .LVU102
+ 484 0020 0020     		movs	r0, #0
+ 485 0022 F9E7     		b	.L34
+ 486              	.L35:
+ 265:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   }
+ 487              		.loc 1 265 12 view .LVU103
+ 488 0024 4FF0FF30 		mov	r0, #-1
+ 489 0028 F6E7     		b	.L34
+ 490              		.cfi_endproc
+ 491              	.LFE374:
+ 493              		.section	.text.sys_arch_sem_wait,"ax",%progbits
+ 494              		.align	1
+ 495              		.global	sys_arch_sem_wait
+ 496              		.syntax unified
+ 497              		.thumb
+ 498              		.thumb_func
+ 500              	sys_arch_sem_wait:
+ 501              	.LVL45:
+ 502              	.LFB375:
+ 286:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 287:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*-----------------------------------------------------------------------------------*/
+ 288:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*
+ 289:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   Blocks the thread while waiting for the semaphore to be
+ 290:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   signaled. If the "timeout" argument is non-zero, the thread should
+ 291:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   only be blocked for the specified time (measured in
+ 292:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   milliseconds).
+ 293:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 294:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   If the timeout argument is non-zero, the return value is the number of
+ 295:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   milliseconds spent waiting for the semaphore to be signaled. If the
+ 296:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   semaphore wasn't signaled within the specified time, the return value is
+ 297:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   SYS_ARCH_TIMEOUT. If the thread didn't have to wait for the semaphore
+ 298:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   (i.e., it was already signaled), the function may return zero.
+ 299:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ARM GAS  /tmp/ccIbULwI.s 			page 15
+
+
+ 300:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   Notice that lwIP implements a function with a similar name,
+ 301:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   sys_sem_wait(), that uses the sys_arch_sem_wait() function.
+ 302:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** */
+ 303:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** u32_t sys_arch_sem_wait(sys_sem_t *sem, u32_t timeout)
+ 304:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** {
+ 503              		.loc 1 304 1 is_stmt 1 view -0
+ 504              		.cfi_startproc
+ 505              		@ args = 0, pretend = 0, frame = 0
+ 506              		@ frame_needed = 0, uses_anonymous_args = 0
+ 507              		.loc 1 304 1 is_stmt 0 view .LVU105
+ 508 0000 70B5     		push	{r4, r5, r6, lr}
+ 509              	.LCFI13:
+ 510              		.cfi_def_cfa_offset 16
+ 511              		.cfi_offset 4, -16
+ 512              		.cfi_offset 5, -12
+ 513              		.cfi_offset 6, -8
+ 514              		.cfi_offset 14, -4
+ 515 0002 0446     		mov	r4, r0
+ 516 0004 0E46     		mov	r6, r1
+ 305:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if (osCMSIS < 0x20000U)
+ 306:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   uint32_t starttime = osKernelSysTick();
+ 307:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #else
+ 308:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   uint32_t starttime = osKernelGetTickCount();
+ 517              		.loc 1 308 3 is_stmt 1 view .LVU106
+ 518              		.loc 1 308 24 is_stmt 0 view .LVU107
+ 519 0006 FFF7FEFF 		bl	osKernelGetTickCount
+ 520              	.LVL46:
+ 521              		.loc 1 308 24 view .LVU108
+ 522 000a 0546     		mov	r5, r0
+ 523              	.LVL47:
+ 309:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+ 310:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   if(timeout != 0)
+ 524              		.loc 1 310 3 is_stmt 1 view .LVU109
+ 525              		.loc 1 310 5 is_stmt 0 view .LVU110
+ 526 000c 56B9     		cbnz	r6, .L44
+ 527              	.LVL48:
+ 528              	.L40:
+ 311:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   {
+ 312:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if (osCMSIS < 0x20000U)
+ 313:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     if(osSemaphoreWait (*sem, timeout) == osOK)
+ 314:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     {
+ 315:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****       return (osKernelSysTick() - starttime);
+ 316:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #else
+ 317:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     if(osSemaphoreAcquire(*sem, timeout) == osOK)
+ 318:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     {
+ 319:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****         return (osKernelGetTickCount() - starttime);
+ 320:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+ 321:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     }
+ 322:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     else
+ 323:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     {
+ 324:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****       return SYS_ARCH_TIMEOUT;
+ 325:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     }
+ 326:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   }
+ 327:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   else
+ 328:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   {
+ 329:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if (osCMSIS < 0x20000U)
+ 330:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     while(osSemaphoreWait (*sem, osWaitForever) != osOK);
+ARM GAS  /tmp/ccIbULwI.s 			page 16
+
+
+ 331:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     return (osKernelSysTick() - starttime);
+ 332:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #else
+ 333:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     while(osSemaphoreAcquire(*sem, osWaitForever) != osOK);
+ 529              		.loc 1 333 51 is_stmt 1 discriminator 1 view .LVU111
+ 530              		.loc 1 333 11 is_stmt 0 discriminator 1 view .LVU112
+ 531 000e 4FF0FF31 		mov	r1, #-1
+ 532 0012 2068     		ldr	r0, [r4]
+ 533 0014 FFF7FEFF 		bl	osSemaphoreAcquire
+ 534              	.LVL49:
+ 535              		.loc 1 333 51 discriminator 1 view .LVU113
+ 536 0018 0028     		cmp	r0, #0
+ 537 001a F8D1     		bne	.L40
+ 334:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     return (osKernelGetTickCount() - starttime);
+ 538              		.loc 1 334 5 is_stmt 1 view .LVU114
+ 539              		.loc 1 334 13 is_stmt 0 view .LVU115
+ 540 001c FFF7FEFF 		bl	osKernelGetTickCount
+ 541              	.LVL50:
+ 542              		.loc 1 334 36 discriminator 1 view .LVU116
+ 543 0020 401B     		subs	r0, r0, r5
+ 544              	.L39:
+ 335:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+ 336:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   }
+ 337:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** }
+ 545              		.loc 1 337 1 view .LVU117
+ 546 0022 70BD     		pop	{r4, r5, r6, pc}
+ 547              	.LVL51:
+ 548              	.L44:
+ 317:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     {
+ 549              		.loc 1 317 5 is_stmt 1 view .LVU118
+ 317:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     {
+ 550              		.loc 1 317 8 is_stmt 0 view .LVU119
+ 551 0024 3146     		mov	r1, r6
+ 552 0026 2068     		ldr	r0, [r4]
+ 553              	.LVL52:
+ 317:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     {
+ 554              		.loc 1 317 8 view .LVU120
+ 555 0028 FFF7FEFF 		bl	osSemaphoreAcquire
+ 556              	.LVL53:
+ 317:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     {
+ 557              		.loc 1 317 7 discriminator 1 view .LVU121
+ 558 002c 10B1     		cbz	r0, .L45
+ 324:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     }
+ 559              		.loc 1 324 14 view .LVU122
+ 560 002e 4FF0FF30 		mov	r0, #-1
+ 561 0032 F6E7     		b	.L39
+ 562              	.L45:
+ 319:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+ 563              		.loc 1 319 9 is_stmt 1 view .LVU123
+ 319:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+ 564              		.loc 1 319 17 is_stmt 0 view .LVU124
+ 565 0034 FFF7FEFF 		bl	osKernelGetTickCount
+ 566              	.LVL54:
+ 319:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+ 567              		.loc 1 319 40 discriminator 1 view .LVU125
+ 568 0038 401B     		subs	r0, r0, r5
+ 319:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+ 569              		.loc 1 319 40 view .LVU126
+ARM GAS  /tmp/ccIbULwI.s 			page 17
+
+
+ 570 003a F2E7     		b	.L39
+ 571              		.cfi_endproc
+ 572              	.LFE375:
+ 574              		.section	.text.sys_sem_signal,"ax",%progbits
+ 575              		.align	1
+ 576              		.global	sys_sem_signal
+ 577              		.syntax unified
+ 578              		.thumb
+ 579              		.thumb_func
+ 581              	sys_sem_signal:
+ 582              	.LVL55:
+ 583              	.LFB376:
+ 338:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 339:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*-----------------------------------------------------------------------------------*/
+ 340:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** // Signals a semaphore
+ 341:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** void sys_sem_signal(sys_sem_t *sem)
+ 342:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** {
+ 584              		.loc 1 342 1 is_stmt 1 view -0
+ 585              		.cfi_startproc
+ 586              		@ args = 0, pretend = 0, frame = 0
+ 587              		@ frame_needed = 0, uses_anonymous_args = 0
+ 588              		.loc 1 342 1 is_stmt 0 view .LVU128
+ 589 0000 08B5     		push	{r3, lr}
+ 590              	.LCFI14:
+ 591              		.cfi_def_cfa_offset 8
+ 592              		.cfi_offset 3, -8
+ 593              		.cfi_offset 14, -4
+ 343:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   osSemaphoreRelease(*sem);
+ 594              		.loc 1 343 3 is_stmt 1 view .LVU129
+ 595 0002 0068     		ldr	r0, [r0]
+ 596              	.LVL56:
+ 597              		.loc 1 343 3 is_stmt 0 view .LVU130
+ 598 0004 FFF7FEFF 		bl	osSemaphoreRelease
+ 599              	.LVL57:
+ 344:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** }
+ 600              		.loc 1 344 1 view .LVU131
+ 601 0008 08BD     		pop	{r3, pc}
+ 602              		.cfi_endproc
+ 603              	.LFE376:
+ 605              		.section	.text.sys_sem_free,"ax",%progbits
+ 606              		.align	1
+ 607              		.global	sys_sem_free
+ 608              		.syntax unified
+ 609              		.thumb
+ 610              		.thumb_func
+ 612              	sys_sem_free:
+ 613              	.LVL58:
+ 614              	.LFB377:
+ 345:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 346:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*-----------------------------------------------------------------------------------*/
+ 347:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** // Deallocates a semaphore
+ 348:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** void sys_sem_free(sys_sem_t *sem)
+ 349:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** {
+ 615              		.loc 1 349 1 is_stmt 1 view -0
+ 616              		.cfi_startproc
+ 617              		@ args = 0, pretend = 0, frame = 0
+ 618              		@ frame_needed = 0, uses_anonymous_args = 0
+ARM GAS  /tmp/ccIbULwI.s 			page 18
+
+
+ 619              		.loc 1 349 1 is_stmt 0 view .LVU133
+ 620 0000 08B5     		push	{r3, lr}
+ 621              	.LCFI15:
+ 622              		.cfi_def_cfa_offset 8
+ 623              		.cfi_offset 3, -8
+ 624              		.cfi_offset 14, -4
+ 350:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if SYS_STATS
+ 351:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   --lwip_stats.sys.sem.used;
+ 352:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif /* SYS_STATS */
+ 353:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 354:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   osSemaphoreDelete(*sem);
+ 625              		.loc 1 354 3 is_stmt 1 view .LVU134
+ 626 0002 0068     		ldr	r0, [r0]
+ 627              	.LVL59:
+ 628              		.loc 1 354 3 is_stmt 0 view .LVU135
+ 629 0004 FFF7FEFF 		bl	osSemaphoreDelete
+ 630              	.LVL60:
+ 355:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** }
+ 631              		.loc 1 355 1 view .LVU136
+ 632 0008 08BD     		pop	{r3, pc}
+ 633              		.cfi_endproc
+ 634              	.LFE377:
+ 636              		.section	.text.sys_sem_valid,"ax",%progbits
+ 637              		.align	1
+ 638              		.global	sys_sem_valid
+ 639              		.syntax unified
+ 640              		.thumb
+ 641              		.thumb_func
+ 643              	sys_sem_valid:
+ 644              	.LVL61:
+ 645              	.LFB378:
+ 356:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*-----------------------------------------------------------------------------------*/
+ 357:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** int sys_sem_valid(sys_sem_t *sem)
+ 358:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** {
+ 646              		.loc 1 358 1 is_stmt 1 view -0
+ 647              		.cfi_startproc
+ 648              		@ args = 0, pretend = 0, frame = 0
+ 649              		@ frame_needed = 0, uses_anonymous_args = 0
+ 650              		@ link register save eliminated.
+ 359:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   if (*sem == SYS_SEM_NULL)
+ 651              		.loc 1 359 3 view .LVU138
+ 652              		.loc 1 359 7 is_stmt 0 view .LVU139
+ 653 0000 0368     		ldr	r3, [r0]
+ 654              		.loc 1 359 6 view .LVU140
+ 655 0002 0BB1     		cbz	r3, .L53
+ 360:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     return 0;
+ 361:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   else
+ 362:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     return 1;
+ 656              		.loc 1 362 12 view .LVU141
+ 657 0004 0120     		movs	r0, #1
+ 658              	.LVL62:
+ 363:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** }
+ 659              		.loc 1 363 1 view .LVU142
+ 660 0006 7047     		bx	lr
+ 661              	.LVL63:
+ 662              	.L53:
+ 360:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     return 0;
+ARM GAS  /tmp/ccIbULwI.s 			page 19
+
+
+ 663              		.loc 1 360 12 view .LVU143
+ 664 0008 0020     		movs	r0, #0
+ 665              	.LVL64:
+ 360:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     return 0;
+ 666              		.loc 1 360 12 view .LVU144
+ 667 000a 7047     		bx	lr
+ 668              		.cfi_endproc
+ 669              	.LFE378:
+ 671              		.section	.text.sys_sem_set_invalid,"ax",%progbits
+ 672              		.align	1
+ 673              		.global	sys_sem_set_invalid
+ 674              		.syntax unified
+ 675              		.thumb
+ 676              		.thumb_func
+ 678              	sys_sem_set_invalid:
+ 679              	.LVL65:
+ 680              	.LFB379:
+ 364:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 365:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*-----------------------------------------------------------------------------------*/
+ 366:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** void sys_sem_set_invalid(sys_sem_t *sem)
+ 367:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** {
+ 681              		.loc 1 367 1 is_stmt 1 view -0
+ 682              		.cfi_startproc
+ 683              		@ args = 0, pretend = 0, frame = 0
+ 684              		@ frame_needed = 0, uses_anonymous_args = 0
+ 685              		@ link register save eliminated.
+ 368:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   *sem = SYS_SEM_NULL;
+ 686              		.loc 1 368 3 view .LVU146
+ 687              		.loc 1 368 8 is_stmt 0 view .LVU147
+ 688 0000 0023     		movs	r3, #0
+ 689 0002 0360     		str	r3, [r0]
+ 369:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** }
+ 690              		.loc 1 369 1 view .LVU148
+ 691 0004 7047     		bx	lr
+ 692              		.cfi_endproc
+ 693              	.LFE379:
+ 695              		.section	.text.sys_init,"ax",%progbits
+ 696              		.align	1
+ 697              		.global	sys_init
+ 698              		.syntax unified
+ 699              		.thumb
+ 700              		.thumb_func
+ 702              	sys_init:
+ 703              	.LFB380:
+ 370:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 371:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*-----------------------------------------------------------------------------------*/
+ 372:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if (osCMSIS < 0x20000U)
+ 373:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** osMutexId lwip_sys_mutex;
+ 374:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** osMutexDef(lwip_sys_mutex);
+ 375:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #else
+ 376:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** osMutexId_t lwip_sys_mutex;
+ 377:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+ 378:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** // Initialize sys arch
+ 379:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** void sys_init(void)
+ 380:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** {
+ 704              		.loc 1 380 1 is_stmt 1 view -0
+ 705              		.cfi_startproc
+ARM GAS  /tmp/ccIbULwI.s 			page 20
+
+
+ 706              		@ args = 0, pretend = 0, frame = 0
+ 707              		@ frame_needed = 0, uses_anonymous_args = 0
+ 708 0000 08B5     		push	{r3, lr}
+ 709              	.LCFI16:
+ 710              		.cfi_def_cfa_offset 8
+ 711              		.cfi_offset 3, -8
+ 712              		.cfi_offset 14, -4
+ 381:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if (osCMSIS < 0x20000U)
+ 382:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   lwip_sys_mutex = osMutexCreate(osMutex(lwip_sys_mutex));
+ 383:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #else
+ 384:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   lwip_sys_mutex = osMutexNew(NULL);
+ 713              		.loc 1 384 3 view .LVU150
+ 714              		.loc 1 384 20 is_stmt 0 view .LVU151
+ 715 0002 0020     		movs	r0, #0
+ 716 0004 FFF7FEFF 		bl	osMutexNew
+ 717              	.LVL66:
+ 718              		.loc 1 384 18 discriminator 1 view .LVU152
+ 719 0008 014B     		ldr	r3, .L57
+ 720 000a 1860     		str	r0, [r3]
+ 385:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+ 386:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** }
+ 721              		.loc 1 386 1 view .LVU153
+ 722 000c 08BD     		pop	{r3, pc}
+ 723              	.L58:
+ 724 000e 00BF     		.align	2
+ 725              	.L57:
+ 726 0010 00000000 		.word	lwip_sys_mutex
+ 727              		.cfi_endproc
+ 728              	.LFE380:
+ 730              		.section	.text.sys_mutex_new,"ax",%progbits
+ 731              		.align	1
+ 732              		.global	sys_mutex_new
+ 733              		.syntax unified
+ 734              		.thumb
+ 735              		.thumb_func
+ 737              	sys_mutex_new:
+ 738              	.LVL67:
+ 739              	.LFB381:
+ 387:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*-----------------------------------------------------------------------------------*/
+ 388:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****                                       /* Mutexes*/
+ 389:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*-----------------------------------------------------------------------------------*/
+ 390:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*-----------------------------------------------------------------------------------*/
+ 391:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if LWIP_COMPAT_MUTEX == 0
+ 392:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /* Create a new mutex*/
+ 393:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** err_t sys_mutex_new(sys_mutex_t *mutex) {
+ 740              		.loc 1 393 41 is_stmt 1 view -0
+ 741              		.cfi_startproc
+ 742              		@ args = 0, pretend = 0, frame = 0
+ 743              		@ frame_needed = 0, uses_anonymous_args = 0
+ 744              		.loc 1 393 41 is_stmt 0 view .LVU155
+ 745 0000 10B5     		push	{r4, lr}
+ 746              	.LCFI17:
+ 747              		.cfi_def_cfa_offset 8
+ 748              		.cfi_offset 4, -8
+ 749              		.cfi_offset 14, -4
+ 750 0002 0446     		mov	r4, r0
+ 394:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ARM GAS  /tmp/ccIbULwI.s 			page 21
+
+
+ 395:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if (osCMSIS < 0x20000U)
+ 396:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   osMutexDef(MUTEX);
+ 397:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   *mutex = osMutexCreate(osMutex(MUTEX));
+ 398:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #else
+ 399:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   *mutex = osMutexNew(NULL);
+ 751              		.loc 1 399 3 is_stmt 1 view .LVU156
+ 752              		.loc 1 399 12 is_stmt 0 view .LVU157
+ 753 0004 0020     		movs	r0, #0
+ 754              	.LVL68:
+ 755              		.loc 1 399 12 view .LVU158
+ 756 0006 FFF7FEFF 		bl	osMutexNew
+ 757              	.LVL69:
+ 758              		.loc 1 399 10 discriminator 1 view .LVU159
+ 759 000a 2060     		str	r0, [r4]
+ 400:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+ 401:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 402:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   if(*mutex == NULL)
+ 760              		.loc 1 402 3 is_stmt 1 view .LVU160
+ 761              		.loc 1 402 5 is_stmt 0 view .LVU161
+ 762 000c 08B1     		cbz	r0, .L61
+ 403:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   {
+ 404:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if SYS_STATS
+ 405:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     ++lwip_stats.sys.mutex.err;
+ 406:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif /* SYS_STATS */
+ 407:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     return ERR_MEM;
+ 408:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   }
+ 409:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 410:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if SYS_STATS
+ 411:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   ++lwip_stats.sys.mutex.used;
+ 412:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   if (lwip_stats.sys.mutex.max < lwip_stats.sys.mutex.used) {
+ 413:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****     lwip_stats.sys.mutex.max = lwip_stats.sys.mutex.used;
+ 414:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   }
+ 415:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif /* SYS_STATS */
+ 416:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   return ERR_OK;
+ 763              		.loc 1 416 10 view .LVU162
+ 764 000e 0020     		movs	r0, #0
+ 765              	.L60:
+ 417:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** }
+ 766              		.loc 1 417 1 view .LVU163
+ 767 0010 10BD     		pop	{r4, pc}
+ 768              	.LVL70:
+ 769              	.L61:
+ 407:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   }
+ 770              		.loc 1 407 12 view .LVU164
+ 771 0012 4FF0FF30 		mov	r0, #-1
+ 772 0016 FBE7     		b	.L60
+ 773              		.cfi_endproc
+ 774              	.LFE381:
+ 776              		.section	.text.sys_mutex_free,"ax",%progbits
+ 777              		.align	1
+ 778              		.global	sys_mutex_free
+ 779              		.syntax unified
+ 780              		.thumb
+ 781              		.thumb_func
+ 783              	sys_mutex_free:
+ 784              	.LVL71:
+ 785              	.LFB382:
+ARM GAS  /tmp/ccIbULwI.s 			page 22
+
+
+ 418:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*-----------------------------------------------------------------------------------*/
+ 419:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /* Deallocate a mutex*/
+ 420:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** void sys_mutex_free(sys_mutex_t *mutex)
+ 421:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** {
+ 786              		.loc 1 421 1 is_stmt 1 view -0
+ 787              		.cfi_startproc
+ 788              		@ args = 0, pretend = 0, frame = 0
+ 789              		@ frame_needed = 0, uses_anonymous_args = 0
+ 790              		.loc 1 421 1 is_stmt 0 view .LVU166
+ 791 0000 08B5     		push	{r3, lr}
+ 792              	.LCFI18:
+ 793              		.cfi_def_cfa_offset 8
+ 794              		.cfi_offset 3, -8
+ 795              		.cfi_offset 14, -4
+ 422:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if SYS_STATS
+ 423:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****       --lwip_stats.sys.mutex.used;
+ 424:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif /* SYS_STATS */
+ 425:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 426:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   osMutexDelete(*mutex);
+ 796              		.loc 1 426 3 is_stmt 1 view .LVU167
+ 797 0002 0068     		ldr	r0, [r0]
+ 798              	.LVL72:
+ 799              		.loc 1 426 3 is_stmt 0 view .LVU168
+ 800 0004 FFF7FEFF 		bl	osMutexDelete
+ 801              	.LVL73:
+ 427:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** }
+ 802              		.loc 1 427 1 view .LVU169
+ 803 0008 08BD     		pop	{r3, pc}
+ 804              		.cfi_endproc
+ 805              	.LFE382:
+ 807              		.section	.text.sys_mutex_lock,"ax",%progbits
+ 808              		.align	1
+ 809              		.global	sys_mutex_lock
+ 810              		.syntax unified
+ 811              		.thumb
+ 812              		.thumb_func
+ 814              	sys_mutex_lock:
+ 815              	.LVL74:
+ 816              	.LFB383:
+ 428:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*-----------------------------------------------------------------------------------*/
+ 429:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /* Lock a mutex*/
+ 430:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** void sys_mutex_lock(sys_mutex_t *mutex)
+ 431:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** {
+ 817              		.loc 1 431 1 is_stmt 1 view -0
+ 818              		.cfi_startproc
+ 819              		@ args = 0, pretend = 0, frame = 0
+ 820              		@ frame_needed = 0, uses_anonymous_args = 0
+ 821              		.loc 1 431 1 is_stmt 0 view .LVU171
+ 822 0000 08B5     		push	{r3, lr}
+ 823              	.LCFI19:
+ 824              		.cfi_def_cfa_offset 8
+ 825              		.cfi_offset 3, -8
+ 826              		.cfi_offset 14, -4
+ 432:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if (osCMSIS < 0x20000U)
+ 433:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   osMutexWait(*mutex, osWaitForever);
+ 434:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #else
+ 435:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   osMutexAcquire(*mutex, osWaitForever);
+ARM GAS  /tmp/ccIbULwI.s 			page 23
+
+
+ 827              		.loc 1 435 3 is_stmt 1 view .LVU172
+ 828 0002 4FF0FF31 		mov	r1, #-1
+ 829 0006 0068     		ldr	r0, [r0]
+ 830              	.LVL75:
+ 831              		.loc 1 435 3 is_stmt 0 view .LVU173
+ 832 0008 FFF7FEFF 		bl	osMutexAcquire
+ 833              	.LVL76:
+ 436:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+ 437:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** }
+ 834              		.loc 1 437 1 view .LVU174
+ 835 000c 08BD     		pop	{r3, pc}
+ 836              		.cfi_endproc
+ 837              	.LFE383:
+ 839              		.section	.text.sys_mutex_unlock,"ax",%progbits
+ 840              		.align	1
+ 841              		.global	sys_mutex_unlock
+ 842              		.syntax unified
+ 843              		.thumb
+ 844              		.thumb_func
+ 846              	sys_mutex_unlock:
+ 847              	.LVL77:
+ 848              	.LFB384:
+ 438:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 439:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*-----------------------------------------------------------------------------------*/
+ 440:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /* Unlock a mutex*/
+ 441:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** void sys_mutex_unlock(sys_mutex_t *mutex)
+ 442:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** {
+ 849              		.loc 1 442 1 is_stmt 1 view -0
+ 850              		.cfi_startproc
+ 851              		@ args = 0, pretend = 0, frame = 0
+ 852              		@ frame_needed = 0, uses_anonymous_args = 0
+ 853              		.loc 1 442 1 is_stmt 0 view .LVU176
+ 854 0000 08B5     		push	{r3, lr}
+ 855              	.LCFI20:
+ 856              		.cfi_def_cfa_offset 8
+ 857              		.cfi_offset 3, -8
+ 858              		.cfi_offset 14, -4
+ 443:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   osMutexRelease(*mutex);
+ 859              		.loc 1 443 3 is_stmt 1 view .LVU177
+ 860 0002 0068     		ldr	r0, [r0]
+ 861              	.LVL78:
+ 862              		.loc 1 443 3 is_stmt 0 view .LVU178
+ 863 0004 FFF7FEFF 		bl	osMutexRelease
+ 864              	.LVL79:
+ 444:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** }
+ 865              		.loc 1 444 1 view .LVU179
+ 866 0008 08BD     		pop	{r3, pc}
+ 867              		.cfi_endproc
+ 868              	.LFE384:
+ 870              		.section	.text.sys_thread_new,"ax",%progbits
+ 871              		.align	1
+ 872              		.global	sys_thread_new
+ 873              		.syntax unified
+ 874              		.thumb
+ 875              		.thumb_func
+ 877              	sys_thread_new:
+ 878              	.LVL80:
+ARM GAS  /tmp/ccIbULwI.s 			page 24
+
+
+ 879              	.LFB385:
+ 445:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif /*LWIP_COMPAT_MUTEX*/
+ 446:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*-----------------------------------------------------------------------------------*/
+ 447:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** // TODO
+ 448:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*-----------------------------------------------------------------------------------*/
+ 449:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*
+ 450:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   Starts a new thread with priority "prio" that will begin its execution in the
+ 451:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   function "thread()". The "arg" argument will be passed as an argument to the
+ 452:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   thread() function. The id of the new thread is returned. Both the id and
+ 453:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   the priority are system dependent.
+ 454:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** */
+ 455:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread , void *arg, int stacksize, int
+ 456:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** {
+ 880              		.loc 1 456 1 is_stmt 1 view -0
+ 881              		.cfi_startproc
+ 882              		@ args = 4, pretend = 0, frame = 40
+ 883              		@ frame_needed = 0, uses_anonymous_args = 0
+ 884              		.loc 1 456 1 is_stmt 0 view .LVU181
+ 885 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+ 886              	.LCFI21:
+ 887              		.cfi_def_cfa_offset 20
+ 888              		.cfi_offset 4, -20
+ 889              		.cfi_offset 5, -16
+ 890              		.cfi_offset 6, -12
+ 891              		.cfi_offset 7, -8
+ 892              		.cfi_offset 14, -4
+ 893 0002 8BB0     		sub	sp, sp, #44
+ 894              	.LCFI22:
+ 895              		.cfi_def_cfa_offset 64
+ 896 0004 0746     		mov	r7, r0
+ 897 0006 0C46     		mov	r4, r1
+ 898 0008 1546     		mov	r5, r2
+ 899 000a 1E46     		mov	r6, r3
+ 457:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if (osCMSIS < 0x20000U)
+ 458:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   const osThreadDef_t os_thread_def = { (char *)name, (os_pthread)thread, (osPriority)prio, 0, stac
+ 459:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   return osThreadCreate(&os_thread_def, arg);
+ 460:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #else
+ 461:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   const osThreadAttr_t attributes = {
+ 900              		.loc 1 461 3 is_stmt 1 view .LVU182
+ 901              		.loc 1 461 24 is_stmt 0 view .LVU183
+ 902 000c 2422     		movs	r2, #36
+ 903              	.LVL81:
+ 904              		.loc 1 461 24 view .LVU184
+ 905 000e 0021     		movs	r1, #0
+ 906              	.LVL82:
+ 907              		.loc 1 461 24 view .LVU185
+ 908 0010 01A8     		add	r0, sp, #4
+ 909              	.LVL83:
+ 910              		.loc 1 461 24 view .LVU186
+ 911 0012 FFF7FEFF 		bl	memset
+ 912              	.LVL84:
+ 913              		.loc 1 461 24 view .LVU187
+ 914 0016 0197     		str	r7, [sp, #4]
+ 915 0018 0696     		str	r6, [sp, #24]
+ 916 001a 109B     		ldr	r3, [sp, #64]
+ 917 001c 0793     		str	r3, [sp, #28]
+ 462:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****                         .name = name,
+ARM GAS  /tmp/ccIbULwI.s 			page 25
+
+
+ 463:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****                         .stack_size = stacksize,
+ 464:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****                         .priority = (osPriority_t)prio,
+ 465:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****                       };
+ 466:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   return osThreadNew(thread, arg, &attributes);
+ 918              		.loc 1 466 3 is_stmt 1 view .LVU188
+ 919              		.loc 1 466 10 is_stmt 0 view .LVU189
+ 920 001e 01AA     		add	r2, sp, #4
+ 921 0020 2946     		mov	r1, r5
+ 922 0022 2046     		mov	r0, r4
+ 923 0024 FFF7FEFF 		bl	osThreadNew
+ 924              	.LVL85:
+ 467:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+ 468:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** }
+ 925              		.loc 1 468 1 view .LVU190
+ 926 0028 0BB0     		add	sp, sp, #44
+ 927              	.LCFI23:
+ 928              		.cfi_def_cfa_offset 20
+ 929              		@ sp needed
+ 930 002a F0BD     		pop	{r4, r5, r6, r7, pc}
+ 931              		.loc 1 468 1 view .LVU191
+ 932              		.cfi_endproc
+ 933              	.LFE385:
+ 935              		.section	.text.sys_arch_protect,"ax",%progbits
+ 936              		.align	1
+ 937              		.global	sys_arch_protect
+ 938              		.syntax unified
+ 939              		.thumb
+ 940              		.thumb_func
+ 942              	sys_arch_protect:
+ 943              	.LFB386:
+ 469:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 470:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*
+ 471:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   This optional function does a "fast" critical region protection and returns
+ 472:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   the previous protection level. This function is only called during very short
+ 473:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   critical regions. An embedded system which supports ISR-based drivers might
+ 474:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   want to implement this function by disabling interrupts. Task-based systems
+ 475:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   might want to implement this by using a mutex or disabling tasking. This
+ 476:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   function should support recursive calls from the same task or interrupt. In
+ 477:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   other words, sys_arch_protect() could be called while already protected. In
+ 478:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   that case the return value indicates that it is already protected.
+ 479:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 480:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   sys_arch_protect() is only required if your port is supporting an operating
+ 481:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   system.
+ 482:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 483:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   Note: This function is based on FreeRTOS API, because no equivalent CMSIS-RTOS
+ 484:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****         API is available
+ 485:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** */
+ 486:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** sys_prot_t sys_arch_protect(void)
+ 487:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** {
+ 944              		.loc 1 487 1 is_stmt 1 view -0
+ 945              		.cfi_startproc
+ 946              		@ args = 0, pretend = 0, frame = 0
+ 947              		@ frame_needed = 0, uses_anonymous_args = 0
+ 948 0000 08B5     		push	{r3, lr}
+ 949              	.LCFI24:
+ 950              		.cfi_def_cfa_offset 8
+ 951              		.cfi_offset 3, -8
+ARM GAS  /tmp/ccIbULwI.s 			page 26
+
+
+ 952              		.cfi_offset 14, -4
+ 488:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #if (osCMSIS < 0x20000U)
+ 489:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   osMutexWait(lwip_sys_mutex, osWaitForever);
+ 490:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #else
+ 491:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   osMutexAcquire(lwip_sys_mutex, osWaitForever);
+ 953              		.loc 1 491 3 view .LVU193
+ 954 0002 4FF0FF31 		mov	r1, #-1
+ 955 0006 034B     		ldr	r3, .L73
+ 956 0008 1868     		ldr	r0, [r3]
+ 957 000a FFF7FEFF 		bl	osMutexAcquire
+ 958              	.LVL86:
+ 492:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** #endif
+ 493:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   return (sys_prot_t)1;
+ 959              		.loc 1 493 3 view .LVU194
+ 494:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** }
+ 960              		.loc 1 494 1 is_stmt 0 view .LVU195
+ 961 000e 0120     		movs	r0, #1
+ 962 0010 08BD     		pop	{r3, pc}
+ 963              	.L74:
+ 964 0012 00BF     		.align	2
+ 965              	.L73:
+ 966 0014 00000000 		.word	lwip_sys_mutex
+ 967              		.cfi_endproc
+ 968              	.LFE386:
+ 970              		.section	.text.sys_arch_unprotect,"ax",%progbits
+ 971              		.align	1
+ 972              		.global	sys_arch_unprotect
+ 973              		.syntax unified
+ 974              		.thumb
+ 975              		.thumb_func
+ 977              	sys_arch_unprotect:
+ 978              	.LVL87:
+ 979              	.LFB387:
+ 495:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 496:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 497:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** /*
+ 498:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   This optional function does a "fast" set of critical region protection to the
+ 499:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   value specified by pval. See the documentation for sys_arch_protect() for
+ 500:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   more information. This function is only required if your port is supporting
+ 501:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   an operating system.
+ 502:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** 
+ 503:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   Note: This function is based on FreeRTOS API, because no equivalent CMSIS-RTOS
+ 504:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****         API is available
+ 505:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** */
+ 506:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** void sys_arch_unprotect(sys_prot_t pval)
+ 507:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** {
+ 980              		.loc 1 507 1 is_stmt 1 view -0
+ 981              		.cfi_startproc
+ 982              		@ args = 0, pretend = 0, frame = 0
+ 983              		@ frame_needed = 0, uses_anonymous_args = 0
+ 984              		.loc 1 507 1 is_stmt 0 view .LVU197
+ 985 0000 08B5     		push	{r3, lr}
+ 986              	.LCFI25:
+ 987              		.cfi_def_cfa_offset 8
+ 988              		.cfi_offset 3, -8
+ 989              		.cfi_offset 14, -4
+ 508:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   ( void ) pval;
+ARM GAS  /tmp/ccIbULwI.s 			page 27
+
+
+ 990              		.loc 1 508 3 is_stmt 1 view .LVU198
+ 509:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c ****   osMutexRelease(lwip_sys_mutex);
+ 991              		.loc 1 509 3 view .LVU199
+ 992 0002 024B     		ldr	r3, .L77
+ 993 0004 1868     		ldr	r0, [r3]
+ 994              	.LVL88:
+ 995              		.loc 1 509 3 is_stmt 0 view .LVU200
+ 996 0006 FFF7FEFF 		bl	osMutexRelease
+ 997              	.LVL89:
+ 510:../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c **** }
+ 998              		.loc 1 510 1 view .LVU201
+ 999 000a 08BD     		pop	{r3, pc}
+ 1000              	.L78:
+ 1001              		.align	2
+ 1002              	.L77:
+ 1003 000c 00000000 		.word	lwip_sys_mutex
+ 1004              		.cfi_endproc
+ 1005              	.LFE387:
+ 1007              		.global	lwip_sys_mutex
+ 1008              		.section	.bss.lwip_sys_mutex,"aw",%nobits
+ 1009              		.align	2
+ 1012              	lwip_sys_mutex:
+ 1013 0000 00000000 		.space	4
+ 1014              		.global	errno
+ 1015              		.section	.bss.errno,"aw",%nobits
+ 1016              		.align	2
+ 1019              	errno:
+ 1020 0000 00000000 		.space	4
+ 1021              		.text
+ 1022              	.Letext0:
+ 1023              		.file 2 "/usr/include/newlib/machine/_default_types.h"
+ 1024              		.file 3 "../../Middlewares/Third_Party/LwIP/system/arch/cc.h"
+ 1025              		.file 4 "/usr/include/newlib/sys/_stdint.h"
+ 1026              		.file 5 "../../Middlewares/Third_Party/LwIP/src/include/lwip/arch.h"
+ 1027              		.file 6 "../../Middlewares/Third_Party/LwIP/src/include/lwip/err.h"
+ 1028              		.file 7 "../../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h"
+ 1029              		.file 8 "../../Middlewares/Third_Party/LwIP/system/arch/sys_arch.h"
+ 1030              		.file 9 "../../Middlewares/Third_Party/LwIP/src/include/lwip/sys.h"
+ 1031              		.file 10 "../../Middlewares/Third_Party/LwIP/src/include/lwip/memp.h"
+ 1032              		.file 11 "<built-in>"
+ARM GAS  /tmp/ccIbULwI.s 			page 28
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 sys_arch.c
+     /tmp/ccIbULwI.s:20     .text.sys_mbox_new:00000000 $t
+     /tmp/ccIbULwI.s:26     .text.sys_mbox_new:00000000 sys_mbox_new
+     /tmp/ccIbULwI.s:69     .text.sys_mbox_free:00000000 $t
+     /tmp/ccIbULwI.s:75     .text.sys_mbox_free:00000000 sys_mbox_free
+     /tmp/ccIbULwI.s:108    .text.sys_mbox_post:00000000 $t
+     /tmp/ccIbULwI.s:114    .text.sys_mbox_post:00000000 sys_mbox_post
+     /tmp/ccIbULwI.s:157    .text.sys_mbox_trypost:00000000 $t
+     /tmp/ccIbULwI.s:163    .text.sys_mbox_trypost:00000000 sys_mbox_trypost
+     /tmp/ccIbULwI.s:215    .text.sys_mbox_trypost_fromisr:00000000 $t
+     /tmp/ccIbULwI.s:221    .text.sys_mbox_trypost_fromisr:00000000 sys_mbox_trypost_fromisr
+     /tmp/ccIbULwI.s:244    .text.sys_arch_mbox_fetch:00000000 $t
+     /tmp/ccIbULwI.s:250    .text.sys_arch_mbox_fetch:00000000 sys_arch_mbox_fetch
+     /tmp/ccIbULwI.s:333    .text.sys_arch_mbox_tryfetch:00000000 $t
+     /tmp/ccIbULwI.s:339    .text.sys_arch_mbox_tryfetch:00000000 sys_arch_mbox_tryfetch
+     /tmp/ccIbULwI.s:374    .text.sys_mbox_valid:00000000 $t
+     /tmp/ccIbULwI.s:380    .text.sys_mbox_valid:00000000 sys_mbox_valid
+     /tmp/ccIbULwI.s:409    .text.sys_mbox_set_invalid:00000000 $t
+     /tmp/ccIbULwI.s:415    .text.sys_mbox_set_invalid:00000000 sys_mbox_set_invalid
+     /tmp/ccIbULwI.s:433    .text.sys_sem_new:00000000 $t
+     /tmp/ccIbULwI.s:439    .text.sys_sem_new:00000000 sys_sem_new
+     /tmp/ccIbULwI.s:494    .text.sys_arch_sem_wait:00000000 $t
+     /tmp/ccIbULwI.s:500    .text.sys_arch_sem_wait:00000000 sys_arch_sem_wait
+     /tmp/ccIbULwI.s:575    .text.sys_sem_signal:00000000 $t
+     /tmp/ccIbULwI.s:581    .text.sys_sem_signal:00000000 sys_sem_signal
+     /tmp/ccIbULwI.s:606    .text.sys_sem_free:00000000 $t
+     /tmp/ccIbULwI.s:612    .text.sys_sem_free:00000000 sys_sem_free
+     /tmp/ccIbULwI.s:637    .text.sys_sem_valid:00000000 $t
+     /tmp/ccIbULwI.s:643    .text.sys_sem_valid:00000000 sys_sem_valid
+     /tmp/ccIbULwI.s:672    .text.sys_sem_set_invalid:00000000 $t
+     /tmp/ccIbULwI.s:678    .text.sys_sem_set_invalid:00000000 sys_sem_set_invalid
+     /tmp/ccIbULwI.s:696    .text.sys_init:00000000 $t
+     /tmp/ccIbULwI.s:702    .text.sys_init:00000000 sys_init
+     /tmp/ccIbULwI.s:726    .text.sys_init:00000010 $d
+     /tmp/ccIbULwI.s:1012   .bss.lwip_sys_mutex:00000000 lwip_sys_mutex
+     /tmp/ccIbULwI.s:731    .text.sys_mutex_new:00000000 $t
+     /tmp/ccIbULwI.s:737    .text.sys_mutex_new:00000000 sys_mutex_new
+     /tmp/ccIbULwI.s:777    .text.sys_mutex_free:00000000 $t
+     /tmp/ccIbULwI.s:783    .text.sys_mutex_free:00000000 sys_mutex_free
+     /tmp/ccIbULwI.s:808    .text.sys_mutex_lock:00000000 $t
+     /tmp/ccIbULwI.s:814    .text.sys_mutex_lock:00000000 sys_mutex_lock
+     /tmp/ccIbULwI.s:840    .text.sys_mutex_unlock:00000000 $t
+     /tmp/ccIbULwI.s:846    .text.sys_mutex_unlock:00000000 sys_mutex_unlock
+     /tmp/ccIbULwI.s:871    .text.sys_thread_new:00000000 $t
+     /tmp/ccIbULwI.s:877    .text.sys_thread_new:00000000 sys_thread_new
+     /tmp/ccIbULwI.s:936    .text.sys_arch_protect:00000000 $t
+     /tmp/ccIbULwI.s:942    .text.sys_arch_protect:00000000 sys_arch_protect
+     /tmp/ccIbULwI.s:966    .text.sys_arch_protect:00000014 $d
+     /tmp/ccIbULwI.s:971    .text.sys_arch_unprotect:00000000 $t
+     /tmp/ccIbULwI.s:977    .text.sys_arch_unprotect:00000000 sys_arch_unprotect
+     /tmp/ccIbULwI.s:1003   .text.sys_arch_unprotect:0000000c $d
+     /tmp/ccIbULwI.s:1009   .bss.lwip_sys_mutex:00000000 $d
+     /tmp/ccIbULwI.s:1019   .bss.errno:00000000 errno
+     /tmp/ccIbULwI.s:1016   .bss.errno:00000000 $d
+
+UNDEFINED SYMBOLS
+ARM GAS  /tmp/ccIbULwI.s 			page 29
+
+
+osMessageQueueNew
+osMessageQueueGetCount
+osMessageQueueDelete
+osMessageQueuePut
+osKernelGetTickCount
+osMessageQueueGet
+osSemaphoreNew
+osSemaphoreAcquire
+osSemaphoreRelease
+osSemaphoreDelete
+osMutexNew
+osMutexDelete
+osMutexAcquire
+osMutexRelease
+memset
+osThreadNew

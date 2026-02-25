@@ -1,0 +1,1449 @@
+ARM GAS  /tmp/ccp8w3Ix.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 1
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"ip4_addr.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.file 1 "../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c"
+  19              		.section	.text.ip4_addr_isbroadcast_u32,"ax",%progbits
+  20              		.align	1
+  21              		.global	ip4_addr_isbroadcast_u32
+  22              		.syntax unified
+  23              		.thumb
+  24              		.thumb_func
+  26              	ip4_addr_isbroadcast_u32:
+  27              	.LVL0:
+  28              	.LFB361:
+   1:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** /**
+   2:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * @file
+   3:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * This is the IPv4 address tools implementation.
+   4:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  *
+   5:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  */
+   6:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+   7:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** /*
+   8:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * Copyright (c) 2001-2004 Swedish Institute of Computer Science.
+   9:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * All rights reserved.
+  10:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  *
+  11:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * Redistribution and use in source and binary forms, with or without modification,
+  12:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * are permitted provided that the following conditions are met:
+  13:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  *
+  14:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * 1. Redistributions of source code must retain the above copyright notice,
+  15:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  *    this list of conditions and the following disclaimer.
+  16:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * 2. Redistributions in binary form must reproduce the above copyright notice,
+  17:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  *    this list of conditions and the following disclaimer in the documentation
+  18:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  *    and/or other materials provided with the distribution.
+  19:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * 3. The name of the author may not be used to endorse or promote products
+  20:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  *    derived from this software without specific prior written permission.
+  21:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  *
+  22:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
+  23:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+  24:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+  25:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+  26:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+  27:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  28:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  29:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+  30:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+ARM GAS  /tmp/ccp8w3Ix.s 			page 2
+
+
+  31:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * OF SUCH DAMAGE.
+  32:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  *
+  33:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * This file is part of the lwIP TCP/IP stack.
+  34:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  *
+  35:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * Author: Adam Dunkels <adam@sics.se>
+  36:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  *
+  37:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  */
+  38:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+  39:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** #include "lwip/opt.h"
+  40:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+  41:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** #if LWIP_IPV4
+  42:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+  43:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** #include "lwip/ip_addr.h"
+  44:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** #include "lwip/netif.h"
+  45:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+  46:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** /* used by IP4_ADDR_ANY and IP_ADDR_BROADCAST in ip_addr.h */
+  47:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** const ip_addr_t ip_addr_any = IPADDR4_INIT(IPADDR_ANY);
+  48:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** const ip_addr_t ip_addr_broadcast = IPADDR4_INIT(IPADDR_BROADCAST);
+  49:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+  50:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** /**
+  51:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * Determine if an address is a broadcast address on a network interface
+  52:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  *
+  53:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * @param addr address to be checked
+  54:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * @param netif the network interface against which the address is checked
+  55:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * @return returns non-zero if the address is a broadcast address
+  56:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  */
+  57:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** u8_t
+  58:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** ip4_addr_isbroadcast_u32(u32_t addr, const struct netif *netif)
+  59:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** {
+  29              		.loc 1 59 1 view -0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 0
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              		@ link register save eliminated.
+  34              		.loc 1 59 1 is_stmt 0 view .LVU1
+  35 0000 0346     		mov	r3, r0
+  60:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   ip4_addr_t ipaddr;
+  36              		.loc 1 60 3 is_stmt 1 view .LVU2
+  61:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   ip4_addr_set_u32(&ipaddr, addr);
+  37              		.loc 1 61 3 view .LVU3
+  62:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+  63:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   /* all ones (broadcast) or all zeroes (old skool broadcast) */
+  64:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   if ((~addr == IPADDR_ANY) ||
+  38              		.loc 1 64 3 view .LVU4
+  39              		.loc 1 64 29 is_stmt 0 view .LVU5
+  40 0002 421E     		subs	r2, r0, #1
+  41              		.loc 1 64 6 view .LVU6
+  42 0004 12F1030F 		cmn	r2, #3
+  43 0008 12D8     		bhi	.L3
+  65:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       (addr == IPADDR_ANY)) {
+  66:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     return 1;
+  67:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     /* no broadcast support on this network interface? */
+  68:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   } else if ((netif->flags & NETIF_FLAG_BROADCAST) == 0) {
+  44              		.loc 1 68 10 is_stmt 1 view .LVU7
+  45              		.loc 1 68 20 is_stmt 0 view .LVU8
+  46 000a 91F82D00 		ldrb	r0, [r1, #45]	@ zero_extendqisi2
+  47              	.LVL1:
+ARM GAS  /tmp/ccp8w3Ix.s 			page 3
+
+
+  48              		.loc 1 68 13 view .LVU9
+  49 000e 10F00200 		ands	r0, r0, #2
+  50 0012 14D0     		beq	.L2
+  69:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     /* the given address cannot be a broadcast address
+  70:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****      * nor can we check against any broadcast addresses */
+  71:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     return 0;
+  72:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     /* address matches network interface address exactly? => no broadcast */
+  73:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   } else if (addr == ip4_addr_get_u32(netif_ip4_addr(netif))) {
+  51              		.loc 1 73 10 is_stmt 1 view .LVU10
+  52              		.loc 1 73 22 is_stmt 0 view .LVU11
+  53 0014 4A68     		ldr	r2, [r1, #4]
+  54              		.loc 1 73 13 view .LVU12
+  55 0016 9A42     		cmp	r2, r3
+  56 0018 0CD0     		beq	.L4
+  74:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     return 0;
+  75:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     /*  on the same (sub) network... */
+  76:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   } else if (ip4_addr_netcmp(&ipaddr, netif_ip4_addr(netif), netif_ip4_netmask(netif))
+  57              		.loc 1 76 10 is_stmt 1 view .LVU13
+  58              		.loc 1 76 14 is_stmt 0 view .LVU14
+  59 001a 8968     		ldr	r1, [r1, #8]
+  60              	.LVL2:
+  61              		.loc 1 76 14 view .LVU15
+  62 001c 5A40     		eors	r2, r2, r3
+  63              		.loc 1 76 13 view .LVU16
+  64 001e 0A42     		tst	r2, r1
+  65 0020 0AD1     		bne	.L5
+  77:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****              /* ...and host identifier bits are all ones? =>... */
+  78:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****              && ((addr & ~ip4_addr_get_u32(netif_ip4_netmask(netif))) ==
+  66              		.loc 1 78 26 view .LVU17
+  67 0022 CA43     		mvns	r2, r1
+  68              		.loc 1 78 24 view .LVU18
+  69 0024 23EA0103 		bic	r3, r3, r1
+  70              	.LVL3:
+  71              		.loc 1 78 14 view .LVU19
+  72 0028 9A42     		cmp	r2, r3
+  73 002a 07D0     		beq	.L6
+  79:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****                  (IPADDR_BROADCAST & ~ip4_addr_get_u32(netif_ip4_netmask(netif))))) {
+  80:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     /* => network broadcast address */
+  81:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     return 1;
+  82:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   } else {
+  83:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     return 0;
+  74              		.loc 1 83 12 view .LVU20
+  75 002c 0020     		movs	r0, #0
+  76 002e 7047     		bx	lr
+  77              	.LVL4:
+  78              	.L3:
+  66:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     /* no broadcast support on this network interface? */
+  79              		.loc 1 66 12 view .LVU21
+  80 0030 0120     		movs	r0, #1
+  81              	.LVL5:
+  66:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     /* no broadcast support on this network interface? */
+  82              		.loc 1 66 12 view .LVU22
+  83 0032 7047     		bx	lr
+  84              	.L4:
+  74:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     /*  on the same (sub) network... */
+  85              		.loc 1 74 12 view .LVU23
+  86 0034 0020     		movs	r0, #0
+ARM GAS  /tmp/ccp8w3Ix.s 			page 4
+
+
+  87 0036 7047     		bx	lr
+  88              	.LVL6:
+  89              	.L5:
+  90              		.loc 1 83 12 view .LVU24
+  91 0038 0020     		movs	r0, #0
+  92 003a 7047     		bx	lr
+  93              	.LVL7:
+  94              	.L6:
+  81:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   } else {
+  95              		.loc 1 81 12 view .LVU25
+  96 003c 0120     		movs	r0, #1
+  97              	.L2:
+  84:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   }
+  85:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** }
+  98              		.loc 1 85 1 view .LVU26
+  99 003e 7047     		bx	lr
+ 100              		.cfi_endproc
+ 101              	.LFE361:
+ 103              		.section	.text.ip4_addr_netmask_valid,"ax",%progbits
+ 104              		.align	1
+ 105              		.global	ip4_addr_netmask_valid
+ 106              		.syntax unified
+ 107              		.thumb
+ 108              		.thumb_func
+ 110              	ip4_addr_netmask_valid:
+ 111              	.LVL8:
+ 112              	.LFB362:
+  86:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+  87:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** /** Checks if a netmask is valid (starting with ones, then only zeros)
+  88:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  *
+  89:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * @param netmask the IPv4 netmask to check (in network byte order!)
+  90:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * @return 1 if the netmask is valid, 0 if it is not
+  91:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  */
+  92:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** u8_t
+  93:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** ip4_addr_netmask_valid(u32_t netmask)
+  94:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** {
+ 113              		.loc 1 94 1 is_stmt 1 view -0
+ 114              		.cfi_startproc
+ 115              		@ args = 0, pretend = 0, frame = 0
+ 116              		@ frame_needed = 0, uses_anonymous_args = 0
+ 117              		.loc 1 94 1 is_stmt 0 view .LVU28
+ 118 0000 08B5     		push	{r3, lr}
+ 119              	.LCFI0:
+ 120              		.cfi_def_cfa_offset 8
+ 121              		.cfi_offset 3, -8
+ 122              		.cfi_offset 14, -4
+  95:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   u32_t mask;
+ 123              		.loc 1 95 3 is_stmt 1 view .LVU29
+  96:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   u32_t nm_hostorder = lwip_htonl(netmask);
+ 124              		.loc 1 96 3 view .LVU30
+ 125              		.loc 1 96 24 is_stmt 0 view .LVU31
+ 126 0002 FFF7FEFF 		bl	lwip_htonl
+ 127              	.LVL9:
+  97:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+  98:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   /* first, check for the first zero */
+  99:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   for (mask = 1UL << 31 ; mask != 0; mask >>= 1) {
+ 128              		.loc 1 99 3 is_stmt 1 view .LVU32
+ARM GAS  /tmp/ccp8w3Ix.s 			page 5
+
+
+ 129              		.loc 1 99 13 is_stmt 0 view .LVU33
+ 130 0006 4FF00043 		mov	r3, #-2147483648
+ 131              	.LVL10:
+ 132              	.L8:
+ 133              		.loc 1 99 32 is_stmt 1 discriminator 1 view .LVU34
+ 134 000a 1BB1     		cbz	r3, .L12
+ 100:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     if ((nm_hostorder & mask) == 0) {
+ 135              		.loc 1 100 5 view .LVU35
+ 136              		.loc 1 100 8 is_stmt 0 view .LVU36
+ 137 000c 0342     		tst	r3, r0
+ 138 000e 01D0     		beq	.L12
+  99:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     if ((nm_hostorder & mask) == 0) {
+ 139              		.loc 1 99 43 is_stmt 1 discriminator 2 view .LVU37
+ 140 0010 5B08     		lsrs	r3, r3, #1
+ 141              	.LVL11:
+  99:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     if ((nm_hostorder & mask) == 0) {
+ 142              		.loc 1 99 43 is_stmt 0 discriminator 2 view .LVU38
+ 143 0012 FAE7     		b	.L8
+ 144              	.L12:
+ 101:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       break;
+ 102:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     }
+ 103:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   }
+ 104:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   /* then check that there is no one */
+ 105:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   for (; mask != 0; mask >>= 1) {
+ 145              		.loc 1 105 15 is_stmt 1 discriminator 1 view .LVU39
+ 146 0014 1BB1     		cbz	r3, .L16
+ 106:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     if ((nm_hostorder & mask) != 0) {
+ 147              		.loc 1 106 5 view .LVU40
+ 148              		.loc 1 106 8 is_stmt 0 view .LVU41
+ 149 0016 0342     		tst	r3, r0
+ 150 0018 03D1     		bne	.L14
+ 105:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     if ((nm_hostorder & mask) != 0) {
+ 151              		.loc 1 105 26 is_stmt 1 view .LVU42
+ 152 001a 5B08     		lsrs	r3, r3, #1
+ 153              	.LVL12:
+ 105:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     if ((nm_hostorder & mask) != 0) {
+ 154              		.loc 1 105 26 is_stmt 0 view .LVU43
+ 155 001c FAE7     		b	.L12
+ 156              	.L16:
+ 107:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       /* there is a one after the first zero -> invalid */
+ 108:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       return 0;
+ 109:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     }
+ 110:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   }
+ 111:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   /* no one after the first zero -> valid */
+ 112:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   return 1;
+ 157              		.loc 1 112 10 view .LVU44
+ 158 001e 0120     		movs	r0, #1
+ 159              	.LVL13:
+ 160              	.L11:
+ 113:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** }
+ 161              		.loc 1 113 1 view .LVU45
+ 162 0020 08BD     		pop	{r3, pc}
+ 163              	.LVL14:
+ 164              	.L14:
+ 108:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     }
+ 165              		.loc 1 108 14 view .LVU46
+ 166 0022 0020     		movs	r0, #0
+ARM GAS  /tmp/ccp8w3Ix.s 			page 6
+
+
+ 167              	.LVL15:
+ 108:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     }
+ 168              		.loc 1 108 14 view .LVU47
+ 169 0024 FCE7     		b	.L11
+ 170              		.cfi_endproc
+ 171              	.LFE362:
+ 173              		.section	.rodata.ip4addr_aton.str1.4,"aMS",%progbits,1
+ 174              		.align	2
+ 175              	.LC0:
+ 176 0000 2E2E2F2E 		.ascii	"../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip"
+ 176      2E2F4D69 
+ 176      64646C65 
+ 176      77617265 
+ 176      732F5468 
+ 177 0033 345F6164 		.ascii	"4_addr.c\000"
+ 177      64722E63 
+ 177      00
+ 178              		.align	2
+ 179              	.LC1:
+ 180 003c 756E6861 		.ascii	"unhandled\000"
+ 180      6E646C65 
+ 180      6400
+ 181 0046 0000     		.align	2
+ 182              	.LC2:
+ 183 0048 41737365 		.ascii	"Assertion \"%s\" failed at line %d in %s\012\000"
+ 183      7274696F 
+ 183      6E202225 
+ 183      73222066 
+ 183      61696C65 
+ 184              		.section	.text.ip4addr_aton,"ax",%progbits
+ 185              		.align	1
+ 186              		.global	ip4addr_aton
+ 187              		.syntax unified
+ 188              		.thumb
+ 189              		.thumb_func
+ 191              	ip4addr_aton:
+ 192              	.LVL16:
+ 193              	.LFB364:
+ 114:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+ 115:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** /**
+ 116:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * Ascii internet address interpretation routine.
+ 117:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * The value returned is in network order.
+ 118:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  *
+ 119:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * @param cp IP address in ascii representation (e.g. "127.0.0.1")
+ 120:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * @return ip address in network order
+ 121:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  */
+ 122:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** u32_t
+ 123:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** ipaddr_addr(const char *cp)
+ 124:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** {
+ 125:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   ip4_addr_t val;
+ 126:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+ 127:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   if (ip4addr_aton(cp, &val)) {
+ 128:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     return ip4_addr_get_u32(&val);
+ 129:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   }
+ 130:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   return (IPADDR_NONE);
+ 131:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** }
+ 132:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+ARM GAS  /tmp/ccp8w3Ix.s 			page 7
+
+
+ 133:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** /**
+ 134:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * Check whether "cp" is a valid ascii representation
+ 135:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * of an Internet address and convert to a binary address.
+ 136:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * Returns 1 if the address is valid, 0 if not.
+ 137:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * This replaces inet_addr, the return value from which
+ 138:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * cannot distinguish between failure and a local broadcast address.
+ 139:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  *
+ 140:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * @param cp IP address in ascii representation (e.g. "127.0.0.1")
+ 141:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * @param addr pointer to which to save the ip address in network order
+ 142:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * @return 1 if cp could be converted to addr, 0 on failure
+ 143:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  */
+ 144:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** int
+ 145:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** ip4addr_aton(const char *cp, ip4_addr_t *addr)
+ 146:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** {
+ 194              		.loc 1 146 1 is_stmt 1 view -0
+ 195              		.cfi_startproc
+ 196              		@ args = 0, pretend = 0, frame = 16
+ 197              		@ frame_needed = 0, uses_anonymous_args = 0
+ 198              		.loc 1 146 1 is_stmt 0 view .LVU49
+ 199 0000 30B5     		push	{r4, r5, lr}
+ 200              	.LCFI1:
+ 201              		.cfi_def_cfa_offset 12
+ 202              		.cfi_offset 4, -12
+ 203              		.cfi_offset 5, -8
+ 204              		.cfi_offset 14, -4
+ 205 0002 85B0     		sub	sp, sp, #20
+ 206              	.LCFI2:
+ 207              		.cfi_def_cfa_offset 32
+ 208 0004 0D46     		mov	r5, r1
+ 147:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   u32_t val;
+ 209              		.loc 1 147 3 is_stmt 1 view .LVU50
+ 148:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   u8_t base;
+ 210              		.loc 1 148 3 view .LVU51
+ 149:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   char c;
+ 211              		.loc 1 149 3 view .LVU52
+ 150:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   u32_t parts[4];
+ 212              		.loc 1 150 3 view .LVU53
+ 151:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   u32_t *pp = parts;
+ 213              		.loc 1 151 3 view .LVU54
+ 214              	.LVL17:
+ 152:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+ 153:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   c = *cp;
+ 215              		.loc 1 153 3 view .LVU55
+ 216              		.loc 1 153 5 is_stmt 0 view .LVU56
+ 217 0006 0378     		ldrb	r3, [r0]	@ zero_extendqisi2
+ 218              	.LVL18:
+ 151:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   u32_t *pp = parts;
+ 219              		.loc 1 151 10 view .LVU57
+ 220 0008 EC46     		mov	ip, sp
+ 221 000a 35E0     		b	.L26
+ 222              	.LVL19:
+ 223              	.L55:
+ 154:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   for (;;) {
+ 155:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     /*
+ 156:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****      * Collect number up to ``.''.
+ 157:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****      * Values are specified as for C:
+ 158:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****      * 0x=hex, 0=octal, 1-9=decimal.
+ARM GAS  /tmp/ccp8w3Ix.s 			page 8
+
+
+ 159:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****      */
+ 160:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     if (!lwip_isdigit(c)) {
+ 161:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       return 0;
+ 162:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     }
+ 163:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     val = 0;
+ 164:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     base = 10;
+ 165:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     if (c == '0') {
+ 166:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       c = *++cp;
+ 224              		.loc 1 166 7 is_stmt 1 view .LVU58
+ 225              		.loc 1 166 9 is_stmt 0 view .LVU59
+ 226 000c 421C     		adds	r2, r0, #1
+ 227              	.LVL20:
+ 228              		.loc 1 166 9 view .LVU60
+ 229 000e 4378     		ldrb	r3, [r0, #1]	@ zero_extendqisi2
+ 230              	.LVL21:
+ 167:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       if (c == 'x' || c == 'X') {
+ 231              		.loc 1 167 7 is_stmt 1 view .LVU61
+ 232              		.loc 1 167 10 is_stmt 0 view .LVU62
+ 233 0010 582B     		cmp	r3, #88
+ 234 0012 18BF     		it	ne
+ 235 0014 782B     		cmpne	r3, #120
+ 236 0016 03D1     		bne	.L36
+ 168:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         base = 16;
+ 237              		.loc 1 168 9 is_stmt 1 view .LVU63
+ 238              	.LVL22:
+ 169:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         c = *++cp;
+ 239              		.loc 1 169 9 view .LVU64
+ 240              		.loc 1 169 11 is_stmt 0 view .LVU65
+ 241 0018 8378     		ldrb	r3, [r0, #2]	@ zero_extendqisi2
+ 242              	.LVL23:
+ 243              		.loc 1 169 11 view .LVU66
+ 244 001a 0230     		adds	r0, r0, #2
+ 245              	.LVL24:
+ 168:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         base = 16;
+ 246              		.loc 1 168 14 view .LVU67
+ 247 001c 1021     		movs	r1, #16
+ 248 001e 33E0     		b	.L19
+ 249              	.LVL25:
+ 250              	.L36:
+ 166:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       if (c == 'x' || c == 'X') {
+ 251              		.loc 1 166 9 view .LVU68
+ 252 0020 1046     		mov	r0, r2
+ 170:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       } else {
+ 171:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         base = 8;
+ 253              		.loc 1 171 14 view .LVU69
+ 254 0022 0821     		movs	r1, #8
+ 255 0024 30E0     		b	.L19
+ 256              	.LVL26:
+ 257              	.L53:
+ 172:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       }
+ 173:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     }
+ 174:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     for (;;) {
+ 175:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       if (lwip_isdigit(c)) {
+ 176:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         val = (val * base) + (u32_t)(c - '0');
+ 258              		.loc 1 176 9 is_stmt 1 view .LVU70
+ 259              		.loc 1 176 28 is_stmt 0 view .LVU71
+ 260 0026 04FB0133 		mla	r3, r4, r1, r3
+ARM GAS  /tmp/ccp8w3Ix.s 			page 9
+
+
+ 261              	.LVL27:
+ 262              		.loc 1 176 13 view .LVU72
+ 263 002a A3F13004 		sub	r4, r3, #48
+ 264              	.LVL28:
+ 177:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         c = *++cp;
+ 265              		.loc 1 177 9 is_stmt 1 view .LVU73
+ 266              		.loc 1 177 11 is_stmt 0 view .LVU74
+ 267 002e 10F8013F 		ldrb	r3, [r0, #1]!	@ zero_extendqisi2
+ 268              	.LVL29:
+ 269              	.L20:
+ 174:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       if (lwip_isdigit(c)) {
+ 270              		.loc 1 174 5 is_stmt 1 view .LVU75
+ 175:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         val = (val * base) + (u32_t)(c - '0');
+ 271              		.loc 1 175 7 view .LVU76
+ 175:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         val = (val * base) + (u32_t)(c - '0');
+ 272              		.loc 1 175 11 is_stmt 0 view .LVU77
+ 273 0032 474A     		ldr	r2, .L56
+ 274 0034 D25C     		ldrb	r2, [r2, r3]	@ zero_extendqisi2
+ 175:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         val = (val * base) + (u32_t)(c - '0');
+ 275              		.loc 1 175 10 view .LVU78
+ 276 0036 12F0040F 		tst	r2, #4
+ 277 003a F4D1     		bne	.L53
+ 178:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       } else if (base == 16 && lwip_isxdigit(c)) {
+ 278              		.loc 1 178 14 is_stmt 1 view .LVU79
+ 279              		.loc 1 178 17 is_stmt 0 view .LVU80
+ 280 003c 1029     		cmp	r1, #16
+ 281 003e 10D1     		bne	.L23
+ 282              		.loc 1 178 29 discriminator 1 view .LVU81
+ 283 0040 12F0440F 		tst	r2, #68
+ 284 0044 0DD0     		beq	.L23
+ 179:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         val = (val << 4) | (u32_t)(c + 10 - (lwip_islower(c) ? 'a' : 'A'));
+ 285              		.loc 1 179 9 is_stmt 1 view .LVU82
+ 286              		.loc 1 179 20 is_stmt 0 view .LVU83
+ 287 0046 2401     		lsls	r4, r4, #4
+ 288              	.LVL30:
+ 289              		.loc 1 179 38 view .LVU84
+ 290 0048 0A33     		adds	r3, r3, #10
+ 291              	.LVL31:
+ 292              		.loc 1 179 68 view .LVU85
+ 293 004a 02F00302 		and	r2, r2, #3
+ 294 004e 022A     		cmp	r2, #2
+ 295 0050 05D0     		beq	.L54
+ 296              		.loc 1 179 68 discriminator 2 view .LVU86
+ 297 0052 4122     		movs	r2, #65
+ 298              	.L24:
+ 299              		.loc 1 179 43 discriminator 4 view .LVU87
+ 300 0054 9B1A     		subs	r3, r3, r2
+ 301              	.LVL32:
+ 302              		.loc 1 179 13 discriminator 4 view .LVU88
+ 303 0056 1C43     		orrs	r4, r4, r3
+ 304              	.LVL33:
+ 180:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         c = *++cp;
+ 305              		.loc 1 180 9 is_stmt 1 view .LVU89
+ 306              		.loc 1 180 11 is_stmt 0 view .LVU90
+ 307 0058 10F8013F 		ldrb	r3, [r0, #1]!	@ zero_extendqisi2
+ 308              	.LVL34:
+ 309              		.loc 1 180 11 view .LVU91
+ARM GAS  /tmp/ccp8w3Ix.s 			page 10
+
+
+ 310 005c E9E7     		b	.L20
+ 311              	.LVL35:
+ 312              	.L54:
+ 179:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         val = (val << 4) | (u32_t)(c + 10 - (lwip_islower(c) ? 'a' : 'A'));
+ 313              		.loc 1 179 68 discriminator 1 view .LVU92
+ 314 005e 6122     		movs	r2, #97
+ 315 0060 F8E7     		b	.L24
+ 316              	.LVL36:
+ 317              	.L23:
+ 181:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       } else {
+ 182:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         break;
+ 183:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       }
+ 184:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     }
+ 185:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     if (c == '.') {
+ 318              		.loc 1 185 5 is_stmt 1 view .LVU93
+ 319              		.loc 1 185 8 is_stmt 0 view .LVU94
+ 320 0062 2E2B     		cmp	r3, #46
+ 321 0064 12D1     		bne	.L25
+ 186:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       /*
+ 187:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****        * Internet format:
+ 188:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****        *  a.b.c.d
+ 189:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****        *  a.b.c   (with c treated as 16 bits)
+ 190:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****        *  a.b (with b treated as 24 bits)
+ 191:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****        */
+ 192:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       if (pp >= parts + 3) {
+ 322              		.loc 1 192 7 is_stmt 1 view .LVU95
+ 323              		.loc 1 192 10 is_stmt 0 view .LVU96
+ 324 0066 03AB     		add	r3, sp, #12
+ 325              	.LVL37:
+ 326              		.loc 1 192 10 view .LVU97
+ 327 0068 9C45     		cmp	ip, r3
+ 328 006a 58D2     		bcs	.L38
+ 193:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return 0;
+ 194:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       }
+ 195:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       *pp++ = val;
+ 329              		.loc 1 195 7 is_stmt 1 view .LVU98
+ 330              		.loc 1 195 10 is_stmt 0 view .LVU99
+ 331 006c 6246     		mov	r2, ip
+ 332              	.LVL38:
+ 333              		.loc 1 195 13 view .LVU100
+ 334 006e 42F8044B 		str	r4, [r2], #4
+ 335              	.LVL39:
+ 196:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       c = *++cp;
+ 336              		.loc 1 196 7 is_stmt 1 view .LVU101
+ 337              		.loc 1 196 9 is_stmt 0 view .LVU102
+ 338 0072 4378     		ldrb	r3, [r0, #1]	@ zero_extendqisi2
+ 339              	.LVL40:
+ 154:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     /*
+ 340              		.loc 1 154 3 is_stmt 1 view .LVU103
+ 195:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       c = *++cp;
+ 341              		.loc 1 195 10 is_stmt 0 view .LVU104
+ 342 0074 9446     		mov	ip, r2
+ 343              		.loc 1 196 9 view .LVU105
+ 344 0076 0130     		adds	r0, r0, #1
+ 345              	.LVL41:
+ 346              	.L26:
+ 154:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     /*
+ARM GAS  /tmp/ccp8w3Ix.s 			page 11
+
+
+ 347              		.loc 1 154 3 is_stmt 1 view .LVU106
+ 160:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       return 0;
+ 348              		.loc 1 160 5 view .LVU107
+ 160:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       return 0;
+ 349              		.loc 1 160 10 is_stmt 0 view .LVU108
+ 350 0078 354A     		ldr	r2, .L56
+ 351 007a D25C     		ldrb	r2, [r2, r3]	@ zero_extendqisi2
+ 160:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       return 0;
+ 352              		.loc 1 160 8 view .LVU109
+ 353 007c 12F0040F 		tst	r2, #4
+ 354 0080 4BD0     		beq	.L34
+ 163:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     base = 10;
+ 355              		.loc 1 163 5 is_stmt 1 view .LVU110
+ 356              	.LVL42:
+ 164:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     if (c == '0') {
+ 357              		.loc 1 164 5 view .LVU111
+ 165:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       c = *++cp;
+ 358              		.loc 1 165 5 view .LVU112
+ 165:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       c = *++cp;
+ 359              		.loc 1 165 8 is_stmt 0 view .LVU113
+ 360 0082 302B     		cmp	r3, #48
+ 361 0084 C2D0     		beq	.L55
+ 164:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     if (c == '0') {
+ 362              		.loc 1 164 10 view .LVU114
+ 363 0086 0A21     		movs	r1, #10
+ 364              	.LVL43:
+ 365              	.L19:
+ 171:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       }
+ 366              		.loc 1 171 14 view .LVU115
+ 367 0088 0024     		movs	r4, #0
+ 368 008a D2E7     		b	.L20
+ 369              	.LVL44:
+ 370              	.L25:
+ 197:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     } else {
+ 198:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       break;
+ 199:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     }
+ 200:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   }
+ 201:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   /*
+ 202:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****    * Check for trailing characters.
+ 203:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****    */
+ 204:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   if (c != '\0' && !lwip_isspace(c)) {
+ 371              		.loc 1 204 3 is_stmt 1 view .LVU116
+ 372              		.loc 1 204 6 is_stmt 0 view .LVU117
+ 373 008c 13B1     		cbz	r3, .L27
+ 374              		.loc 1 204 17 discriminator 1 view .LVU118
+ 375 008e 12F0080F 		tst	r2, #8
+ 376 0092 47D0     		beq	.L39
+ 377              	.L27:
+ 205:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     return 0;
+ 206:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   }
+ 207:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   /*
+ 208:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****    * Concoct the address according to
+ 209:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****    * the number of parts specified.
+ 210:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****    */
+ 211:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   switch (pp - parts + 1) {
+ 378              		.loc 1 211 3 is_stmt 1 view .LVU119
+ 379              		.loc 1 211 14 is_stmt 0 view .LVU120
+ARM GAS  /tmp/ccp8w3Ix.s 			page 12
+
+
+ 380 0094 6B46     		mov	r3, sp
+ 381              	.LVL45:
+ 382              		.loc 1 211 14 view .LVU121
+ 383 0096 ACEB0300 		sub	r0, ip, r3
+ 384              	.LVL46:
+ 385              		.loc 1 211 14 view .LVU122
+ 386 009a 8010     		asrs	r0, r0, #2
+ 387              		.loc 1 211 22 view .LVU123
+ 388 009c 0130     		adds	r0, r0, #1
+ 389              		.loc 1 211 3 view .LVU124
+ 390 009e 0428     		cmp	r0, #4
+ 391 00a0 34D8     		bhi	.L28
+ 392 00a2 DFE800F0 		tbb	[pc, r0]
+ 393              	.L30:
+ 394 00a6 3D       		.byte	(.L17-.L30)/2
+ 395 00a7 0B       		.byte	(.L33-.L30)/2
+ 396 00a8 03       		.byte	(.L32-.L30)/2
+ 397 00a9 13       		.byte	(.L31-.L30)/2
+ 398 00aa 21       		.byte	(.L29-.L30)/2
+ 399 00ab 00       		.p2align 1
+ 400              	.L32:
+ 212:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+ 213:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     case 0:
+ 214:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       return 0;       /* initial nondigit */
+ 215:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+ 216:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     case 1:             /* a -- 32 bits */
+ 217:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       break;
+ 218:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+ 219:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     case 2:             /* a.b -- 8.24 bits */
+ 220:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       if (val > 0xffffffUL) {
+ 401              		.loc 1 220 7 is_stmt 1 view .LVU125
+ 402              		.loc 1 220 10 is_stmt 0 view .LVU126
+ 403 00ac B4F1807F 		cmp	r4, #16777216
+ 404 00b0 3AD2     		bcs	.L40
+ 221:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return 0;
+ 222:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       }
+ 223:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       if (parts[0] > 0xff) {
+ 405              		.loc 1 223 7 is_stmt 1 view .LVU127
+ 406              		.loc 1 223 16 is_stmt 0 view .LVU128
+ 407 00b2 009B     		ldr	r3, [sp]
+ 408              		.loc 1 223 10 view .LVU129
+ 409 00b4 FF2B     		cmp	r3, #255
+ 410 00b6 39D8     		bhi	.L41
+ 224:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return 0;
+ 225:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       }
+ 226:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       val |= parts[0] << 24;
+ 411              		.loc 1 226 7 is_stmt 1 view .LVU130
+ 412              		.loc 1 226 11 is_stmt 0 view .LVU131
+ 413 00b8 44EA0364 		orr	r4, r4, r3, lsl #24
+ 414              	.LVL47:
+ 227:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       break;
+ 415              		.loc 1 227 7 is_stmt 1 view .LVU132
+ 416              	.L33:
+ 228:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+ 229:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     case 3:             /* a.b.c -- 8.8.16 bits */
+ 230:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       if (val > 0xffff) {
+ 231:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return 0;
+ARM GAS  /tmp/ccp8w3Ix.s 			page 13
+
+
+ 232:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       }
+ 233:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       if ((parts[0] > 0xff) || (parts[1] > 0xff)) {
+ 234:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return 0;
+ 235:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       }
+ 236:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       val |= (parts[0] << 24) | (parts[1] << 16);
+ 237:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       break;
+ 238:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+ 239:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     case 4:             /* a.b.c.d -- 8.8.8.8 bits */
+ 240:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       if (val > 0xff) {
+ 241:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return 0;
+ 242:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       }
+ 243:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       if ((parts[0] > 0xff) || (parts[1] > 0xff) || (parts[2] > 0xff)) {
+ 244:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return 0;
+ 245:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       }
+ 246:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       val |= (parts[0] << 24) | (parts[1] << 16) | (parts[2] << 8);
+ 247:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       break;
+ 248:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     default:
+ 249:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       LWIP_ASSERT("unhandled", 0);
+ 250:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       break;
+ 251:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   }
+ 252:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   if (addr) {
+ 417              		.loc 1 252 3 view .LVU133
+ 418              		.loc 1 252 6 is_stmt 0 view .LVU134
+ 419 00bc 002D     		cmp	r5, #0
+ 420 00be 45D0     		beq	.L49
+ 253:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     ip4_addr_set_u32(addr, lwip_htonl(val));
+ 421              		.loc 1 253 5 is_stmt 1 view .LVU135
+ 422 00c0 2046     		mov	r0, r4
+ 423 00c2 FFF7FEFF 		bl	lwip_htonl
+ 424              	.LVL48:
+ 425              		.loc 1 253 5 is_stmt 0 discriminator 1 view .LVU136
+ 426 00c6 2860     		str	r0, [r5]
+ 254:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   }
+ 255:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   return 1;
+ 427              		.loc 1 255 10 view .LVU137
+ 428 00c8 0120     		movs	r0, #1
+ 429 00ca 29E0     		b	.L17
+ 430              	.LVL49:
+ 431              	.L31:
+ 230:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return 0;
+ 432              		.loc 1 230 7 is_stmt 1 view .LVU138
+ 230:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return 0;
+ 433              		.loc 1 230 10 is_stmt 0 view .LVU139
+ 434 00cc B4F5803F 		cmp	r4, #65536
+ 435 00d0 2ED2     		bcs	.L42
+ 233:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return 0;
+ 436              		.loc 1 233 7 is_stmt 1 view .LVU140
+ 233:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return 0;
+ 437              		.loc 1 233 17 is_stmt 0 view .LVU141
+ 438 00d2 009A     		ldr	r2, [sp]
+ 233:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return 0;
+ 439              		.loc 1 233 10 view .LVU142
+ 440 00d4 FF2A     		cmp	r2, #255
+ 441 00d6 2DD8     		bhi	.L43
+ 233:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return 0;
+ 442              		.loc 1 233 38 discriminator 1 view .LVU143
+ 443 00d8 019B     		ldr	r3, [sp, #4]
+ARM GAS  /tmp/ccp8w3Ix.s 			page 14
+
+
+ 233:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return 0;
+ 444              		.loc 1 233 29 discriminator 1 view .LVU144
+ 445 00da FF2B     		cmp	r3, #255
+ 446 00dc 2CD8     		bhi	.L44
+ 236:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       break;
+ 447              		.loc 1 236 7 is_stmt 1 view .LVU145
+ 236:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       break;
+ 448              		.loc 1 236 43 is_stmt 0 view .LVU146
+ 449 00de 1B04     		lsls	r3, r3, #16
+ 236:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       break;
+ 450              		.loc 1 236 31 view .LVU147
+ 451 00e0 43EA0263 		orr	r3, r3, r2, lsl #24
+ 236:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       break;
+ 452              		.loc 1 236 11 view .LVU148
+ 453 00e4 1C43     		orrs	r4, r4, r3
+ 454              	.LVL50:
+ 237:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+ 455              		.loc 1 237 7 is_stmt 1 view .LVU149
+ 456 00e6 E9E7     		b	.L33
+ 457              	.L29:
+ 240:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return 0;
+ 458              		.loc 1 240 7 view .LVU150
+ 240:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return 0;
+ 459              		.loc 1 240 10 is_stmt 0 view .LVU151
+ 460 00e8 FF2C     		cmp	r4, #255
+ 461 00ea 27D8     		bhi	.L45
+ 243:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return 0;
+ 462              		.loc 1 243 7 is_stmt 1 view .LVU152
+ 243:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return 0;
+ 463              		.loc 1 243 17 is_stmt 0 view .LVU153
+ 464 00ec 0099     		ldr	r1, [sp]
+ 465              	.LVL51:
+ 243:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return 0;
+ 466              		.loc 1 243 10 view .LVU154
+ 467 00ee FF29     		cmp	r1, #255
+ 468 00f0 26D8     		bhi	.L46
+ 243:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return 0;
+ 469              		.loc 1 243 38 discriminator 1 view .LVU155
+ 470 00f2 019B     		ldr	r3, [sp, #4]
+ 243:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return 0;
+ 471              		.loc 1 243 29 discriminator 1 view .LVU156
+ 472 00f4 FF2B     		cmp	r3, #255
+ 473 00f6 25D8     		bhi	.L47
+ 243:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return 0;
+ 474              		.loc 1 243 59 discriminator 2 view .LVU157
+ 475 00f8 029A     		ldr	r2, [sp, #8]
+ 243:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return 0;
+ 476              		.loc 1 243 50 discriminator 2 view .LVU158
+ 477 00fa FF2A     		cmp	r2, #255
+ 478 00fc 24D8     		bhi	.L48
+ 246:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       break;
+ 479              		.loc 1 246 7 is_stmt 1 view .LVU159
+ 246:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       break;
+ 480              		.loc 1 246 43 is_stmt 0 view .LVU160
+ 481 00fe 1B04     		lsls	r3, r3, #16
+ 246:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       break;
+ 482              		.loc 1 246 31 view .LVU161
+ARM GAS  /tmp/ccp8w3Ix.s 			page 15
+
+
+ 483 0100 43EA0163 		orr	r3, r3, r1, lsl #24
+ 246:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       break;
+ 484              		.loc 1 246 50 view .LVU162
+ 485 0104 43EA0223 		orr	r3, r3, r2, lsl #8
+ 246:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       break;
+ 486              		.loc 1 246 11 view .LVU163
+ 487 0108 1C43     		orrs	r4, r4, r3
+ 488              	.LVL52:
+ 247:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     default:
+ 489              		.loc 1 247 7 is_stmt 1 view .LVU164
+ 490 010a D7E7     		b	.L33
+ 491              	.LVL53:
+ 492              	.L28:
+ 249:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       break;
+ 493              		.loc 1 249 7 view .LVU165
+ 249:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       break;
+ 494              		.loc 1 249 7 view .LVU166
+ 249:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       break;
+ 495              		.loc 1 249 7 discriminator 1 view .LVU167
+ 249:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       break;
+ 496              		.loc 1 249 7 discriminator 1 view .LVU168
+ 497 010c 114B     		ldr	r3, .L56+4
+ 498 010e F922     		movs	r2, #249
+ 499 0110 1149     		ldr	r1, .L56+8
+ 500              	.LVL54:
+ 249:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       break;
+ 501              		.loc 1 249 7 is_stmt 0 discriminator 1 view .LVU169
+ 502 0112 1248     		ldr	r0, .L56+12
+ 503 0114 FFF7FEFF 		bl	printf
+ 504              	.LVL55:
+ 249:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       break;
+ 505              		.loc 1 249 7 is_stmt 1 discriminator 3 view .LVU170
+ 249:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       break;
+ 506              		.loc 1 249 7 discriminator 3 view .LVU171
+ 250:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   }
+ 507              		.loc 1 250 7 view .LVU172
+ 508 0118 D0E7     		b	.L33
+ 509              	.LVL56:
+ 510              	.L34:
+ 161:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     }
+ 511              		.loc 1 161 14 is_stmt 0 view .LVU173
+ 512 011a 0020     		movs	r0, #0
+ 513              	.LVL57:
+ 161:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     }
+ 514              		.loc 1 161 14 view .LVU174
+ 515 011c 00E0     		b	.L17
+ 516              	.LVL58:
+ 517              	.L38:
+ 193:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       }
+ 518              		.loc 1 193 16 view .LVU175
+ 519 011e 0020     		movs	r0, #0
+ 520              	.LVL59:
+ 521              	.L17:
+ 256:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** }
+ 522              		.loc 1 256 1 view .LVU176
+ 523 0120 05B0     		add	sp, sp, #20
+ 524              	.LCFI3:
+ARM GAS  /tmp/ccp8w3Ix.s 			page 16
+
+
+ 525              		.cfi_remember_state
+ 526              		.cfi_def_cfa_offset 12
+ 527              		@ sp needed
+ 528 0122 30BD     		pop	{r4, r5, pc}
+ 529              	.LVL60:
+ 530              	.L39:
+ 531              	.LCFI4:
+ 532              		.cfi_restore_state
+ 205:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   }
+ 533              		.loc 1 205 12 view .LVU177
+ 534 0124 0020     		movs	r0, #0
+ 535              	.LVL61:
+ 205:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   }
+ 536              		.loc 1 205 12 view .LVU178
+ 537 0126 FBE7     		b	.L17
+ 538              	.LVL62:
+ 539              	.L40:
+ 221:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       }
+ 540              		.loc 1 221 16 view .LVU179
+ 541 0128 0020     		movs	r0, #0
+ 542 012a F9E7     		b	.L17
+ 543              	.L41:
+ 224:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       }
+ 544              		.loc 1 224 16 view .LVU180
+ 545 012c 0020     		movs	r0, #0
+ 546 012e F7E7     		b	.L17
+ 547              	.L42:
+ 231:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       }
+ 548              		.loc 1 231 16 view .LVU181
+ 549 0130 0020     		movs	r0, #0
+ 550 0132 F5E7     		b	.L17
+ 551              	.L43:
+ 234:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       }
+ 552              		.loc 1 234 16 view .LVU182
+ 553 0134 0020     		movs	r0, #0
+ 554 0136 F3E7     		b	.L17
+ 555              	.L44:
+ 556 0138 0020     		movs	r0, #0
+ 557 013a F1E7     		b	.L17
+ 558              	.L45:
+ 241:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       }
+ 559              		.loc 1 241 16 view .LVU183
+ 560 013c 0020     		movs	r0, #0
+ 561 013e EFE7     		b	.L17
+ 562              	.LVL63:
+ 563              	.L46:
+ 244:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       }
+ 564              		.loc 1 244 16 view .LVU184
+ 565 0140 0020     		movs	r0, #0
+ 566 0142 EDE7     		b	.L17
+ 567              	.L47:
+ 568 0144 0020     		movs	r0, #0
+ 569 0146 EBE7     		b	.L17
+ 570              	.L48:
+ 571 0148 0020     		movs	r0, #0
+ 572 014a E9E7     		b	.L17
+ 573              	.LVL64:
+ARM GAS  /tmp/ccp8w3Ix.s 			page 17
+
+
+ 574              	.L49:
+ 255:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** }
+ 575              		.loc 1 255 10 view .LVU185
+ 576 014c 0120     		movs	r0, #1
+ 577 014e E7E7     		b	.L17
+ 578              	.L57:
+ 579              		.align	2
+ 580              	.L56:
+ 581 0150 01000000 		.word	_ctype_+1
+ 582 0154 00000000 		.word	.LC0
+ 583 0158 3C000000 		.word	.LC1
+ 584 015c 48000000 		.word	.LC2
+ 585              		.cfi_endproc
+ 586              	.LFE364:
+ 588              		.section	.text.ipaddr_addr,"ax",%progbits
+ 589              		.align	1
+ 590              		.global	ipaddr_addr
+ 591              		.syntax unified
+ 592              		.thumb
+ 593              		.thumb_func
+ 595              	ipaddr_addr:
+ 596              	.LVL65:
+ 597              	.LFB363:
+ 124:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   ip4_addr_t val;
+ 598              		.loc 1 124 1 is_stmt 1 view -0
+ 599              		.cfi_startproc
+ 600              		@ args = 0, pretend = 0, frame = 8
+ 601              		@ frame_needed = 0, uses_anonymous_args = 0
+ 124:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   ip4_addr_t val;
+ 602              		.loc 1 124 1 is_stmt 0 view .LVU187
+ 603 0000 00B5     		push	{lr}
+ 604              	.LCFI5:
+ 605              		.cfi_def_cfa_offset 4
+ 606              		.cfi_offset 14, -4
+ 607 0002 83B0     		sub	sp, sp, #12
+ 608              	.LCFI6:
+ 609              		.cfi_def_cfa_offset 16
+ 125:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+ 610              		.loc 1 125 3 is_stmt 1 view .LVU188
+ 127:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     return ip4_addr_get_u32(&val);
+ 611              		.loc 1 127 3 view .LVU189
+ 127:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     return ip4_addr_get_u32(&val);
+ 612              		.loc 1 127 7 is_stmt 0 view .LVU190
+ 613 0004 01A9     		add	r1, sp, #4
+ 614 0006 FFF7FEFF 		bl	ip4addr_aton
+ 615              	.LVL66:
+ 127:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     return ip4_addr_get_u32(&val);
+ 616              		.loc 1 127 6 discriminator 1 view .LVU191
+ 617 000a 20B9     		cbnz	r0, .L62
+ 130:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** }
+ 618              		.loc 1 130 10 view .LVU192
+ 619 000c 4FF0FF30 		mov	r0, #-1
+ 620              	.L58:
+ 131:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+ 621              		.loc 1 131 1 view .LVU193
+ 622 0010 03B0     		add	sp, sp, #12
+ 623              	.LCFI7:
+ARM GAS  /tmp/ccp8w3Ix.s 			page 18
+
+
+ 624              		.cfi_remember_state
+ 625              		.cfi_def_cfa_offset 4
+ 626              		@ sp needed
+ 627 0012 5DF804FB 		ldr	pc, [sp], #4
+ 628              	.L62:
+ 629              	.LCFI8:
+ 630              		.cfi_restore_state
+ 128:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   }
+ 631              		.loc 1 128 5 is_stmt 1 view .LVU194
+ 128:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   }
+ 632              		.loc 1 128 12 is_stmt 0 view .LVU195
+ 633 0016 0198     		ldr	r0, [sp, #4]
+ 634 0018 FAE7     		b	.L58
+ 635              		.cfi_endproc
+ 636              	.LFE363:
+ 638              		.section	.text.ip4addr_ntoa_r,"ax",%progbits
+ 639              		.align	1
+ 640              		.global	ip4addr_ntoa_r
+ 641              		.syntax unified
+ 642              		.thumb
+ 643              		.thumb_func
+ 645              	ip4addr_ntoa_r:
+ 646              	.LVL67:
+ 647              	.LFB366:
+ 257:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+ 258:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** /**
+ 259:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * Convert numeric IP address into decimal dotted ASCII representation.
+ 260:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * returns ptr to static buffer; not reentrant!
+ 261:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  *
+ 262:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * @param addr ip address in network order to convert
+ 263:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * @return pointer to a global static (!) buffer that holds the ASCII
+ 264:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  *         representation of addr
+ 265:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  */
+ 266:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** char *
+ 267:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** ip4addr_ntoa(const ip4_addr_t *addr)
+ 268:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** {
+ 269:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   static char str[IP4ADDR_STRLEN_MAX];
+ 270:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   return ip4addr_ntoa_r(addr, str, IP4ADDR_STRLEN_MAX);
+ 271:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** }
+ 272:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+ 273:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** /**
+ 274:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * Same as ip4addr_ntoa, but reentrant since a user-supplied buffer is used.
+ 275:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  *
+ 276:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * @param addr ip address in network order to convert
+ 277:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * @param buf target buffer where the string is stored
+ 278:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * @param buflen length of buf
+ 279:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  * @return either pointer to buf which now holds the ASCII
+ 280:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  *         representation of addr or NULL if buf was too small
+ 281:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****  */
+ 282:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** char *
+ 283:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** ip4addr_ntoa_r(const ip4_addr_t *addr, char *buf, int buflen)
+ 284:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** {
+ 648              		.loc 1 284 1 is_stmt 1 view -0
+ 649              		.cfi_startproc
+ 650              		@ args = 0, pretend = 0, frame = 8
+ 651              		@ frame_needed = 0, uses_anonymous_args = 0
+ 652              		.loc 1 284 1 is_stmt 0 view .LVU197
+ARM GAS  /tmp/ccp8w3Ix.s 			page 19
+
+
+ 653 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 654              	.LCFI9:
+ 655              		.cfi_def_cfa_offset 24
+ 656              		.cfi_offset 4, -24
+ 657              		.cfi_offset 5, -20
+ 658              		.cfi_offset 6, -16
+ 659              		.cfi_offset 7, -12
+ 660              		.cfi_offset 8, -8
+ 661              		.cfi_offset 14, -4
+ 662 0004 82B0     		sub	sp, sp, #8
+ 663              	.LCFI10:
+ 664              		.cfi_def_cfa_offset 32
+ 665 0006 8846     		mov	r8, r1
+ 285:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   u32_t s_addr;
+ 666              		.loc 1 285 3 is_stmt 1 view .LVU198
+ 286:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   char inv[3];
+ 667              		.loc 1 286 3 view .LVU199
+ 287:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   char *rp;
+ 668              		.loc 1 287 3 view .LVU200
+ 288:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   u8_t *ap;
+ 669              		.loc 1 288 3 view .LVU201
+ 289:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   u8_t rem;
+ 670              		.loc 1 289 3 view .LVU202
+ 290:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   u8_t n;
+ 671              		.loc 1 290 3 view .LVU203
+ 291:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   u8_t i;
+ 672              		.loc 1 291 3 view .LVU204
+ 292:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   int len = 0;
+ 673              		.loc 1 292 3 view .LVU205
+ 674              	.LVL68:
+ 293:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+ 294:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   s_addr = ip4_addr_get_u32(addr);
+ 675              		.loc 1 294 3 view .LVU206
+ 676              		.loc 1 294 12 is_stmt 0 view .LVU207
+ 677 0008 0368     		ldr	r3, [r0]
+ 678              		.loc 1 294 10 view .LVU208
+ 679 000a 0193     		str	r3, [sp, #4]
+ 295:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+ 296:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   rp = buf;
+ 680              		.loc 1 296 3 is_stmt 1 view .LVU209
+ 681              	.LVL69:
+ 297:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   ap = (u8_t *)&s_addr;
+ 682              		.loc 1 297 3 view .LVU210
+ 298:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   for (n = 0; n < 4; n++) {
+ 683              		.loc 1 298 3 view .LVU211
+ 296:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   ap = (u8_t *)&s_addr;
+ 684              		.loc 1 296 6 is_stmt 0 view .LVU212
+ 685 000c 0C46     		mov	r4, r1
+ 292:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+ 686              		.loc 1 292 7 view .LVU213
+ 687 000e 0026     		movs	r6, #0
+ 688              		.loc 1 298 10 view .LVU214
+ 689 0010 3046     		mov	r0, r6
+ 690              	.LVL70:
+ 297:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   for (n = 0; n < 4; n++) {
+ 691              		.loc 1 297 6 view .LVU215
+ 692 0012 01AF     		add	r7, sp, #4
+ARM GAS  /tmp/ccp8w3Ix.s 			page 20
+
+
+ 693              	.LVL71:
+ 694              	.L64:
+ 695              		.loc 1 298 17 is_stmt 1 discriminator 1 view .LVU216
+ 696 0014 0328     		cmp	r0, #3
+ 697 0016 3BD8     		bhi	.L73
+ 299:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     i = 0;
+ 698              		.loc 1 299 7 is_stmt 0 view .LVU217
+ 699 0018 0023     		movs	r3, #0
+ 700              	.L65:
+ 701              	.LVL72:
+ 300:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     do {
+ 702              		.loc 1 300 5 is_stmt 1 view .LVU218
+ 301:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       rem = *ap % (u8_t)10;
+ 703              		.loc 1 301 7 view .LVU219
+ 704              		.loc 1 301 13 is_stmt 0 view .LVU220
+ 705 001a 3D78     		ldrb	r5, [r7]	@ zero_extendqisi2
+ 706              		.loc 1 301 11 view .LVU221
+ 707 001c 2049     		ldr	r1, .L76
+ 708 001e A1FB05CE 		umull	ip, lr, r1, r5
+ 709 0022 4FEADE0E 		lsr	lr, lr, #3
+ 710 0026 0EEB8E0C 		add	ip, lr, lr, lsl #2
+ 711 002a A5EB4C0C 		sub	ip, r5, ip, lsl #1
+ 712 002e 5FFA8CFC 		uxtb	ip, ip
+ 713              	.LVL73:
+ 302:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       *ap /= (u8_t)10;
+ 714              		.loc 1 302 7 is_stmt 1 view .LVU222
+ 715              		.loc 1 302 11 is_stmt 0 view .LVU223
+ 716 0032 87F800E0 		strb	lr, [r7]
+ 303:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       inv[i++] = (char)('0' + rem);
+ 717              		.loc 1 303 7 is_stmt 1 view .LVU224
+ 718 0036 9E46     		mov	lr, r3
+ 719              		.loc 1 303 12 is_stmt 0 view .LVU225
+ 720 0038 0133     		adds	r3, r3, #1
+ 721              	.LVL74:
+ 722              		.loc 1 303 12 view .LVU226
+ 723 003a DBB2     		uxtb	r3, r3
+ 724              	.LVL75:
+ 725              		.loc 1 303 18 view .LVU227
+ 726 003c 0CF1300C 		add	ip, ip, #48
+ 727              	.LVL76:
+ 728              		.loc 1 303 16 view .LVU228
+ 729 0040 0EF10801 		add	r1, lr, #8
+ 730 0044 0DEB010E 		add	lr, sp, r1
+ 731 0048 0EF808CC 		strb	ip, [lr, #-8]
+ 304:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     } while (*ap);
+ 732              		.loc 1 304 14 is_stmt 1 discriminator 1 view .LVU229
+ 733 004c 092D     		cmp	r5, #9
+ 734 004e E4D8     		bhi	.L65
+ 735 0050 09E0     		b	.L66
+ 736              	.LVL77:
+ 737              	.L75:
+ 305:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     while (i--) {
+ 306:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       if (len++ >= buflen) {
+ 307:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return NULL;
+ 308:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       }
+ 309:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       *rp++ = inv[i];
+ 738              		.loc 1 309 7 view .LVU230
+ARM GAS  /tmp/ccp8w3Ix.s 			page 21
+
+
+ 739              		.loc 1 309 18 is_stmt 0 view .LVU231
+ 740 0052 05F10801 		add	r1, r5, #8
+ 741 0056 0DEB0106 		add	r6, sp, r1
+ 742 005a 16F8086C 		ldrb	r6, [r6, #-8]	@ zero_extendqisi2
+ 743              		.loc 1 309 13 view .LVU232
+ 744 005e 04F8016B 		strb	r6, [r4], #1
+ 745              	.LVL78:
+ 306:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return NULL;
+ 746              		.loc 1 306 14 view .LVU233
+ 747 0062 1E46     		mov	r6, r3
+ 305:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     while (i--) {
+ 748              		.loc 1 305 13 view .LVU234
+ 749 0064 2B46     		mov	r3, r5
+ 750              	.LVL79:
+ 751              	.L66:
+ 305:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     while (i--) {
+ 752              		.loc 1 305 12 is_stmt 1 view .LVU235
+ 305:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     while (i--) {
+ 753              		.loc 1 305 13 is_stmt 0 view .LVU236
+ 754 0066 5D1E     		subs	r5, r3, #1
+ 755 0068 EDB2     		uxtb	r5, r5
+ 756              	.LVL80:
+ 305:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     while (i--) {
+ 757              		.loc 1 305 12 view .LVU237
+ 758 006a 33B1     		cbz	r3, .L74
+ 306:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return NULL;
+ 759              		.loc 1 306 7 is_stmt 1 view .LVU238
+ 306:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return NULL;
+ 760              		.loc 1 306 14 is_stmt 0 view .LVU239
+ 761 006c 731C     		adds	r3, r6, #1
+ 762              	.LVL81:
+ 306:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****         return NULL;
+ 763              		.loc 1 306 10 view .LVU240
+ 764 006e 9642     		cmp	r6, r2
+ 765 0070 EFDB     		blt	.L75
+ 307:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       }
+ 766              		.loc 1 307 16 view .LVU241
+ 767 0072 0020     		movs	r0, #0
+ 768              	.LVL82:
+ 769              	.L63:
+ 310:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     }
+ 311:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     if (len++ >= buflen) {
+ 312:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       return NULL;
+ 313:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     }
+ 314:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     *rp++ = '.';
+ 315:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     ap++;
+ 316:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   }
+ 317:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   *--rp = 0;
+ 318:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   return buf;
+ 319:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** }
+ 770              		.loc 1 319 1 view .LVU242
+ 771 0074 02B0     		add	sp, sp, #8
+ 772              	.LCFI11:
+ 773              		.cfi_remember_state
+ 774              		.cfi_def_cfa_offset 24
+ 775              		@ sp needed
+ 776 0076 BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ARM GAS  /tmp/ccp8w3Ix.s 			page 22
+
+
+ 777              	.LVL83:
+ 778              	.L74:
+ 779              	.LCFI12:
+ 780              		.cfi_restore_state
+ 311:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       return NULL;
+ 781              		.loc 1 311 5 is_stmt 1 view .LVU243
+ 311:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       return NULL;
+ 782              		.loc 1 311 12 is_stmt 0 view .LVU244
+ 783 007a 731C     		adds	r3, r6, #1
+ 784              	.LVL84:
+ 311:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       return NULL;
+ 785              		.loc 1 311 8 view .LVU245
+ 786 007c 9642     		cmp	r6, r2
+ 787 007e 0CDA     		bge	.L70
+ 314:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     ap++;
+ 788              		.loc 1 314 5 is_stmt 1 view .LVU246
+ 789              	.LVL85:
+ 314:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     ap++;
+ 790              		.loc 1 314 11 is_stmt 0 view .LVU247
+ 791 0080 2E25     		movs	r5, #46
+ 792              	.LVL86:
+ 314:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     ap++;
+ 793              		.loc 1 314 11 view .LVU248
+ 794 0082 04F8015B 		strb	r5, [r4], #1
+ 795              	.LVL87:
+ 315:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   }
+ 796              		.loc 1 315 5 is_stmt 1 view .LVU249
+ 315:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   }
+ 797              		.loc 1 315 7 is_stmt 0 view .LVU250
+ 798 0086 0137     		adds	r7, r7, #1
+ 799              	.LVL88:
+ 298:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     i = 0;
+ 800              		.loc 1 298 23 is_stmt 1 discriminator 2 view .LVU251
+ 801 0088 0130     		adds	r0, r0, #1
+ 802              	.LVL89:
+ 298:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     i = 0;
+ 803              		.loc 1 298 23 is_stmt 0 discriminator 2 view .LVU252
+ 804 008a C0B2     		uxtb	r0, r0
+ 805              	.LVL90:
+ 311:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****       return NULL;
+ 806              		.loc 1 311 12 view .LVU253
+ 807 008c 1E46     		mov	r6, r3
+ 808 008e C1E7     		b	.L64
+ 809              	.LVL91:
+ 810              	.L73:
+ 317:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   return buf;
+ 811              		.loc 1 317 3 is_stmt 1 view .LVU254
+ 317:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   return buf;
+ 812              		.loc 1 317 9 is_stmt 0 view .LVU255
+ 813 0090 0023     		movs	r3, #0
+ 814 0092 04F8013C 		strb	r3, [r4, #-1]
+ 318:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** }
+ 815              		.loc 1 318 3 is_stmt 1 view .LVU256
+ 318:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** }
+ 816              		.loc 1 318 10 is_stmt 0 view .LVU257
+ 817 0096 4046     		mov	r0, r8
+ 818              	.LVL92:
+ARM GAS  /tmp/ccp8w3Ix.s 			page 23
+
+
+ 318:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** }
+ 819              		.loc 1 318 10 view .LVU258
+ 820 0098 ECE7     		b	.L63
+ 821              	.LVL93:
+ 822              	.L70:
+ 312:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     }
+ 823              		.loc 1 312 14 view .LVU259
+ 824 009a 0020     		movs	r0, #0
+ 825              	.LVL94:
+ 312:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****     }
+ 826              		.loc 1 312 14 view .LVU260
+ 827 009c EAE7     		b	.L63
+ 828              	.L77:
+ 829 009e 00BF     		.align	2
+ 830              	.L76:
+ 831 00a0 CDCCCCCC 		.word	-858993459
+ 832              		.cfi_endproc
+ 833              	.LFE366:
+ 835              		.section	.text.ip4addr_ntoa,"ax",%progbits
+ 836              		.align	1
+ 837              		.global	ip4addr_ntoa
+ 838              		.syntax unified
+ 839              		.thumb
+ 840              		.thumb_func
+ 842              	ip4addr_ntoa:
+ 843              	.LVL95:
+ 844              	.LFB365:
+ 268:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   static char str[IP4ADDR_STRLEN_MAX];
+ 845              		.loc 1 268 1 is_stmt 1 view -0
+ 846              		.cfi_startproc
+ 847              		@ args = 0, pretend = 0, frame = 0
+ 848              		@ frame_needed = 0, uses_anonymous_args = 0
+ 268:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   static char str[IP4ADDR_STRLEN_MAX];
+ 849              		.loc 1 268 1 is_stmt 0 view .LVU262
+ 850 0000 08B5     		push	{r3, lr}
+ 851              	.LCFI13:
+ 852              		.cfi_def_cfa_offset 8
+ 853              		.cfi_offset 3, -8
+ 854              		.cfi_offset 14, -4
+ 269:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c ****   return ip4addr_ntoa_r(addr, str, IP4ADDR_STRLEN_MAX);
+ 855              		.loc 1 269 3 is_stmt 1 view .LVU263
+ 270:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** }
+ 856              		.loc 1 270 3 view .LVU264
+ 270:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** }
+ 857              		.loc 1 270 10 is_stmt 0 view .LVU265
+ 858 0002 1022     		movs	r2, #16
+ 859 0004 0149     		ldr	r1, .L80
+ 860 0006 FFF7FEFF 		bl	ip4addr_ntoa_r
+ 861              	.LVL96:
+ 271:../../Middlewares/Third_Party/LwIP/src/core/ipv4/ip4_addr.c **** 
+ 862              		.loc 1 271 1 view .LVU266
+ 863 000a 08BD     		pop	{r3, pc}
+ 864              	.L81:
+ 865              		.align	2
+ 866              	.L80:
+ 867 000c 00000000 		.word	str.0
+ 868              		.cfi_endproc
+ARM GAS  /tmp/ccp8w3Ix.s 			page 24
+
+
+ 869              	.LFE365:
+ 871              		.section	.bss.str.0,"aw",%nobits
+ 872              		.align	2
+ 875              	str.0:
+ 876 0000 00000000 		.space	16
+ 876      00000000 
+ 876      00000000 
+ 876      00000000 
+ 877              		.global	ip_addr_broadcast
+ 878              		.section	.rodata.ip_addr_broadcast,"a"
+ 879              		.align	2
+ 882              	ip_addr_broadcast:
+ 883 0000 FFFFFFFF 		.word	-1
+ 884              		.global	ip_addr_any
+ 885              		.section	.rodata.ip_addr_any,"a"
+ 886              		.align	2
+ 889              	ip_addr_any:
+ 890 0000 00000000 		.space	4
+ 891              		.text
+ 892              	.Letext0:
+ 893              		.file 2 "/usr/lib/gcc/arm-none-eabi/13.2.1/include/stdint.h"
+ 894              		.file 3 "../../Middlewares/Third_Party/LwIP/src/include/lwip/arch.h"
+ 895              		.file 4 "../../Middlewares/Third_Party/LwIP/src/include/lwip/ip4_addr.h"
+ 896              		.file 5 "../../Middlewares/Third_Party/LwIP/src/include/lwip/ip_addr.h"
+ 897              		.file 6 "/usr/include/newlib/ctype.h"
+ 898              		.file 7 "../../Middlewares/Third_Party/LwIP/src/include/lwip/err.h"
+ 899              		.file 8 "../../Middlewares/Third_Party/LwIP/src/include/lwip/pbuf.h"
+ 900              		.file 9 "../../Middlewares/Third_Party/LwIP/src/include/lwip/netif.h"
+ 901              		.file 10 "/usr/include/newlib/stdio.h"
+ 902              		.file 11 "../../Middlewares/Third_Party/LwIP/src/include/lwip/def.h"
+ 903              		.file 12 "../../Middlewares/Third_Party/LwIP/src/include/lwip/memp.h"
+ARM GAS  /tmp/ccp8w3Ix.s 			page 25
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 ip4_addr.c
+     /tmp/ccp8w3Ix.s:20     .text.ip4_addr_isbroadcast_u32:00000000 $t
+     /tmp/ccp8w3Ix.s:26     .text.ip4_addr_isbroadcast_u32:00000000 ip4_addr_isbroadcast_u32
+     /tmp/ccp8w3Ix.s:104    .text.ip4_addr_netmask_valid:00000000 $t
+     /tmp/ccp8w3Ix.s:110    .text.ip4_addr_netmask_valid:00000000 ip4_addr_netmask_valid
+     /tmp/ccp8w3Ix.s:174    .rodata.ip4addr_aton.str1.4:00000000 $d
+     /tmp/ccp8w3Ix.s:185    .text.ip4addr_aton:00000000 $t
+     /tmp/ccp8w3Ix.s:191    .text.ip4addr_aton:00000000 ip4addr_aton
+     /tmp/ccp8w3Ix.s:394    .text.ip4addr_aton:000000a6 $d
+     /tmp/ccp8w3Ix.s:581    .text.ip4addr_aton:00000150 $d
+     /tmp/ccp8w3Ix.s:589    .text.ipaddr_addr:00000000 $t
+     /tmp/ccp8w3Ix.s:595    .text.ipaddr_addr:00000000 ipaddr_addr
+     /tmp/ccp8w3Ix.s:639    .text.ip4addr_ntoa_r:00000000 $t
+     /tmp/ccp8w3Ix.s:645    .text.ip4addr_ntoa_r:00000000 ip4addr_ntoa_r
+     /tmp/ccp8w3Ix.s:831    .text.ip4addr_ntoa_r:000000a0 $d
+     /tmp/ccp8w3Ix.s:836    .text.ip4addr_ntoa:00000000 $t
+     /tmp/ccp8w3Ix.s:842    .text.ip4addr_ntoa:00000000 ip4addr_ntoa
+     /tmp/ccp8w3Ix.s:867    .text.ip4addr_ntoa:0000000c $d
+     /tmp/ccp8w3Ix.s:875    .bss.str.0:00000000 str.0
+     /tmp/ccp8w3Ix.s:872    .bss.str.0:00000000 $d
+     /tmp/ccp8w3Ix.s:882    .rodata.ip_addr_broadcast:00000000 ip_addr_broadcast
+     /tmp/ccp8w3Ix.s:879    .rodata.ip_addr_broadcast:00000000 $d
+     /tmp/ccp8w3Ix.s:889    .rodata.ip_addr_any:00000000 ip_addr_any
+     /tmp/ccp8w3Ix.s:886    .rodata.ip_addr_any:00000000 $d
+     /tmp/ccp8w3Ix.s:399    .text.ip4addr_aton:000000ab $d
+     /tmp/ccp8w3Ix.s:399    .text.ip4addr_aton:000000ac $t
+
+UNDEFINED SYMBOLS
+lwip_htonl
+printf
+_ctype_

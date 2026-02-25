@@ -1,5 +1,0 @@
-../Core/Src/PWM.c:34:20:set_motor_dir	1
-../Core/Src/PWM.c:44:19:sign_with_deadband	3
-../Core/Src/PWM.c:51:6:PWM_SetMaxRpmLimit	2
-../Core/Src/PWM.c:64:8:PWM_GetMaxRpmLimit	1
-../Core/Src/PWM.c:69:6:PWM	46

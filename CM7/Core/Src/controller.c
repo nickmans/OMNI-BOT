@@ -1,6 +1,7 @@
 #include "controller.h"
 #include "main.h"
 #include <math.h>
+#include <stdio.h>
 #include "cmd.h"
 
 // Definitions for globals declared in controller.h
@@ -296,7 +297,9 @@ void Controller_Step(const double           x[3],
     /*static int counttter = 0;
     if (counttter++>50)
     {
-        printf("Control: %.2f %.2f %.2f\n",u_cmd[0],u_cmd[1],u_cmd[2]);
+        char msg[96];
+        (void)snprintf(msg, sizeof(msg), "Control: %.2f %.2f %.2f\r\n", u_cmd[0], u_cmd[1], u_cmd[2]);
+        CMD_Send(msg);
         counttter = 0;
     }*/
 

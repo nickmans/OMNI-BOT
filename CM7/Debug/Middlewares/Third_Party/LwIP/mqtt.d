@@ -1,5 +1,5 @@
 Middlewares/Third_Party/LwIP/mqtt.o: \
- C:/Users/Loren/Documents/H7code/OMNI-BOT/Middlewares/Third_Party/LwIP/src/apps/mqtt/mqtt.c \
+ ../../Middlewares/Third_Party/LwIP/src/apps/mqtt/mqtt.c \
  ../../Middlewares/Third_Party/LwIP/src/include/lwip/apps/mqtt.h \
  ../../Middlewares/Third_Party/LwIP/src/include/lwip/apps/mqtt_opts.h \
  ../../Middlewares/Third_Party/LwIP/src/include/lwip/opt.h \

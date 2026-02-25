@@ -184,6 +184,20 @@ lan8742_IOCtx_t  LAN8742_IOCtx = {ETH_PHY_IO_Init,
 /* Private functions ---------------------------------------------------------*/
 void pbuf_free_custom(struct pbuf *p);
 
+static void netif_down_link_down_cb(void *arg)
+{
+  struct netif *netif = (struct netif *)arg;
+  netif_set_down(netif);
+  netif_set_link_down(netif);
+}
+
+static void netif_up_link_up_cb(void *arg)
+{
+  struct netif *netif = (struct netif *)arg;
+  netif_set_up(netif);
+  netif_set_link_up(netif);
+}
+
 /**
   * @brief  Ethernet Rx Transfer completed callback
   * @param  handlerEth: ETH handler
@@ -240,15 +254,8 @@ static void low_level_init(struct netif *netif)
   ETH_MACConfigTypeDef MACConf = {0};
   /* Start ETH HAL Init */
 
-   uint8_t MACAddr[6] ;
   heth.Instance = ETH;
-  MACAddr[0] = 0x00;
-  MACAddr[1] = 0x80;
-  MACAddr[2] = 0xE1;
-  MACAddr[3] = 0x00;
-  MACAddr[4] = 0x00;
-  MACAddr[5] = 0x00;
-  heth.Init.MACAddr = &MACAddr[0];
+  heth.Init.MACAddr = EthMacAddr;
   heth.Init.MediaInterface = HAL_ETH_RMII_MODE;
   heth.Init.TxDesc = DMATxDscrTab;
   heth.Init.RxDesc = DMARxDscrTab;
@@ -317,8 +324,7 @@ static void low_level_init(struct netif *netif)
   /* Initialize the LAN8742 ETH PHY */
   if(LAN8742_Init(&LAN8742) != LAN8742_STATUS_OK)
   {
-    netif_set_link_down(netif);
-    netif_set_down(netif);
+    (void)tcpip_callback_with_block(netif_down_link_down_cb, netif, 1);
     return;
   }
 
@@ -329,8 +335,7 @@ static void low_level_init(struct netif *netif)
     /* Get link state */
     if(PHYLinkState <= LAN8742_STATUS_LINK_DOWN)
     {
-      netif_set_link_down(netif);
-      netif_set_down(netif);
+      (void)tcpip_callback_with_block(netif_down_link_down_cb, netif, 1);
     }
     else
     {
@@ -365,8 +370,7 @@ static void low_level_init(struct netif *netif)
     HAL_ETH_SetMACConfig(&heth, &MACConf);
 
     HAL_ETH_Start_IT(&heth);
-    netif_set_up(netif);
-    netif_set_link_up(netif);
+    (void)tcpip_callback_with_block(netif_up_link_up_cb, netif, 1);
 /* USER CODE BEGIN PHY_POST_CONFIG */
 
 /* USER CODE END PHY_POST_CONFIG */
@@ -837,8 +841,7 @@ void ethernet_link_thread(void* argument)
   if(netif_is_link_up(netif) && (PHYLinkState <= LAN8742_STATUS_LINK_DOWN))
   {
     HAL_ETH_Stop_IT(&heth);
-    netif_set_down(netif);
-    netif_set_link_down(netif);
+    (void)tcpip_callback_with_block(netif_down_link_down_cb, netif, 1);
   }
   else if(!netif_is_link_up(netif) && (PHYLinkState > LAN8742_STATUS_LINK_DOWN))
   {
@@ -876,8 +879,7 @@ void ethernet_link_thread(void* argument)
       MACConf.Speed = speed;
       HAL_ETH_SetMACConfig(&heth, &MACConf);
       HAL_ETH_Start_IT(&heth);
-      netif_set_up(netif);
-      netif_set_link_up(netif);
+      (void)tcpip_callback_with_block(netif_up_link_up_cb, netif, 1);
     }
   }
 
@@ -959,11 +961,6 @@ void HAL_ETH_RxLinkCallback(void **pStart, void **pEnd, uint8_t *buff, uint16_t 
       total_len -= p->len;
     }
   }
-
-  /* Invalidate D-Cache for the exact RX span so CPU reads fresh data. */
-  uintptr_t addr = (uintptr_t)buff & ~((uintptr_t)0x1FU);
-  uint32_t inv_len = (uint32_t)(((uintptr_t)buff - addr) + Length + 31U) & ~31U;
-  SCB_InvalidateDCache_by_Addr((uint32_t *)addr, inv_len);
 
 /* USER CODE END HAL ETH RxLinkCallback */
 }

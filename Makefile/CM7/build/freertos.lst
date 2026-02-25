@@ -1,0 +1,560 @@
+ARM GAS  /tmp/ccLYOxdk.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 1
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"freertos.c"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.file 1 "../../CM7/Core/Src/freertos.c"
+  19              		.section	.rodata.vApplicationMallocFailedHook.str1.4,"aMS",%progbits,1
+  20              		.align	2
+  21              	.LC0:
+  22 0000 0D0A0D0A 		.ascii	"\015\012\015\012*** MALLOC FAILED ***\015\000"
+  22      2A2A2A20 
+  22      4D414C4C 
+  22      4F432046 
+  22      41494C45 
+  23 001b 00       		.align	2
+  24              	.LC1:
+  25 001c 46726565 		.ascii	"FreeRTOS heap exhausted!\015\000"
+  25      52544F53 
+  25      20686561 
+  25      70206578 
+  25      68617573 
+  26 0036 0000     		.align	2
+  27              	.LC2:
+  28 0038 43757272 		.ascii	"Current heap size: %lu bytes\015\012\000"
+  28      656E7420 
+  28      68656170 
+  28      2073697A 
+  28      653A2025 
+  29 0057 00       		.align	2
+  30              	.LC3:
+  31 0058 496E6372 		.ascii	"Increase configTOTAL_HEAP_SIZE in FreeRTOSConfig.h\015"
+  31      65617365 
+  31      20636F6E 
+  31      66696754 
+  31      4F54414C 
+  32 008b 00       		.ascii	"\000"
+  33              		.align	2
+  34              	.LC4:
+  35 008c 53797374 		.ascii	"System halted.\015\012\015\000"
+  35      656D2068 
+  35      616C7465 
+  35      642E0D0A 
+  35      0D00
+  36              		.section	.text.vApplicationMallocFailedHook,"ax",%progbits
+  37              		.align	1
+ARM GAS  /tmp/ccLYOxdk.s 			page 2
+
+
+  38              		.global	vApplicationMallocFailedHook
+  39              		.syntax unified
+  40              		.thumb
+  41              		.thumb_func
+  43              	vApplicationMallocFailedHook:
+  44              	.LFB342:
+   1:../../CM7/Core/Src/freertos.c **** /* USER CODE BEGIN Header */
+   2:../../CM7/Core/Src/freertos.c **** /**
+   3:../../CM7/Core/Src/freertos.c ****   ******************************************************************************
+   4:../../CM7/Core/Src/freertos.c ****   * File Name          : freertos.c
+   5:../../CM7/Core/Src/freertos.c ****   * Description        : Code for freertos applications
+   6:../../CM7/Core/Src/freertos.c ****   ******************************************************************************
+   7:../../CM7/Core/Src/freertos.c ****   * @attention
+   8:../../CM7/Core/Src/freertos.c ****   *
+   9:../../CM7/Core/Src/freertos.c ****   * Copyright (c) 2025 STMicroelectronics.
+  10:../../CM7/Core/Src/freertos.c ****   * All rights reserved.
+  11:../../CM7/Core/Src/freertos.c ****   *
+  12:../../CM7/Core/Src/freertos.c ****   * This software is licensed under terms that can be found in the LICENSE file
+  13:../../CM7/Core/Src/freertos.c ****   * in the root directory of this software component.
+  14:../../CM7/Core/Src/freertos.c ****   * If no LICENSE file comes with this software, it is provided AS-IS.
+  15:../../CM7/Core/Src/freertos.c ****   *
+  16:../../CM7/Core/Src/freertos.c ****   ******************************************************************************
+  17:../../CM7/Core/Src/freertos.c ****   */
+  18:../../CM7/Core/Src/freertos.c **** /* USER CODE END Header */
+  19:../../CM7/Core/Src/freertos.c **** 
+  20:../../CM7/Core/Src/freertos.c **** /* Includes ------------------------------------------------------------------*/
+  21:../../CM7/Core/Src/freertos.c **** #include "FreeRTOS.h"
+  22:../../CM7/Core/Src/freertos.c **** #include "task.h"
+  23:../../CM7/Core/Src/freertos.c **** #include "main.h"
+  24:../../CM7/Core/Src/freertos.c **** 
+  25:../../CM7/Core/Src/freertos.c **** /* Private includes ----------------------------------------------------------*/
+  26:../../CM7/Core/Src/freertos.c **** /* USER CODE BEGIN Includes */
+  27:../../CM7/Core/Src/freertos.c **** #include <stdio.h>
+  28:../../CM7/Core/Src/freertos.c **** /* USER CODE END Includes */
+  29:../../CM7/Core/Src/freertos.c **** 
+  30:../../CM7/Core/Src/freertos.c **** /* Private typedef -----------------------------------------------------------*/
+  31:../../CM7/Core/Src/freertos.c **** /* USER CODE BEGIN PTD */
+  32:../../CM7/Core/Src/freertos.c **** 
+  33:../../CM7/Core/Src/freertos.c **** /* USER CODE END PTD */
+  34:../../CM7/Core/Src/freertos.c **** 
+  35:../../CM7/Core/Src/freertos.c **** /* Private define ------------------------------------------------------------*/
+  36:../../CM7/Core/Src/freertos.c **** /* USER CODE BEGIN PD */
+  37:../../CM7/Core/Src/freertos.c **** 
+  38:../../CM7/Core/Src/freertos.c **** /* USER CODE END PD */
+  39:../../CM7/Core/Src/freertos.c **** 
+  40:../../CM7/Core/Src/freertos.c **** /* Private macro -------------------------------------------------------------*/
+  41:../../CM7/Core/Src/freertos.c **** /* USER CODE BEGIN PM */
+  42:../../CM7/Core/Src/freertos.c **** 
+  43:../../CM7/Core/Src/freertos.c **** /* USER CODE END PM */
+  44:../../CM7/Core/Src/freertos.c **** 
+  45:../../CM7/Core/Src/freertos.c **** /* Private variables ---------------------------------------------------------*/
+  46:../../CM7/Core/Src/freertos.c **** /* USER CODE BEGIN Variables */
+  47:../../CM7/Core/Src/freertos.c **** 
+  48:../../CM7/Core/Src/freertos.c **** /* USER CODE END Variables */
+  49:../../CM7/Core/Src/freertos.c **** 
+  50:../../CM7/Core/Src/freertos.c **** /* Private function prototypes -----------------------------------------------*/
+  51:../../CM7/Core/Src/freertos.c **** /* USER CODE BEGIN FunctionPrototypes */
+ARM GAS  /tmp/ccLYOxdk.s 			page 3
+
+
+  52:../../CM7/Core/Src/freertos.c **** 
+  53:../../CM7/Core/Src/freertos.c **** /* USER CODE END FunctionPrototypes */
+  54:../../CM7/Core/Src/freertos.c **** 
+  55:../../CM7/Core/Src/freertos.c **** /* Private application code --------------------------------------------------*/
+  56:../../CM7/Core/Src/freertos.c **** /* USER CODE BEGIN Application */
+  57:../../CM7/Core/Src/freertos.c **** 
+  58:../../CM7/Core/Src/freertos.c **** /**
+  59:../../CM7/Core/Src/freertos.c ****   * @brief  Application Malloc failed hook
+  60:../../CM7/Core/Src/freertos.c ****   * @param  None
+  61:../../CM7/Core/Src/freertos.c ****   * @retval None
+  62:../../CM7/Core/Src/freertos.c ****   */
+  63:../../CM7/Core/Src/freertos.c **** void vApplicationMallocFailedHook(void)
+  64:../../CM7/Core/Src/freertos.c **** {
+  45              		.loc 1 64 1 view -0
+  46              		.cfi_startproc
+  47              		@ Volatile: function does not return.
+  48              		@ args = 0, pretend = 0, frame = 0
+  49              		@ frame_needed = 0, uses_anonymous_args = 0
+  50 0000 08B5     		push	{r3, lr}
+  51              	.LCFI0:
+  52              		.cfi_def_cfa_offset 8
+  53              		.cfi_offset 3, -8
+  54              		.cfi_offset 14, -4
+  65:../../CM7/Core/Src/freertos.c ****   printf("\r\n\r\n*** MALLOC FAILED ***\r\n");
+  55              		.loc 1 65 3 view .LVU1
+  56 0002 0D48     		ldr	r0, .L4
+  57 0004 FFF7FEFF 		bl	puts
+  58              	.LVL0:
+  66:../../CM7/Core/Src/freertos.c ****   printf("FreeRTOS heap exhausted!\r\n");
+  59              		.loc 1 66 3 view .LVU2
+  60 0008 0C48     		ldr	r0, .L4+4
+  61 000a FFF7FEFF 		bl	puts
+  62              	.LVL1:
+  67:../../CM7/Core/Src/freertos.c ****   printf("Current heap size: %lu bytes\r\n", (unsigned long)configTOTAL_HEAP_SIZE);
+  63              		.loc 1 67 3 view .LVU3
+  64 000e 4FF4C031 		mov	r1, #98304
+  65 0012 0B48     		ldr	r0, .L4+8
+  66 0014 FFF7FEFF 		bl	printf
+  67              	.LVL2:
+  68:../../CM7/Core/Src/freertos.c ****   printf("Increase configTOTAL_HEAP_SIZE in FreeRTOSConfig.h\r\n");
+  68              		.loc 1 68 3 view .LVU4
+  69 0018 0A48     		ldr	r0, .L4+12
+  70 001a FFF7FEFF 		bl	puts
+  71              	.LVL3:
+  69:../../CM7/Core/Src/freertos.c ****   printf("System halted.\r\n\r\n");
+  72              		.loc 1 69 3 view .LVU5
+  73 001e 0A48     		ldr	r0, .L4+16
+  74 0020 FFF7FEFF 		bl	puts
+  75              	.LVL4:
+  70:../../CM7/Core/Src/freertos.c ****   taskDISABLE_INTERRUPTS();
+  76              		.loc 1 70 3 view .LVU6
+  77              	.LBB6:
+  78              	.LBI6:
+  79              		.file 2 "../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h"
+   1:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** /*
+   2:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  * FreeRTOS Kernel V10.3.1
+   3:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ARM GAS  /tmp/ccLYOxdk.s 			page 4
+
+
+   4:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  *
+   5:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  * Permission is hereby granted, free of charge, to any person obtaining a copy of
+   6:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  * this software and associated documentation files (the "Software"), to deal in
+   7:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  * the Software without restriction, including without limitation the rights to
+   8:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+   9:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  * the Software, and to permit persons to whom the Software is furnished to do so,
+  10:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  * subject to the following conditions:
+  11:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  *
+  12:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  * The above copyright notice and this permission notice shall be included in all
+  13:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  * copies or substantial portions of the Software.
+  14:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  *
+  15:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  16:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  17:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  18:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  19:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  20:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  21:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  *
+  22:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  * http://www.FreeRTOS.org
+  23:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  * http://aws.amazon.com/freertos
+  24:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  *
+  25:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  * 1 tab == 4 spaces!
+  26:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  */
+  27:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+  28:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+  29:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #ifndef PORTMACRO_H
+  30:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #define PORTMACRO_H
+  31:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+  32:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #ifdef __cplusplus
+  33:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** extern "C" {
+  34:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #endif
+  35:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+  36:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** /*-----------------------------------------------------------
+  37:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  * Port specific definitions.
+  38:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  *
+  39:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  * The settings in this file configure FreeRTOS correctly for the
+  40:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  * given hardware and compiler.
+  41:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  *
+  42:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  * These settings should not be altered.
+  43:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  *-----------------------------------------------------------
+  44:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h ****  */
+  45:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+  46:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** /* Type definitions. */
+  47:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #define portCHAR		char
+  48:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #define portFLOAT		float
+  49:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #define portDOUBLE		double
+  50:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #define portLONG		long
+  51:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #define portSHORT		short
+  52:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #define portSTACK_TYPE	uint32_t
+  53:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #define portBASE_TYPE	long
+  54:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+  55:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** typedef portSTACK_TYPE StackType_t;
+  56:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** typedef long BaseType_t;
+  57:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** typedef unsigned long UBaseType_t;
+  58:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+  59:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #if( configUSE_16_BIT_TICKS == 1 )
+  60:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	typedef uint16_t TickType_t;
+ARM GAS  /tmp/ccLYOxdk.s 			page 5
+
+
+  61:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	#define portMAX_DELAY ( TickType_t ) 0xffff
+  62:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #else
+  63:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	typedef uint32_t TickType_t;
+  64:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	#define portMAX_DELAY ( TickType_t ) 0xffffffffUL
+  65:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+  66:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	/* 32-bit tick type on a 32-bit architecture, so reads of the tick count do
+  67:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	not need to be guarded with a critical section. */
+  68:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	#define portTICK_TYPE_IS_ATOMIC 1
+  69:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #endif
+  70:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** /*-----------------------------------------------------------*/
+  71:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+  72:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** /* Architecture specifics. */
+  73:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #define portSTACK_GROWTH			( -1 )
+  74:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #define portTICK_PERIOD_MS			( ( TickType_t ) 1000 / configTICK_RATE_HZ )
+  75:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #define portBYTE_ALIGNMENT			8
+  76:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** /*-----------------------------------------------------------*/
+  77:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+  78:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** /* Scheduler utilities. */
+  79:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #define portYIELD() 															\
+  80:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** {																				\
+  81:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	/* Set a PendSV to request a context switch. */								\
+  82:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT;								\
+  83:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 																				\
+  84:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	/* Barriers are normally not required but do ensure the code is completely	\
+  85:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	within the specified behaviour for the architecture. */						\
+  86:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	__asm volatile( "dsb" ::: "memory" );										\
+  87:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	__asm volatile( "isb" );													\
+  88:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** }
+  89:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+  90:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #define portNVIC_INT_CTRL_REG		( * ( ( volatile uint32_t * ) 0xe000ed04 ) )
+  91:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #define portNVIC_PENDSVSET_BIT		( 1UL << 28UL )
+  92:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #define portEND_SWITCHING_ISR( xSwitchRequired ) if( xSwitchRequired != pdFALSE ) portYIELD()
+  93:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #define portYIELD_FROM_ISR( x ) portEND_SWITCHING_ISR( x )
+  94:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** /*-----------------------------------------------------------*/
+  95:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+  96:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** /* Critical section management. */
+  97:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** extern void vPortEnterCritical( void );
+  98:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** extern void vPortExitCritical( void );
+  99:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #define portSET_INTERRUPT_MASK_FROM_ISR()		ulPortRaiseBASEPRI()
+ 100:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #define portCLEAR_INTERRUPT_MASK_FROM_ISR(x)	vPortSetBASEPRI(x)
+ 101:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #define portDISABLE_INTERRUPTS()				vPortRaiseBASEPRI()
+ 102:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #define portENABLE_INTERRUPTS()					vPortSetBASEPRI(0)
+ 103:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #define portENTER_CRITICAL()					vPortEnterCritical()
+ 104:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #define portEXIT_CRITICAL()						vPortExitCritical()
+ 105:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+ 106:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** /*-----------------------------------------------------------*/
+ 107:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+ 108:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** /* Task function macros as described on the FreeRTOS.org WEB site.  These are
+ 109:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** not necessary for to use this port.  They are defined so the common demo files
+ 110:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** (which build with all the ports) will build. */
+ 111:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #define portTASK_FUNCTION_PROTO( vFunction, pvParameters ) void vFunction( void *pvParameters )
+ 112:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #define portTASK_FUNCTION( vFunction, pvParameters ) void vFunction( void *pvParameters )
+ 113:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** /*-----------------------------------------------------------*/
+ 114:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+ 115:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** /* Tickless idle/low power functionality. */
+ 116:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #ifndef portSUPPRESS_TICKS_AND_SLEEP
+ 117:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	extern void vPortSuppressTicksAndSleep( TickType_t xExpectedIdleTime );
+ARM GAS  /tmp/ccLYOxdk.s 			page 6
+
+
+ 118:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	#define portSUPPRESS_TICKS_AND_SLEEP( xExpectedIdleTime ) vPortSuppressTicksAndSleep( xExpectedIdl
+ 119:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #endif
+ 120:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** /*-----------------------------------------------------------*/
+ 121:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+ 122:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** /* Architecture specific optimisations. */
+ 123:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #ifndef configUSE_PORT_OPTIMISED_TASK_SELECTION
+ 124:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	#define configUSE_PORT_OPTIMISED_TASK_SELECTION 1
+ 125:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #endif
+ 126:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+ 127:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #if configUSE_PORT_OPTIMISED_TASK_SELECTION == 1
+ 128:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+ 129:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	/* Generic helper function. */
+ 130:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	__attribute__( ( always_inline ) ) static inline uint8_t ucPortCountLeadingZeros( uint32_t ulBitma
+ 131:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	{
+ 132:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	uint8_t ucReturn;
+ 133:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+ 134:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 		__asm volatile ( "clz %0, %1" : "=r" ( ucReturn ) : "r" ( ulBitmap ) : "memory" );
+ 135:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 		return ucReturn;
+ 136:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	}
+ 137:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+ 138:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	/* Check the configuration. */
+ 139:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	#if( configMAX_PRIORITIES > 32 )
+ 140:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 		#error configUSE_PORT_OPTIMISED_TASK_SELECTION can only be set to 1 when configMAX_PRIORITIES is 
+ 141:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	#endif
+ 142:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+ 143:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	/* Store/clear the ready priorities in a bit map. */
+ 144:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	#define portRECORD_READY_PRIORITY( uxPriority, uxReadyPriorities ) ( uxReadyPriorities ) |= ( 1UL 
+ 145:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	#define portRESET_READY_PRIORITY( uxPriority, uxReadyPriorities ) ( uxReadyPriorities ) &= ~( 1UL 
+ 146:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+ 147:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	/*-----------------------------------------------------------*/
+ 148:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+ 149:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	#define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities ) uxTopPriority = ( 31UL - ( ui
+ 150:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+ 151:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #endif /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
+ 152:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+ 153:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** /*-----------------------------------------------------------*/
+ 154:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+ 155:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #ifdef configASSERT
+ 156:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	void vPortValidateInterruptPriority( void );
+ 157:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	#define portASSERT_IF_INTERRUPT_PRIORITY_INVALID() 	vPortValidateInterruptPriority()
+ 158:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #endif
+ 159:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+ 160:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** /* portNOP() is not required by this port. */
+ 161:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #define portNOP()
+ 162:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+ 163:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #define portINLINE	__inline
+ 164:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+ 165:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #ifndef portFORCE_INLINE
+ 166:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	#define portFORCE_INLINE inline __attribute__(( always_inline))
+ 167:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** #endif
+ 168:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+ 169:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** portFORCE_INLINE static BaseType_t xPortIsInsideInterrupt( void )
+ 170:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** {
+ 171:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** uint32_t ulCurrentInterrupt;
+ 172:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** BaseType_t xReturn;
+ 173:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+ 174:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	/* Obtain the number of the currently executing interrupt. */
+ARM GAS  /tmp/ccLYOxdk.s 			page 7
+
+
+ 175:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	__asm volatile( "mrs %0, ipsr" : "=r"( ulCurrentInterrupt ) :: "memory" );
+ 176:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+ 177:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	if( ulCurrentInterrupt == 0 )
+ 178:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	{
+ 179:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 		xReturn = pdFALSE;
+ 180:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	}
+ 181:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	else
+ 182:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	{
+ 183:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 		xReturn = pdTRUE;
+ 184:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	}
+ 185:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+ 186:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	return xReturn;
+ 187:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** }
+ 188:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+ 189:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** /*-----------------------------------------------------------*/
+ 190:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+ 191:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** portFORCE_INLINE static void vPortRaiseBASEPRI( void )
+  80              		.loc 2 191 30 view .LVU7
+  81              	.LBB7:
+ 192:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** {
+ 193:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** uint32_t ulNewBASEPRI;
+  82              		.loc 2 193 1 view .LVU8
+ 194:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+ 195:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 	__asm volatile
+  83              		.loc 2 195 2 view .LVU9
+  84              		.syntax unified
+  85              	@ 195 "../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h" 1
+  86 0024 4FF05003 			mov r3, #80												
+  87 0028 83F31188 		msr basepri, r3											
+  88 002c BFF36F8F 		isb														
+  89 0030 BFF34F8F 		dsb														
+  90              	
+  91              	@ 0 "" 2
+  92              		.thumb
+  93              		.syntax unified
+  94              	.L2:
+  95              	.LBE7:
+  96              	.LBE6:
+  71:../../CM7/Core/Src/freertos.c ****   for(;;);
+  97              		.loc 1 71 3 view .LVU10
+  98              		.loc 1 71 3 view .LVU11
+  99 0034 FEE7     		b	.L2
+ 100              	.L5:
+ 101 0036 00BF     		.align	2
+ 102              	.L4:
+ 103 0038 00000000 		.word	.LC0
+ 104 003c 1C000000 		.word	.LC1
+ 105 0040 38000000 		.word	.LC2
+ 106 0044 58000000 		.word	.LC3
+ 107 0048 8C000000 		.word	.LC4
+ 108              		.cfi_endproc
+ 109              	.LFE342:
+ 111              		.section	.rodata.vApplicationStackOverflowHook.str1.4,"aMS",%progbits,1
+ 112              		.align	2
+ 113              	.LC5:
+ 114 0000 0D0A0D0A 		.ascii	"\015\012\015\012*** STACK OVERFLOW ***\015\000"
+ 114      2A2A2A20 
+ARM GAS  /tmp/ccLYOxdk.s 			page 8
+
+
+ 114      53544143 
+ 114      4B204F56 
+ 114      4552464C 
+ 115              		.align	2
+ 116              	.LC6:
+ 117 001c 5461736B 		.ascii	"Task: %s\015\012\000"
+ 117      3A202573 
+ 117      0D0A00
+ 118 0027 00       		.align	2
+ 119              	.LC7:
+ 120 0028 496E6372 		.ascii	"Increase stack size for this task\015\000"
+ 120      65617365 
+ 120      20737461 
+ 120      636B2073 
+ 120      697A6520 
+ 121              		.section	.text.vApplicationStackOverflowHook,"ax",%progbits
+ 122              		.align	1
+ 123              		.global	vApplicationStackOverflowHook
+ 124              		.syntax unified
+ 125              		.thumb
+ 126              		.thumb_func
+ 128              	vApplicationStackOverflowHook:
+ 129              	.LVL5:
+ 130              	.LFB343:
+  72:../../CM7/Core/Src/freertos.c **** }
+  73:../../CM7/Core/Src/freertos.c **** 
+  74:../../CM7/Core/Src/freertos.c **** /**
+  75:../../CM7/Core/Src/freertos.c ****   * @brief  Application stack overflow hook
+  76:../../CM7/Core/Src/freertos.c ****   * @param  xTask: Task handle
+  77:../../CM7/Core/Src/freertos.c ****   * @param  pcTaskName: Task name
+  78:../../CM7/Core/Src/freertos.c ****   * @retval None
+  79:../../CM7/Core/Src/freertos.c ****   */
+  80:../../CM7/Core/Src/freertos.c **** void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName)
+  81:../../CM7/Core/Src/freertos.c **** {
+ 131              		.loc 1 81 1 view -0
+ 132              		.cfi_startproc
+ 133              		@ Volatile: function does not return.
+ 134              		@ args = 0, pretend = 0, frame = 0
+ 135              		@ frame_needed = 0, uses_anonymous_args = 0
+ 136              		.loc 1 81 1 is_stmt 0 view .LVU13
+ 137 0000 08B5     		push	{r3, lr}
+ 138              	.LCFI1:
+ 139              		.cfi_def_cfa_offset 8
+ 140              		.cfi_offset 3, -8
+ 141              		.cfi_offset 14, -4
+ 142 0002 0C46     		mov	r4, r1
+  82:../../CM7/Core/Src/freertos.c ****   (void)xTask;
+ 143              		.loc 1 82 3 is_stmt 1 view .LVU14
+  83:../../CM7/Core/Src/freertos.c ****   printf("\r\n\r\n*** STACK OVERFLOW ***\r\n");
+ 144              		.loc 1 83 3 view .LVU15
+ 145 0004 0A48     		ldr	r0, .L9
+ 146              	.LVL6:
+ 147              		.loc 1 83 3 is_stmt 0 view .LVU16
+ 148 0006 FFF7FEFF 		bl	puts
+ 149              	.LVL7:
+  84:../../CM7/Core/Src/freertos.c ****   printf("Task: %s\r\n", pcTaskName);
+ 150              		.loc 1 84 3 is_stmt 1 view .LVU17
+ARM GAS  /tmp/ccLYOxdk.s 			page 9
+
+
+ 151 000a 2146     		mov	r1, r4
+ 152 000c 0948     		ldr	r0, .L9+4
+ 153 000e FFF7FEFF 		bl	printf
+ 154              	.LVL8:
+  85:../../CM7/Core/Src/freertos.c ****   printf("Increase stack size for this task\r\n");
+ 155              		.loc 1 85 3 view .LVU18
+ 156 0012 0948     		ldr	r0, .L9+8
+ 157 0014 FFF7FEFF 		bl	puts
+ 158              	.LVL9:
+  86:../../CM7/Core/Src/freertos.c ****   printf("System halted.\r\n\r\n");
+ 159              		.loc 1 86 3 view .LVU19
+ 160 0018 0848     		ldr	r0, .L9+12
+ 161 001a FFF7FEFF 		bl	puts
+ 162              	.LVL10:
+  87:../../CM7/Core/Src/freertos.c ****   taskDISABLE_INTERRUPTS();
+ 163              		.loc 1 87 3 view .LVU20
+ 164              	.LBB8:
+ 165              	.LBI8:
+ 191:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** {
+ 166              		.loc 2 191 30 view .LVU21
+ 167              	.LBB9:
+ 193:../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h **** 
+ 168              		.loc 2 193 1 view .LVU22
+ 169              		.loc 2 195 2 view .LVU23
+ 170              		.syntax unified
+ 171              	@ 195 "../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h" 1
+ 172 001e 4FF05003 			mov r3, #80												
+ 173 0022 83F31188 		msr basepri, r3											
+ 174 0026 BFF36F8F 		isb														
+ 175 002a BFF34F8F 		dsb														
+ 176              	
+ 177              	@ 0 "" 2
+ 178              		.thumb
+ 179              		.syntax unified
+ 180              	.L7:
+ 181              	.LBE9:
+ 182              	.LBE8:
+  88:../../CM7/Core/Src/freertos.c ****   for(;;);
+ 183              		.loc 1 88 3 view .LVU24
+ 184              		.loc 1 88 3 view .LVU25
+ 185 002e FEE7     		b	.L7
+ 186              	.L10:
+ 187              		.align	2
+ 188              	.L9:
+ 189 0030 00000000 		.word	.LC5
+ 190 0034 1C000000 		.word	.LC6
+ 191 0038 28000000 		.word	.LC7
+ 192 003c 8C000000 		.word	.LC4
+ 193              		.cfi_endproc
+ 194              	.LFE343:
+ 196              		.text
+ 197              	.Letext0:
+ 198              		.file 3 "/usr/lib/gcc/arm-none-eabi/13.2.1/include/stddef.h"
+ 199              		.file 4 "/usr/lib/gcc/arm-none-eabi/13.2.1/include/stdint.h"
+ 200              		.file 5 "../../Middlewares/Third_Party/FreeRTOS/Source/include/task.h"
+ 201              		.file 6 "/usr/include/newlib/stdio.h"
+ 202              		.file 7 "<built-in>"
+ARM GAS  /tmp/ccLYOxdk.s 			page 10
+
+
+ARM GAS  /tmp/ccLYOxdk.s 			page 11
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 freertos.c
+     /tmp/ccLYOxdk.s:20     .rodata.vApplicationMallocFailedHook.str1.4:00000000 $d
+     /tmp/ccLYOxdk.s:37     .text.vApplicationMallocFailedHook:00000000 $t
+     /tmp/ccLYOxdk.s:43     .text.vApplicationMallocFailedHook:00000000 vApplicationMallocFailedHook
+     /tmp/ccLYOxdk.s:103    .text.vApplicationMallocFailedHook:00000038 $d
+     /tmp/ccLYOxdk.s:112    .rodata.vApplicationStackOverflowHook.str1.4:00000000 $d
+     /tmp/ccLYOxdk.s:122    .text.vApplicationStackOverflowHook:00000000 $t
+     /tmp/ccLYOxdk.s:128    .text.vApplicationStackOverflowHook:00000000 vApplicationStackOverflowHook
+     /tmp/ccLYOxdk.s:189    .text.vApplicationStackOverflowHook:00000030 $d
+
+UNDEFINED SYMBOLS
+puts
+printf

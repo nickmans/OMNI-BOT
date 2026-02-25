@@ -1,5 +1,5 @@
 Middlewares/Third_Party/LwIP/sys_arch.o: \
- C:/Users/Loren/Documents/H7code/OMNI-BOT/Middlewares/Third_Party/LwIP/system/OS/sys_arch.c \
+ ../../Middlewares/Third_Party/LwIP/system/OS/sys_arch.c \
  ../../Middlewares/Third_Party/LwIP/src/include/lwip/debug.h \
  ../../Middlewares/Third_Party/LwIP/src/include/lwip/arch.h \
  ../../Middlewares/Third_Party/LwIP/system/arch/cc.h \

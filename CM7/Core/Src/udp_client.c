@@ -76,6 +76,7 @@ static int s_udp_socket = -1;
 static struct sockaddr_in s_dst_addr;
 
 static uint32_t s_pose_seq = 0;
+static uint8_t s_udp_rx_buffer[UDP_RX_BUFFER_SIZE];
 
 static volatile bool s_cmd_pending = false;
 static volatile uint32_t s_cmd_seq = 0;
@@ -218,13 +219,11 @@ static void udp_receive_nonblocking(void)
         return;
     }
 
-    uint8_t temp_buf[UDP_RX_BUFFER_SIZE];
-
     for (;;)
     {
         struct sockaddr_in src;
         socklen_t slen = sizeof(src);
-        int received = recvfrom(s_udp_socket, temp_buf, sizeof(temp_buf), MSG_DONTWAIT, (struct sockaddr *)&src, &slen);
+        int received = recvfrom(s_udp_socket, s_udp_rx_buffer, sizeof(s_udp_rx_buffer), MSG_DONTWAIT, (struct sockaddr *)&src, &slen);
         if (received <= 0)
         {
             if (received < 0)
@@ -243,7 +242,7 @@ static void udp_receive_nonblocking(void)
         {
             MessageHeader hdr;
             const uint8_t *payload = NULL;
-            if (!parse_message(temp_buf + offset, (uint32_t)received - offset, &hdr, &payload))
+            if (!parse_message(s_udp_rx_buffer + offset, (uint32_t)received - offset, &hdr, &payload))
             {
                 break;
             }
@@ -480,6 +479,7 @@ void UDP_Client_Task(void *argument)
     uint32_t next_socket_retry = 0;
     uint32_t retry_ms = UDP_SOCKET_RETRY_MIN_MS;
     bool last_link_up = false;
+    uint32_t next_diag_log_ms = 0;
 
     udp_prepare_dest_addr();
 
@@ -574,6 +574,25 @@ void UDP_Client_Task(void *argument)
         }
 
         udp_receive_nonblocking();
+
+        if (time_elapsed(now, next_diag_log_ms, 0))
+        {
+            TaskHandle_t udp_task = xTaskGetCurrentTaskHandle();
+            TaskHandle_t tcp_task = xTaskGetHandle("tcpip_thread");
+            TaskHandle_t ethif_task = xTaskGetHandle("EthIf");
+
+            UBaseType_t udp_hwm = (udp_task != NULL) ? uxTaskGetStackHighWaterMark(udp_task) : 0u;
+            UBaseType_t tcp_hwm = (tcp_task != NULL) ? uxTaskGetStackHighWaterMark(tcp_task) : 0u;
+            UBaseType_t ethif_hwm = (ethif_task != NULL) ? uxTaskGetStackHighWaterMark(ethif_task) : 0u;
+
+            printf("stack_hwm words udp=%lu tcpip=%lu ethif=%lu\r\n",
+                   (unsigned long)udp_hwm,
+                   (unsigned long)tcp_hwm,
+                   (unsigned long)ethif_hwm);
+
+            next_diag_log_ms = now + 5000u;
+        }
+
         osDelay(UDP_TASK_DELAY_MS);
     }
 }

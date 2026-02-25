@@ -1,5 +1,5 @@
 Middlewares/Third_Party/LwIP/netdb.o: \
- C:/Users/Loren/Documents/H7code/OMNI-BOT/Middlewares/Third_Party/LwIP/src/api/netdb.c \
+ ../../Middlewares/Third_Party/LwIP/src/api/netdb.c \
  ../../Middlewares/Third_Party/LwIP/src/include/lwip/netdb.h \
  ../../Middlewares/Third_Party/LwIP/src/include/lwip/opt.h \
  ../LWIP/Target/lwipopts.h ../Core/Inc/main.h \

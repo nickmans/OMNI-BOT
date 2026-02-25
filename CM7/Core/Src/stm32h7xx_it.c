@@ -49,6 +49,7 @@
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN PFP */
+static void HardFault_HandlerC(uint32_t *stacked_regs, uint32_t exc_lr);
 
 /* USER CODE END PFP */
 
@@ -87,9 +88,128 @@ void NMI_Handler(void)
 /**
   * @brief This function handles Hard fault interrupt.
   */
+__attribute__((naked)) void HardFault_Handler(void)
+{
+  __asm volatile
+  (
+    "tst lr, #4                         \n"
+    "ite eq                             \n"
+    "mrseq r0, msp                      \n"
+    "mrsne r0, psp                      \n"
+    "mov r1, lr                         \n"
+    "b HardFault_HandlerC               \n"
+  );
+}
+
+static void HardFault_HandlerC(uint32_t *stacked_regs, uint32_t exc_lr)
+{
+  uint32_t cfsr = SCB->CFSR;
+  uint32_t hfsr = SCB->HFSR;
+  uint32_t bfar = SCB->BFAR;
+  uint32_t mmfar = SCB->MMFAR;
+  uint32_t afsr = SCB->AFSR;
+
+  uint32_t stacked_r0 = stacked_regs[0];
+  uint32_t stacked_r1 = stacked_regs[1];
+  uint32_t stacked_r2 = stacked_regs[2];
+  uint32_t stacked_r3 = stacked_regs[3];
+  uint32_t stacked_r12 = stacked_regs[4];
+  uint32_t stacked_lr = stacked_regs[5];
+  uint32_t stacked_pc = stacked_regs[6];
+  uint32_t stacked_psr = stacked_regs[7];
+
+  const char *task_name = "no_task";
+  TaskHandle_t current_task = xTaskGetCurrentTaskHandle();
+  if (current_task != NULL)
+  {
+    task_name = pcTaskGetName(current_task);
+  }
+
+  printf("\r\n*** HARDFAULT ***\r\n");
+  printf("task=%s\r\n", task_name);
+  printf("CFSR=0x%08lX HFSR=0x%08lX AFSR=0x%08lX\r\n",
+         (unsigned long)cfsr,
+         (unsigned long)hfsr,
+         (unsigned long)afsr);
+  printf("BFAR=0x%08lX MMFAR=0x%08lX\r\n",
+         (unsigned long)bfar,
+         (unsigned long)mmfar);
+  printf("stack_ptr=0x%08lX EXC_LR=0x%08lX\r\n",
+         (unsigned long)stacked_regs,
+         (unsigned long)exc_lr);
+  printf("R0=0x%08lX R1=0x%08lX R2=0x%08lX R3=0x%08lX R12=0x%08lX\r\n",
+         (unsigned long)stacked_r0,
+         (unsigned long)stacked_r1,
+         (unsigned long)stacked_r2,
+         (unsigned long)stacked_r3,
+         (unsigned long)stacked_r12);
+  printf("LR=0x%08lX PC=0x%08lX PSR=0x%08lX\r\n",
+         (unsigned long)stacked_lr,
+         (unsigned long)stacked_pc,
+         (unsigned long)stacked_psr);
+
+  if (heth.Instance != NULL)
+  {
+    printf("ETH_DMACSR=0x%08lX\r\n", (unsigned long)heth.Instance->DMACSR);
+  }
+
+  while (1)
+  {
+  }
+}
+
+#if 0
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
+  uint32_t cfsr = SCB->CFSR;
+  uint32_t hfsr = SCB->HFSR;
+  uint32_t bfar = SCB->BFAR;
+  uint32_t mmfar = SCB->MMFAR;
+  uint32_t afsr = SCB->AFSR;
+  uint32_t msp = __get_MSP();
+
+  uint32_t stacked_r0 = *((uint32_t *)(msp + 0u));
+  uint32_t stacked_r1 = *((uint32_t *)(msp + 4u));
+  uint32_t stacked_r2 = *((uint32_t *)(msp + 8u));
+  uint32_t stacked_r3 = *((uint32_t *)(msp + 12u));
+  uint32_t stacked_r12 = *((uint32_t *)(msp + 16u));
+  uint32_t stacked_lr = *((uint32_t *)(msp + 20u));
+  uint32_t stacked_pc = *((uint32_t *)(msp + 24u));
+  uint32_t stacked_psr = *((uint32_t *)(msp + 28u));
+
+  const char *task_name = "no_task";
+  TaskHandle_t current_task = xTaskGetCurrentTaskHandle();
+  if (current_task != NULL)
+  {
+    task_name = pcTaskGetName(current_task);
+  }
+
+  printf("\r\n*** HARDFAULT ***\r\n");
+  printf("task=%s\r\n", task_name);
+  printf("CFSR=0x%08lX HFSR=0x%08lX AFSR=0x%08lX\r\n",
+         (unsigned long)cfsr,
+         (unsigned long)hfsr,
+         (unsigned long)afsr);
+  printf("BFAR=0x%08lX MMFAR=0x%08lX\r\n",
+         (unsigned long)bfar,
+         (unsigned long)mmfar);
+    printf("MSP=0x%08lX\r\n", (unsigned long)msp);
+    printf("R0=0x%08lX R1=0x%08lX R2=0x%08lX R3=0x%08lX R12=0x%08lX\r\n",
+      (unsigned long)stacked_r0,
+      (unsigned long)stacked_r1,
+      (unsigned long)stacked_r2,
+      (unsigned long)stacked_r3,
+      (unsigned long)stacked_r12);
+    printf("LR=0x%08lX PC=0x%08lX PSR=0x%08lX\r\n",
+      (unsigned long)stacked_lr,
+      (unsigned long)stacked_pc,
+      (unsigned long)stacked_psr);
+
+    if (heth.Instance != NULL)
+    {
+      printf("ETH_DMACSR=0x%08lX\r\n", (unsigned long)heth.Instance->DMACSR);
+    }
 
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
@@ -98,6 +218,7 @@ void HardFault_Handler(void)
     /* USER CODE END W1_HardFault_IRQn 0 */
   }
 }
+#endif
 
 /**
   * @brief This function handles Memory management fault.

@@ -1,11 +1,11 @@
-../../Drivers/CMSIS/Include/core_cm7.h:2156:34:__NVIC_SystemReset	4	static,ignoring_inline_asm
+../../Drivers/CMSIS/Include/core_cm7.h:2156:34:__NVIC_SystemReset	4	static
 ../Core/Src/cmd.c:148:24:rb_next	16	static
 ../Core/Src/cmd.c:158:20:rb_is_empty	4	static
 ../Core/Src/cmd.c:163:13:rb_push	24	static
 ../Core/Src/cmd.c:176:13:rb_pop	16	static
 ../Core/Src/cmd.c:196:6:CMD_Init	16	static
 ../Core/Src/cmd.c:206:6:CMD_StartTask	24	static
-../Core/Src/cmd.c:226:6:CMD_OnUartRxByteFromISR	24	static,ignoring_inline_asm
+../Core/Src/cmd.c:226:6:CMD_OnUartRxByteFromISR	24	static
 ../Core/Src/cmd.c:265:13:CMD_Task	96	static
 ../Core/Src/cmd.c:322:13:CMD_ProcessLine	40	static
 ../Core/Src/cmd.c:378:14:CMD_Trim	24	static
@@ -20,7 +20,7 @@
 ../Core/Src/cmd.c:495:13:cmd_med	16	static
 ../Core/Src/cmd.c:505:6:cmd_stop	16	static
 ../Core/Src/cmd.c:515:13:cmd_hello	16	static
-../Core/Src/cmd.c:522:13:cmd_reset	16	static,ignoring_inline_asm
+../Core/Src/cmd.c:522:13:cmd_reset	16	static
 ../Core/Src/cmd.c:537:13:cmd_help	24	static
 ../Core/Src/cmd.c:554:13:cmd_traj	24	static
 ../Core/Src/cmd.c:589:13:cmd_traj2	24	static

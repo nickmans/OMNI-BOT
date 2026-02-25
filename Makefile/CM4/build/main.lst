@@ -1,0 +1,939 @@
+ARM GAS  /tmp/ccCLxiLb.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 1
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"main.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.file 1 "../../CM4/Core/Src/main.c"
+  20              		.section	.text.MX_DMA_Init,"ax",%progbits
+  21              		.align	1
+  22              		.syntax unified
+  23              		.thumb
+  24              		.thumb_func
+  26              	MX_DMA_Init:
+  27              	.LFB141:
+   1:../../CM4/Core/Src/main.c **** /* USER CODE BEGIN Header */
+   2:../../CM4/Core/Src/main.c **** /**
+   3:../../CM4/Core/Src/main.c ****   ******************************************************************************
+   4:../../CM4/Core/Src/main.c ****   * @file           : main.c
+   5:../../CM4/Core/Src/main.c ****   * @brief          : Main program body
+   6:../../CM4/Core/Src/main.c ****   ******************************************************************************
+   7:../../CM4/Core/Src/main.c ****   * @attention
+   8:../../CM4/Core/Src/main.c ****   *
+   9:../../CM4/Core/Src/main.c ****   * Copyright (c) 2025 STMicroelectronics.
+  10:../../CM4/Core/Src/main.c ****   * All rights reserved.
+  11:../../CM4/Core/Src/main.c ****   *
+  12:../../CM4/Core/Src/main.c ****   * This software is licensed under terms that can be found in the LICENSE file
+  13:../../CM4/Core/Src/main.c ****   * in the root directory of this software component.
+  14:../../CM4/Core/Src/main.c ****   * If no LICENSE file comes with this software, it is provided AS-IS.
+  15:../../CM4/Core/Src/main.c ****   *
+  16:../../CM4/Core/Src/main.c ****   ******************************************************************************
+  17:../../CM4/Core/Src/main.c ****   */
+  18:../../CM4/Core/Src/main.c **** /* USER CODE END Header */
+  19:../../CM4/Core/Src/main.c **** /* Includes ------------------------------------------------------------------*/
+  20:../../CM4/Core/Src/main.c **** #include "main.h"
+  21:../../CM4/Core/Src/main.c **** #include "string.h"
+  22:../../CM4/Core/Src/main.c **** #include "cmsis_os.h"
+  23:../../CM4/Core/Src/main.c **** 
+  24:../../CM4/Core/Src/main.c **** /* Private includes ----------------------------------------------------------*/
+  25:../../CM4/Core/Src/main.c **** /* USER CODE BEGIN Includes */
+  26:../../CM4/Core/Src/main.c **** 
+  27:../../CM4/Core/Src/main.c **** /* USER CODE END Includes */
+  28:../../CM4/Core/Src/main.c **** 
+  29:../../CM4/Core/Src/main.c **** /* Private typedef -----------------------------------------------------------*/
+  30:../../CM4/Core/Src/main.c **** /* USER CODE BEGIN PTD */
+  31:../../CM4/Core/Src/main.c **** 
+ARM GAS  /tmp/ccCLxiLb.s 			page 2
+
+
+  32:../../CM4/Core/Src/main.c **** /* USER CODE END PTD */
+  33:../../CM4/Core/Src/main.c **** 
+  34:../../CM4/Core/Src/main.c **** /* Private define ------------------------------------------------------------*/
+  35:../../CM4/Core/Src/main.c **** /* USER CODE BEGIN PD */
+  36:../../CM4/Core/Src/main.c **** 
+  37:../../CM4/Core/Src/main.c **** /* DUAL_CORE_BOOT_SYNC_SEQUENCE: Define for dual core boot synchronization    */
+  38:../../CM4/Core/Src/main.c **** /*                             demonstration code based on hardware semaphore */
+  39:../../CM4/Core/Src/main.c **** /* This define is present in both CM7/CM4 projects                            */
+  40:../../CM4/Core/Src/main.c **** /* To comment when developping/debugging on a single core                     */
+  41:../../CM4/Core/Src/main.c **** #define DUAL_CORE_BOOT_SYNC_SEQUENCE
+  42:../../CM4/Core/Src/main.c **** 
+  43:../../CM4/Core/Src/main.c **** #if defined(DUAL_CORE_BOOT_SYNC_SEQUENCE)
+  44:../../CM4/Core/Src/main.c **** #ifndef HSEM_ID_0
+  45:../../CM4/Core/Src/main.c **** #define HSEM_ID_0 (0U) /* HW semaphore 0*/
+  46:../../CM4/Core/Src/main.c **** #endif
+  47:../../CM4/Core/Src/main.c **** #endif /* DUAL_CORE_BOOT_SYNC_SEQUENCE */
+  48:../../CM4/Core/Src/main.c **** 
+  49:../../CM4/Core/Src/main.c **** /* USER CODE END PD */
+  50:../../CM4/Core/Src/main.c **** 
+  51:../../CM4/Core/Src/main.c **** /* Private macro -------------------------------------------------------------*/
+  52:../../CM4/Core/Src/main.c **** /* USER CODE BEGIN PM */
+  53:../../CM4/Core/Src/main.c **** 
+  54:../../CM4/Core/Src/main.c **** /* USER CODE END PM */
+  55:../../CM4/Core/Src/main.c **** 
+  56:../../CM4/Core/Src/main.c **** /* Private variables ---------------------------------------------------------*/
+  57:../../CM4/Core/Src/main.c **** #if defined ( __ICCARM__ ) /*!< IAR Compiler */
+  58:../../CM4/Core/Src/main.c **** #pragma location=0x30000000
+  59:../../CM4/Core/Src/main.c **** ETH_DMADescTypeDef  DMARxDscrTab[ETH_RX_DESC_CNT]; /* Ethernet Rx DMA Descriptors */
+  60:../../CM4/Core/Src/main.c **** #pragma location=0x30000080
+  61:../../CM4/Core/Src/main.c **** ETH_DMADescTypeDef  DMATxDscrTab[ETH_TX_DESC_CNT]; /* Ethernet Tx DMA Descriptors */
+  62:../../CM4/Core/Src/main.c **** 
+  63:../../CM4/Core/Src/main.c **** #elif defined ( __CC_ARM )  /* MDK ARM Compiler */
+  64:../../CM4/Core/Src/main.c **** 
+  65:../../CM4/Core/Src/main.c **** __attribute__((at(0x30000000))) ETH_DMADescTypeDef  DMARxDscrTab[ETH_RX_DESC_CNT]; /* Ethernet Rx D
+  66:../../CM4/Core/Src/main.c **** __attribute__((at(0x30000080))) ETH_DMADescTypeDef  DMATxDscrTab[ETH_TX_DESC_CNT]; /* Ethernet Tx D
+  67:../../CM4/Core/Src/main.c **** 
+  68:../../CM4/Core/Src/main.c **** #elif defined ( __GNUC__ ) /* GNU Compiler */
+  69:../../CM4/Core/Src/main.c **** 
+  70:../../CM4/Core/Src/main.c **** ETH_DMADescTypeDef DMARxDscrTab[ETH_RX_DESC_CNT] __attribute__((section(".RxDescripSection"))); /* 
+  71:../../CM4/Core/Src/main.c **** ETH_DMADescTypeDef DMATxDscrTab[ETH_TX_DESC_CNT] __attribute__((section(".TxDescripSection")));   /
+  72:../../CM4/Core/Src/main.c **** #endif
+  73:../../CM4/Core/Src/main.c **** 
+  74:../../CM4/Core/Src/main.c **** ETH_TxPacketConfig TxConfig;
+  75:../../CM4/Core/Src/main.c **** 
+  76:../../CM4/Core/Src/main.c **** /* Definitions for defaultTask */
+  77:../../CM4/Core/Src/main.c **** osThreadId_t defaultTaskHandle;
+  78:../../CM4/Core/Src/main.c **** const osThreadAttr_t defaultTask_attributes = {
+  79:../../CM4/Core/Src/main.c ****   .name = "defaultTask",
+  80:../../CM4/Core/Src/main.c ****   .stack_size = 128 * 4,
+  81:../../CM4/Core/Src/main.c ****   .priority = (osPriority_t) osPriorityNormal,
+  82:../../CM4/Core/Src/main.c **** };
+  83:../../CM4/Core/Src/main.c **** /* USER CODE BEGIN PV */
+  84:../../CM4/Core/Src/main.c **** 
+  85:../../CM4/Core/Src/main.c **** /* USER CODE END PV */
+  86:../../CM4/Core/Src/main.c **** 
+  87:../../CM4/Core/Src/main.c **** /* Private function prototypes -----------------------------------------------*/
+  88:../../CM4/Core/Src/main.c **** static void MX_DMA_Init(void);
+ARM GAS  /tmp/ccCLxiLb.s 			page 3
+
+
+  89:../../CM4/Core/Src/main.c **** void StartDefaultTask(void *argument);
+  90:../../CM4/Core/Src/main.c **** 
+  91:../../CM4/Core/Src/main.c **** /* USER CODE BEGIN PFP */
+  92:../../CM4/Core/Src/main.c **** 
+  93:../../CM4/Core/Src/main.c **** /* USER CODE END PFP */
+  94:../../CM4/Core/Src/main.c **** 
+  95:../../CM4/Core/Src/main.c **** /* Private user code ---------------------------------------------------------*/
+  96:../../CM4/Core/Src/main.c **** /* USER CODE BEGIN 0 */
+  97:../../CM4/Core/Src/main.c **** 
+  98:../../CM4/Core/Src/main.c **** /* USER CODE END 0 */
+  99:../../CM4/Core/Src/main.c **** 
+ 100:../../CM4/Core/Src/main.c **** /**
+ 101:../../CM4/Core/Src/main.c ****   * @brief  The application entry point.
+ 102:../../CM4/Core/Src/main.c ****   * @retval int
+ 103:../../CM4/Core/Src/main.c ****   */
+ 104:../../CM4/Core/Src/main.c **** int main(void)
+ 105:../../CM4/Core/Src/main.c **** {
+ 106:../../CM4/Core/Src/main.c **** 
+ 107:../../CM4/Core/Src/main.c ****   /* USER CODE BEGIN 1 */
+ 108:../../CM4/Core/Src/main.c **** 
+ 109:../../CM4/Core/Src/main.c ****   /* USER CODE END 1 */
+ 110:../../CM4/Core/Src/main.c **** 
+ 111:../../CM4/Core/Src/main.c **** /* USER CODE BEGIN Boot_Mode_Sequence_1 */
+ 112:../../CM4/Core/Src/main.c **** #if defined(DUAL_CORE_BOOT_SYNC_SEQUENCE)
+ 113:../../CM4/Core/Src/main.c ****   /*HW semaphore Clock enable*/
+ 114:../../CM4/Core/Src/main.c ****   __HAL_RCC_HSEM_CLK_ENABLE();
+ 115:../../CM4/Core/Src/main.c ****   /* Activate HSEM notification for Cortex-M4*/
+ 116:../../CM4/Core/Src/main.c ****   HAL_HSEM_ActivateNotification(__HAL_HSEM_SEMID_TO_MASK(HSEM_ID_0));
+ 117:../../CM4/Core/Src/main.c ****   /*
+ 118:../../CM4/Core/Src/main.c ****   Domain D2 goes to STOP mode (Cortex-M4 in deep-sleep) waiting for Cortex-M7 to
+ 119:../../CM4/Core/Src/main.c ****   perform system initialization (system clock config, external memory configuration.. )
+ 120:../../CM4/Core/Src/main.c ****   */
+ 121:../../CM4/Core/Src/main.c ****   HAL_PWREx_ClearPendingEvent();
+ 122:../../CM4/Core/Src/main.c ****   HAL_PWREx_EnterSTOPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFE, PWR_D2_DOMAIN);
+ 123:../../CM4/Core/Src/main.c ****   /* Clear HSEM flag */
+ 124:../../CM4/Core/Src/main.c ****   __HAL_HSEM_CLEAR_FLAG(__HAL_HSEM_SEMID_TO_MASK(HSEM_ID_0));
+ 125:../../CM4/Core/Src/main.c **** 
+ 126:../../CM4/Core/Src/main.c **** #endif /* DUAL_CORE_BOOT_SYNC_SEQUENCE */
+ 127:../../CM4/Core/Src/main.c **** /* USER CODE END Boot_Mode_Sequence_1 */
+ 128:../../CM4/Core/Src/main.c ****   /* MCU Configuration--------------------------------------------------------*/
+ 129:../../CM4/Core/Src/main.c **** 
+ 130:../../CM4/Core/Src/main.c ****   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+ 131:../../CM4/Core/Src/main.c ****   HAL_Init();
+ 132:../../CM4/Core/Src/main.c **** 
+ 133:../../CM4/Core/Src/main.c ****   /* USER CODE BEGIN Init */
+ 134:../../CM4/Core/Src/main.c **** 
+ 135:../../CM4/Core/Src/main.c ****   /* USER CODE END Init */
+ 136:../../CM4/Core/Src/main.c **** 
+ 137:../../CM4/Core/Src/main.c ****   /* USER CODE BEGIN SysInit */
+ 138:../../CM4/Core/Src/main.c **** 
+ 139:../../CM4/Core/Src/main.c ****   /* USER CODE END SysInit */
+ 140:../../CM4/Core/Src/main.c **** 
+ 141:../../CM4/Core/Src/main.c ****   /* Initialize all configured peripherals */
+ 142:../../CM4/Core/Src/main.c ****   MX_DMA_Init();
+ 143:../../CM4/Core/Src/main.c ****   /* USER CODE BEGIN 2 */
+ 144:../../CM4/Core/Src/main.c **** 
+ 145:../../CM4/Core/Src/main.c ****   /* USER CODE END 2 */
+ARM GAS  /tmp/ccCLxiLb.s 			page 4
+
+
+ 146:../../CM4/Core/Src/main.c **** 
+ 147:../../CM4/Core/Src/main.c ****   /* Init scheduler */
+ 148:../../CM4/Core/Src/main.c ****   osKernelInitialize();
+ 149:../../CM4/Core/Src/main.c **** 
+ 150:../../CM4/Core/Src/main.c ****   /* USER CODE BEGIN RTOS_MUTEX */
+ 151:../../CM4/Core/Src/main.c ****   /* add mutexes, ... */
+ 152:../../CM4/Core/Src/main.c ****   /* USER CODE END RTOS_MUTEX */
+ 153:../../CM4/Core/Src/main.c **** 
+ 154:../../CM4/Core/Src/main.c ****   /* USER CODE BEGIN RTOS_SEMAPHORES */
+ 155:../../CM4/Core/Src/main.c ****   /* add semaphores, ... */
+ 156:../../CM4/Core/Src/main.c ****   /* USER CODE END RTOS_SEMAPHORES */
+ 157:../../CM4/Core/Src/main.c **** 
+ 158:../../CM4/Core/Src/main.c ****   /* USER CODE BEGIN RTOS_TIMERS */
+ 159:../../CM4/Core/Src/main.c ****   /* start timers, add new ones, ... */
+ 160:../../CM4/Core/Src/main.c ****   /* USER CODE END RTOS_TIMERS */
+ 161:../../CM4/Core/Src/main.c **** 
+ 162:../../CM4/Core/Src/main.c ****   /* USER CODE BEGIN RTOS_QUEUES */
+ 163:../../CM4/Core/Src/main.c ****   /* add queues, ... */
+ 164:../../CM4/Core/Src/main.c ****   /* USER CODE END RTOS_QUEUES */
+ 165:../../CM4/Core/Src/main.c **** 
+ 166:../../CM4/Core/Src/main.c ****   /* Create the thread(s) */
+ 167:../../CM4/Core/Src/main.c ****   /* creation of defaultTask */
+ 168:../../CM4/Core/Src/main.c ****   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+ 169:../../CM4/Core/Src/main.c **** 
+ 170:../../CM4/Core/Src/main.c ****   /* USER CODE BEGIN RTOS_THREADS */
+ 171:../../CM4/Core/Src/main.c ****   /* add threads, ... */
+ 172:../../CM4/Core/Src/main.c ****   /* USER CODE END RTOS_THREADS */
+ 173:../../CM4/Core/Src/main.c **** 
+ 174:../../CM4/Core/Src/main.c ****   /* USER CODE BEGIN RTOS_EVENTS */
+ 175:../../CM4/Core/Src/main.c ****   /* add events, ... */
+ 176:../../CM4/Core/Src/main.c ****   /* USER CODE END RTOS_EVENTS */
+ 177:../../CM4/Core/Src/main.c **** 
+ 178:../../CM4/Core/Src/main.c ****   /* Start scheduler */
+ 179:../../CM4/Core/Src/main.c ****   osKernelStart();
+ 180:../../CM4/Core/Src/main.c **** 
+ 181:../../CM4/Core/Src/main.c ****   /* We should never get here as control is now taken by the scheduler */
+ 182:../../CM4/Core/Src/main.c **** 
+ 183:../../CM4/Core/Src/main.c ****   /* Infinite loop */
+ 184:../../CM4/Core/Src/main.c ****   /* USER CODE BEGIN WHILE */
+ 185:../../CM4/Core/Src/main.c ****   while (1)
+ 186:../../CM4/Core/Src/main.c ****   {
+ 187:../../CM4/Core/Src/main.c ****     /* USER CODE END WHILE */
+ 188:../../CM4/Core/Src/main.c **** 
+ 189:../../CM4/Core/Src/main.c ****     /* USER CODE BEGIN 3 */
+ 190:../../CM4/Core/Src/main.c ****   }
+ 191:../../CM4/Core/Src/main.c ****   /* USER CODE END 3 */
+ 192:../../CM4/Core/Src/main.c **** }
+ 193:../../CM4/Core/Src/main.c **** 
+ 194:../../CM4/Core/Src/main.c **** /**
+ 195:../../CM4/Core/Src/main.c ****   * @brief Peripherals Common Clock Configuration
+ 196:../../CM4/Core/Src/main.c ****   * @retval None
+ 197:../../CM4/Core/Src/main.c ****   */
+ 198:../../CM4/Core/Src/main.c **** void PeriphCommonClock_Config(void)
+ 199:../../CM4/Core/Src/main.c **** {
+ 200:../../CM4/Core/Src/main.c ****   RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
+ 201:../../CM4/Core/Src/main.c **** 
+ 202:../../CM4/Core/Src/main.c ****   /** Initializes the peripherals clock
+ARM GAS  /tmp/ccCLxiLb.s 			page 5
+
+
+ 203:../../CM4/Core/Src/main.c ****   */
+ 204:../../CM4/Core/Src/main.c ****   PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_CKPER;
+ 205:../../CM4/Core/Src/main.c ****   PeriphClkInitStruct.CkperClockSelection = RCC_CLKPSOURCE_HSI;
+ 206:../../CM4/Core/Src/main.c ****   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+ 207:../../CM4/Core/Src/main.c ****   {
+ 208:../../CM4/Core/Src/main.c ****     Error_Handler();
+ 209:../../CM4/Core/Src/main.c ****   }
+ 210:../../CM4/Core/Src/main.c **** }
+ 211:../../CM4/Core/Src/main.c **** 
+ 212:../../CM4/Core/Src/main.c **** /**
+ 213:../../CM4/Core/Src/main.c ****   * Enable DMA controller clock
+ 214:../../CM4/Core/Src/main.c ****   */
+ 215:../../CM4/Core/Src/main.c **** static void MX_DMA_Init(void)
+ 216:../../CM4/Core/Src/main.c **** {
+  28              		.loc 1 216 1 view -0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 8
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32              		@ link register save eliminated.
+  33 0000 82B0     		sub	sp, sp, #8
+  34              	.LCFI0:
+  35              		.cfi_def_cfa_offset 8
+ 217:../../CM4/Core/Src/main.c **** 
+ 218:../../CM4/Core/Src/main.c ****   /* DMA controller clock enable */
+ 219:../../CM4/Core/Src/main.c ****   __HAL_RCC_DMA1_CLK_ENABLE();
+  36              		.loc 1 219 3 view .LVU1
+  37              	.LBB4:
+  38              		.loc 1 219 3 view .LVU2
+  39              		.loc 1 219 3 view .LVU3
+  40 0002 074B     		ldr	r3, .L3
+  41 0004 D3F8D820 		ldr	r2, [r3, #216]
+  42 0008 42F00102 		orr	r2, r2, #1
+  43 000c C3F8D820 		str	r2, [r3, #216]
+  44              		.loc 1 219 3 view .LVU4
+  45 0010 D3F8D830 		ldr	r3, [r3, #216]
+  46 0014 03F00103 		and	r3, r3, #1
+  47 0018 0193     		str	r3, [sp, #4]
+  48              		.loc 1 219 3 view .LVU5
+  49 001a 019B     		ldr	r3, [sp, #4]
+  50              	.LBE4:
+  51              		.loc 1 219 3 view .LVU6
+ 220:../../CM4/Core/Src/main.c **** 
+ 221:../../CM4/Core/Src/main.c **** }
+  52              		.loc 1 221 1 is_stmt 0 view .LVU7
+  53 001c 02B0     		add	sp, sp, #8
+  54              	.LCFI1:
+  55              		.cfi_def_cfa_offset 0
+  56              		@ sp needed
+  57 001e 7047     		bx	lr
+  58              	.L4:
+  59              		.align	2
+  60              	.L3:
+  61 0020 00440258 		.word	1476543488
+  62              		.cfi_endproc
+  63              	.LFE141:
+  65              		.section	.text.StartDefaultTask,"ax",%progbits
+  66              		.align	1
+ARM GAS  /tmp/ccCLxiLb.s 			page 6
+
+
+  67              		.global	StartDefaultTask
+  68              		.syntax unified
+  69              		.thumb
+  70              		.thumb_func
+  72              	StartDefaultTask:
+  73              	.LFB142:
+ 222:../../CM4/Core/Src/main.c **** 
+ 223:../../CM4/Core/Src/main.c **** /* USER CODE BEGIN 4 */
+ 224:../../CM4/Core/Src/main.c **** 
+ 225:../../CM4/Core/Src/main.c **** /* USER CODE END 4 */
+ 226:../../CM4/Core/Src/main.c **** 
+ 227:../../CM4/Core/Src/main.c **** /* USER CODE BEGIN Header_StartDefaultTask */
+ 228:../../CM4/Core/Src/main.c **** /**
+ 229:../../CM4/Core/Src/main.c ****   * @brief  Function implementing the defaultTask thread.
+ 230:../../CM4/Core/Src/main.c ****   * @param  argument: Not used
+ 231:../../CM4/Core/Src/main.c ****   * @retval None
+ 232:../../CM4/Core/Src/main.c ****   */
+ 233:../../CM4/Core/Src/main.c **** /* USER CODE END Header_StartDefaultTask */
+ 234:../../CM4/Core/Src/main.c **** void StartDefaultTask(void *argument)
+ 235:../../CM4/Core/Src/main.c **** {
+  74              		.loc 1 235 1 is_stmt 1 view -0
+  75              		.cfi_startproc
+  76              		@ Volatile: function does not return.
+  77              		@ args = 0, pretend = 0, frame = 0
+  78              		@ frame_needed = 0, uses_anonymous_args = 0
+  79              	.LVL0:
+  80              		.loc 1 235 1 is_stmt 0 view .LVU9
+  81 0000 08B5     		push	{r3, lr}
+  82              	.LCFI2:
+  83              		.cfi_def_cfa_offset 8
+  84              		.cfi_offset 3, -8
+  85              		.cfi_offset 14, -4
+  86              	.LVL1:
+  87              	.L6:
+ 236:../../CM4/Core/Src/main.c ****   /* USER CODE BEGIN 5 */
+ 237:../../CM4/Core/Src/main.c ****   /* Infinite loop */
+ 238:../../CM4/Core/Src/main.c ****   for(;;)
+  88              		.loc 1 238 3 is_stmt 1 view .LVU10
+ 239:../../CM4/Core/Src/main.c ****   {
+ 240:../../CM4/Core/Src/main.c ****     osDelay(1);
+  89              		.loc 1 240 5 discriminator 1 view .LVU11
+  90 0002 0120     		movs	r0, #1
+  91 0004 FFF7FEFF 		bl	osDelay
+  92              	.LVL2:
+ 238:../../CM4/Core/Src/main.c ****   {
+  93              		.loc 1 238 3 view .LVU12
+  94 0008 FBE7     		b	.L6
+  95              		.cfi_endproc
+  96              	.LFE142:
+  98              		.section	.text.main,"ax",%progbits
+  99              		.align	1
+ 100              		.global	main
+ 101              		.syntax unified
+ 102              		.thumb
+ 103              		.thumb_func
+ 105              	main:
+ 106              	.LFB139:
+ARM GAS  /tmp/ccCLxiLb.s 			page 7
+
+
+ 105:../../CM4/Core/Src/main.c **** 
+ 107              		.loc 1 105 1 view -0
+ 108              		.cfi_startproc
+ 109              		@ Volatile: function does not return.
+ 110              		@ args = 0, pretend = 0, frame = 8
+ 111              		@ frame_needed = 0, uses_anonymous_args = 0
+ 112 0000 00B5     		push	{lr}
+ 113              	.LCFI3:
+ 114              		.cfi_def_cfa_offset 4
+ 115              		.cfi_offset 14, -4
+ 116 0002 83B0     		sub	sp, sp, #12
+ 117              	.LCFI4:
+ 118              		.cfi_def_cfa_offset 16
+ 114:../../CM4/Core/Src/main.c ****   /* Activate HSEM notification for Cortex-M4*/
+ 119              		.loc 1 114 3 view .LVU14
+ 120              	.LBB5:
+ 114:../../CM4/Core/Src/main.c ****   /* Activate HSEM notification for Cortex-M4*/
+ 121              		.loc 1 114 3 view .LVU15
+ 114:../../CM4/Core/Src/main.c ****   /* Activate HSEM notification for Cortex-M4*/
+ 122              		.loc 1 114 3 view .LVU16
+ 123 0004 1D4B     		ldr	r3, .L14
+ 124 0006 D3F8E020 		ldr	r2, [r3, #224]
+ 125 000a 42F00072 		orr	r2, r2, #33554432
+ 126 000e C3F8E020 		str	r2, [r3, #224]
+ 114:../../CM4/Core/Src/main.c ****   /* Activate HSEM notification for Cortex-M4*/
+ 127              		.loc 1 114 3 view .LVU17
+ 128 0012 D3F8E030 		ldr	r3, [r3, #224]
+ 129 0016 03F00073 		and	r3, r3, #33554432
+ 130 001a 0193     		str	r3, [sp, #4]
+ 114:../../CM4/Core/Src/main.c ****   /* Activate HSEM notification for Cortex-M4*/
+ 131              		.loc 1 114 3 view .LVU18
+ 132 001c 019B     		ldr	r3, [sp, #4]
+ 133              	.LBE5:
+ 114:../../CM4/Core/Src/main.c ****   /* Activate HSEM notification for Cortex-M4*/
+ 134              		.loc 1 114 3 view .LVU19
+ 116:../../CM4/Core/Src/main.c ****   /*
+ 135              		.loc 1 116 3 view .LVU20
+ 136 001e 0120     		movs	r0, #1
+ 137 0020 FFF7FEFF 		bl	HAL_HSEM_ActivateNotification
+ 138              	.LVL3:
+ 121:../../CM4/Core/Src/main.c ****   HAL_PWREx_EnterSTOPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFE, PWR_D2_DOMAIN);
+ 139              		.loc 1 121 3 view .LVU21
+ 140 0024 FFF7FEFF 		bl	HAL_PWREx_ClearPendingEvent
+ 141              	.LVL4:
+ 122:../../CM4/Core/Src/main.c ****   /* Clear HSEM flag */
+ 142              		.loc 1 122 3 view .LVU22
+ 143 0028 0122     		movs	r2, #1
+ 144 002a 0221     		movs	r1, #2
+ 145 002c 0020     		movs	r0, #0
+ 146 002e FFF7FEFF 		bl	HAL_PWREx_EnterSTOPMode
+ 147              	.LVL5:
+ 124:../../CM4/Core/Src/main.c **** 
+ 148              		.loc 1 124 3 view .LVU23
+ 149 0032 134B     		ldr	r3, .L14+4
+ 150 0034 1B68     		ldr	r3, [r3]
+ 151 0036 03F0F003 		and	r3, r3, #240
+ 152 003a 702B     		cmp	r3, #112
+ARM GAS  /tmp/ccCLxiLb.s 			page 8
+
+
+ 153 003c 16D0     		beq	.L13
+ 124:../../CM4/Core/Src/main.c **** 
+ 154              		.loc 1 124 3 is_stmt 0 discriminator 2 view .LVU24
+ 155 003e 114A     		ldr	r2, .L14+8
+ 156 0040 D2F81431 		ldr	r3, [r2, #276]
+ 157 0044 43F00103 		orr	r3, r3, #1
+ 158 0048 C2F81431 		str	r3, [r2, #276]
+ 159              	.L10:
+ 131:../../CM4/Core/Src/main.c **** 
+ 160              		.loc 1 131 3 is_stmt 1 view .LVU25
+ 161 004c FFF7FEFF 		bl	HAL_Init
+ 162              	.LVL6:
+ 142:../../CM4/Core/Src/main.c ****   /* USER CODE BEGIN 2 */
+ 163              		.loc 1 142 3 view .LVU26
+ 164 0050 FFF7FEFF 		bl	MX_DMA_Init
+ 165              	.LVL7:
+ 148:../../CM4/Core/Src/main.c **** 
+ 166              		.loc 1 148 3 view .LVU27
+ 167 0054 FFF7FEFF 		bl	osKernelInitialize
+ 168              	.LVL8:
+ 168:../../CM4/Core/Src/main.c **** 
+ 169              		.loc 1 168 3 view .LVU28
+ 168:../../CM4/Core/Src/main.c **** 
+ 170              		.loc 1 168 23 is_stmt 0 view .LVU29
+ 171 0058 0B4A     		ldr	r2, .L14+12
+ 172 005a 0021     		movs	r1, #0
+ 173 005c 0B48     		ldr	r0, .L14+16
+ 174 005e FFF7FEFF 		bl	osThreadNew
+ 175              	.LVL9:
+ 168:../../CM4/Core/Src/main.c **** 
+ 176              		.loc 1 168 21 discriminator 1 view .LVU30
+ 177 0062 0B4B     		ldr	r3, .L14+20
+ 178 0064 1860     		str	r0, [r3]
+ 179:../../CM4/Core/Src/main.c **** 
+ 179              		.loc 1 179 3 is_stmt 1 view .LVU31
+ 180 0066 FFF7FEFF 		bl	osKernelStart
+ 181              	.LVL10:
+ 182              	.L11:
+ 185:../../CM4/Core/Src/main.c ****   {
+ 183              		.loc 1 185 3 view .LVU32
+ 190:../../CM4/Core/Src/main.c ****   /* USER CODE END 3 */
+ 184              		.loc 1 190 3 view .LVU33
+ 185:../../CM4/Core/Src/main.c ****   {
+ 185              		.loc 1 185 9 view .LVU34
+ 186 006a FEE7     		b	.L11
+ 187              	.L13:
+ 124:../../CM4/Core/Src/main.c **** 
+ 188              		.loc 1 124 3 is_stmt 0 discriminator 1 view .LVU35
+ 189 006c 054A     		ldr	r2, .L14+8
+ 190 006e D2F80431 		ldr	r3, [r2, #260]
+ 191 0072 43F00103 		orr	r3, r3, #1
+ 192 0076 C2F80431 		str	r3, [r2, #260]
+ 193 007a E7E7     		b	.L10
+ 194              	.L15:
+ 195              		.align	2
+ 196              	.L14:
+ 197 007c 00440258 		.word	1476543488
+ARM GAS  /tmp/ccCLxiLb.s 			page 9
+
+
+ 198 0080 00ED00E0 		.word	-536810240
+ 199 0084 00640258 		.word	1476551680
+ 200 0088 00000000 		.word	defaultTask_attributes
+ 201 008c 00000000 		.word	StartDefaultTask
+ 202 0090 00000000 		.word	defaultTaskHandle
+ 203              		.cfi_endproc
+ 204              	.LFE139:
+ 206              		.section	.text.Error_Handler,"ax",%progbits
+ 207              		.align	1
+ 208              		.global	Error_Handler
+ 209              		.syntax unified
+ 210              		.thumb
+ 211              		.thumb_func
+ 213              	Error_Handler:
+ 214              	.LFB143:
+ 241:../../CM4/Core/Src/main.c ****   }
+ 242:../../CM4/Core/Src/main.c ****   /* USER CODE END 5 */
+ 243:../../CM4/Core/Src/main.c **** }
+ 244:../../CM4/Core/Src/main.c **** 
+ 245:../../CM4/Core/Src/main.c **** /**
+ 246:../../CM4/Core/Src/main.c ****   * @brief  This function is executed in case of error occurrence.
+ 247:../../CM4/Core/Src/main.c ****   * @retval None
+ 248:../../CM4/Core/Src/main.c ****   */
+ 249:../../CM4/Core/Src/main.c **** void Error_Handler(void)
+ 250:../../CM4/Core/Src/main.c **** {
+ 215              		.loc 1 250 1 is_stmt 1 view -0
+ 216              		.cfi_startproc
+ 217              		@ Volatile: function does not return.
+ 218              		@ args = 0, pretend = 0, frame = 0
+ 219              		@ frame_needed = 0, uses_anonymous_args = 0
+ 220              		@ link register save eliminated.
+ 251:../../CM4/Core/Src/main.c ****   /* USER CODE BEGIN Error_Handler_Debug */
+ 252:../../CM4/Core/Src/main.c ****   /* User can add his own implementation to report the HAL error return state */
+ 253:../../CM4/Core/Src/main.c ****   __disable_irq();
+ 221              		.loc 1 253 3 view .LVU37
+ 222              	.LBB6:
+ 223              	.LBI6:
+ 224              		.file 2 "../../Drivers/CMSIS/Include/cmsis_gcc.h"
+   1:../../Drivers/CMSIS/Include/cmsis_gcc.h **** /**************************************************************************//**
+   2:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  * @file     cmsis_gcc.h
+   3:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  * @brief    CMSIS compiler GCC header file
+   4:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  * @version  V5.2.0
+   5:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  * @date     08. May 2019
+   6:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  ******************************************************************************/
+   7:../../Drivers/CMSIS/Include/cmsis_gcc.h **** /*
+   8:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  * Copyright (c) 2009-2019 Arm Limited. All rights reserved.
+   9:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  *
+  10:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  * SPDX-License-Identifier: Apache-2.0
+  11:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  *
+  12:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  * Licensed under the Apache License, Version 2.0 (the License); you may
+  13:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  * not use this file except in compliance with the License.
+  14:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  * You may obtain a copy of the License at
+  15:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  *
+  16:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  * www.apache.org/licenses/LICENSE-2.0
+  17:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  *
+  18:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  * Unless required by applicable law or agreed to in writing, software
+  19:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  * distributed under the License is distributed on an AS IS BASIS, WITHOUT
+ARM GAS  /tmp/ccCLxiLb.s 			page 10
+
+
+  20:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  21:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  * See the License for the specific language governing permissions and
+  22:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  * limitations under the License.
+  23:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  */
+  24:../../Drivers/CMSIS/Include/cmsis_gcc.h **** 
+  25:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef __CMSIS_GCC_H
+  26:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #define __CMSIS_GCC_H
+  27:../../Drivers/CMSIS/Include/cmsis_gcc.h **** 
+  28:../../Drivers/CMSIS/Include/cmsis_gcc.h **** /* ignore some GCC warnings */
+  29:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #pragma GCC diagnostic push
+  30:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #pragma GCC diagnostic ignored "-Wsign-conversion"
+  31:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #pragma GCC diagnostic ignored "-Wconversion"
+  32:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #pragma GCC diagnostic ignored "-Wunused-parameter"
+  33:../../Drivers/CMSIS/Include/cmsis_gcc.h **** 
+  34:../../Drivers/CMSIS/Include/cmsis_gcc.h **** /* Fallback for __has_builtin */
+  35:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef __has_builtin
+  36:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __has_builtin(x) (0)
+  37:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+  38:../../Drivers/CMSIS/Include/cmsis_gcc.h **** 
+  39:../../Drivers/CMSIS/Include/cmsis_gcc.h **** /* CMSIS compiler specific defines */
+  40:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __ASM
+  41:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __ASM                                  __asm
+  42:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+  43:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __INLINE
+  44:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __INLINE                               inline
+  45:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+  46:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __STATIC_INLINE
+  47:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __STATIC_INLINE                        static inline
+  48:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+  49:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __STATIC_FORCEINLINE                 
+  50:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __STATIC_FORCEINLINE                   __attribute__((always_inline)) static inline
+  51:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #endif                                           
+  52:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __NO_RETURN
+  53:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __NO_RETURN                            __attribute__((__noreturn__))
+  54:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+  55:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __USED
+  56:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __USED                                 __attribute__((used))
+  57:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+  58:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __WEAK
+  59:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __WEAK                                 __attribute__((weak))
+  60:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+  61:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __PACKED
+  62:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __PACKED                               __attribute__((packed, aligned(1)))
+  63:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+  64:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __PACKED_STRUCT
+  65:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __PACKED_STRUCT                        struct __attribute__((packed, aligned(1)))
+  66:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+  67:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __PACKED_UNION
+  68:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __PACKED_UNION                         union __attribute__((packed, aligned(1)))
+  69:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+  70:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __UNALIGNED_UINT32        /* deprecated */
+  71:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic push
+  72:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wpacked"
+  73:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wattributes"
+  74:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   struct __attribute__((packed)) T_UINT32 { uint32_t v; };
+  75:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic pop
+  76:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __UNALIGNED_UINT32(x)                  (((struct T_UINT32 *)(x))->v)
+ARM GAS  /tmp/ccCLxiLb.s 			page 11
+
+
+  77:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+  78:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __UNALIGNED_UINT16_WRITE
+  79:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic push
+  80:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wpacked"
+  81:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wattributes"
+  82:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   __PACKED_STRUCT T_UINT16_WRITE { uint16_t v; };
+  83:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic pop
+  84:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __UNALIGNED_UINT16_WRITE(addr, val)    (void)((((struct T_UINT16_WRITE *)(void *)(addr))-
+  85:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+  86:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __UNALIGNED_UINT16_READ
+  87:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic push
+  88:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wpacked"
+  89:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wattributes"
+  90:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   __PACKED_STRUCT T_UINT16_READ { uint16_t v; };
+  91:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic pop
+  92:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __UNALIGNED_UINT16_READ(addr)          (((const struct T_UINT16_READ *)(const void *)(add
+  93:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+  94:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __UNALIGNED_UINT32_WRITE
+  95:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic push
+  96:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wpacked"
+  97:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wattributes"
+  98:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   __PACKED_STRUCT T_UINT32_WRITE { uint32_t v; };
+  99:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic pop
+ 100:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __UNALIGNED_UINT32_WRITE(addr, val)    (void)((((struct T_UINT32_WRITE *)(void *)(addr))-
+ 101:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+ 102:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __UNALIGNED_UINT32_READ
+ 103:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic push
+ 104:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wpacked"
+ 105:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wattributes"
+ 106:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   __PACKED_STRUCT T_UINT32_READ { uint32_t v; };
+ 107:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic pop
+ 108:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __UNALIGNED_UINT32_READ(addr)          (((const struct T_UINT32_READ *)(const void *)(add
+ 109:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+ 110:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __ALIGNED
+ 111:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __ALIGNED(x)                           __attribute__((aligned(x)))
+ 112:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+ 113:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __RESTRICT
+ 114:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __RESTRICT                             __restrict
+ 115:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+ 116:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __COMPILER_BARRIER
+ 117:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __COMPILER_BARRIER()                   __ASM volatile("":::"memory")
+ 118:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+ 119:../../Drivers/CMSIS/Include/cmsis_gcc.h **** 
+ 120:../../Drivers/CMSIS/Include/cmsis_gcc.h **** /* #########################  Startup and Lowlevel Init  ######################## */
+ 121:../../Drivers/CMSIS/Include/cmsis_gcc.h **** 
+ 122:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef __PROGRAM_START
+ 123:../../Drivers/CMSIS/Include/cmsis_gcc.h **** 
+ 124:../../Drivers/CMSIS/Include/cmsis_gcc.h **** /**
+ 125:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   \brief   Initializes data and bss sections
+ 126:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   \details This default implementations initialized all data and additional bss
+ 127:../../Drivers/CMSIS/Include/cmsis_gcc.h ****            sections relying on .copy.table and .zero.table specified properly
+ 128:../../Drivers/CMSIS/Include/cmsis_gcc.h ****            in the used linker script.
+ 129:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   
+ 130:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  */
+ 131:../../Drivers/CMSIS/Include/cmsis_gcc.h **** __STATIC_FORCEINLINE __NO_RETURN void __cmsis_start(void)
+ 132:../../Drivers/CMSIS/Include/cmsis_gcc.h **** {
+ 133:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   extern void _start(void) __NO_RETURN;
+ARM GAS  /tmp/ccCLxiLb.s 			page 12
+
+
+ 134:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   
+ 135:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   typedef struct {
+ 136:../../Drivers/CMSIS/Include/cmsis_gcc.h ****     uint32_t const* src;
+ 137:../../Drivers/CMSIS/Include/cmsis_gcc.h ****     uint32_t* dest;
+ 138:../../Drivers/CMSIS/Include/cmsis_gcc.h ****     uint32_t  wlen;
+ 139:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   } __copy_table_t;
+ 140:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   
+ 141:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   typedef struct {
+ 142:../../Drivers/CMSIS/Include/cmsis_gcc.h ****     uint32_t* dest;
+ 143:../../Drivers/CMSIS/Include/cmsis_gcc.h ****     uint32_t  wlen;
+ 144:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   } __zero_table_t;
+ 145:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   
+ 146:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   extern const __copy_table_t __copy_table_start__;
+ 147:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   extern const __copy_table_t __copy_table_end__;
+ 148:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   extern const __zero_table_t __zero_table_start__;
+ 149:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   extern const __zero_table_t __zero_table_end__;
+ 150:../../Drivers/CMSIS/Include/cmsis_gcc.h **** 
+ 151:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   for (__copy_table_t const* pTable = &__copy_table_start__; pTable < &__copy_table_end__; ++pTable
+ 152:../../Drivers/CMSIS/Include/cmsis_gcc.h ****     for(uint32_t i=0u; i<pTable->wlen; ++i) {
+ 153:../../Drivers/CMSIS/Include/cmsis_gcc.h ****       pTable->dest[i] = pTable->src[i];
+ 154:../../Drivers/CMSIS/Include/cmsis_gcc.h ****     }
+ 155:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   }
+ 156:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  
+ 157:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   for (__zero_table_t const* pTable = &__zero_table_start__; pTable < &__zero_table_end__; ++pTable
+ 158:../../Drivers/CMSIS/Include/cmsis_gcc.h ****     for(uint32_t i=0u; i<pTable->wlen; ++i) {
+ 159:../../Drivers/CMSIS/Include/cmsis_gcc.h ****       pTable->dest[i] = 0u;
+ 160:../../Drivers/CMSIS/Include/cmsis_gcc.h ****     }
+ 161:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   }
+ 162:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  
+ 163:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   _start();
+ 164:../../Drivers/CMSIS/Include/cmsis_gcc.h **** }
+ 165:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   
+ 166:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #define __PROGRAM_START           __cmsis_start
+ 167:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+ 168:../../Drivers/CMSIS/Include/cmsis_gcc.h **** 
+ 169:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef __INITIAL_SP
+ 170:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #define __INITIAL_SP              __StackTop
+ 171:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+ 172:../../Drivers/CMSIS/Include/cmsis_gcc.h **** 
+ 173:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef __STACK_LIMIT
+ 174:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #define __STACK_LIMIT             __StackLimit
+ 175:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+ 176:../../Drivers/CMSIS/Include/cmsis_gcc.h **** 
+ 177:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef __VECTOR_TABLE
+ 178:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #define __VECTOR_TABLE            __Vectors
+ 179:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+ 180:../../Drivers/CMSIS/Include/cmsis_gcc.h **** 
+ 181:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef __VECTOR_TABLE_ATTRIBUTE
+ 182:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #define __VECTOR_TABLE_ATTRIBUTE  __attribute((used, section(".vectors")))
+ 183:../../Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
+ 184:../../Drivers/CMSIS/Include/cmsis_gcc.h **** 
+ 185:../../Drivers/CMSIS/Include/cmsis_gcc.h **** /* ###########################  Core Function Access  ########################### */
+ 186:../../Drivers/CMSIS/Include/cmsis_gcc.h **** /** \ingroup  CMSIS_Core_FunctionInterface
+ 187:../../Drivers/CMSIS/Include/cmsis_gcc.h ****     \defgroup CMSIS_Core_RegAccFunctions CMSIS Core Register Access Functions
+ 188:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   @{
+ 189:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  */
+ 190:../../Drivers/CMSIS/Include/cmsis_gcc.h **** 
+ARM GAS  /tmp/ccCLxiLb.s 			page 13
+
+
+ 191:../../Drivers/CMSIS/Include/cmsis_gcc.h **** /**
+ 192:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   \brief   Enable IRQ Interrupts
+ 193:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   \details Enables IRQ interrupts by clearing the I-bit in the CPSR.
+ 194:../../Drivers/CMSIS/Include/cmsis_gcc.h ****            Can only be executed in Privileged modes.
+ 195:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  */
+ 196:../../Drivers/CMSIS/Include/cmsis_gcc.h **** __STATIC_FORCEINLINE void __enable_irq(void)
+ 197:../../Drivers/CMSIS/Include/cmsis_gcc.h **** {
+ 198:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   __ASM volatile ("cpsie i" : : : "memory");
+ 199:../../Drivers/CMSIS/Include/cmsis_gcc.h **** }
+ 200:../../Drivers/CMSIS/Include/cmsis_gcc.h **** 
+ 201:../../Drivers/CMSIS/Include/cmsis_gcc.h **** 
+ 202:../../Drivers/CMSIS/Include/cmsis_gcc.h **** /**
+ 203:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   \brief   Disable IRQ Interrupts
+ 204:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   \details Disables IRQ interrupts by setting the I-bit in the CPSR.
+ 205:../../Drivers/CMSIS/Include/cmsis_gcc.h ****            Can only be executed in Privileged modes.
+ 206:../../Drivers/CMSIS/Include/cmsis_gcc.h ****  */
+ 207:../../Drivers/CMSIS/Include/cmsis_gcc.h **** __STATIC_FORCEINLINE void __disable_irq(void)
+ 225              		.loc 2 207 27 view .LVU38
+ 226              	.LBB7:
+ 208:../../Drivers/CMSIS/Include/cmsis_gcc.h **** {
+ 209:../../Drivers/CMSIS/Include/cmsis_gcc.h ****   __ASM volatile ("cpsid i" : : : "memory");
+ 227              		.loc 2 209 3 view .LVU39
+ 228              		.syntax unified
+ 229              	@ 209 "../../Drivers/CMSIS/Include/cmsis_gcc.h" 1
+ 230 0000 72B6     		cpsid i
+ 231              	@ 0 "" 2
+ 232              		.thumb
+ 233              		.syntax unified
+ 234              	.L17:
+ 235              	.LBE7:
+ 236              	.LBE6:
+ 254:../../CM4/Core/Src/main.c ****   while (1)
+ 237              		.loc 1 254 3 view .LVU40
+ 255:../../CM4/Core/Src/main.c ****   {
+ 256:../../CM4/Core/Src/main.c ****   }
+ 238              		.loc 1 256 3 view .LVU41
+ 254:../../CM4/Core/Src/main.c ****   while (1)
+ 239              		.loc 1 254 9 view .LVU42
+ 240 0002 FEE7     		b	.L17
+ 241              		.cfi_endproc
+ 242              	.LFE143:
+ 244              		.section	.text.PeriphCommonClock_Config,"ax",%progbits
+ 245              		.align	1
+ 246              		.global	PeriphCommonClock_Config
+ 247              		.syntax unified
+ 248              		.thumb
+ 249              		.thumb_func
+ 251              	PeriphCommonClock_Config:
+ 252              	.LFB140:
+ 199:../../CM4/Core/Src/main.c ****   RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
+ 253              		.loc 1 199 1 view -0
+ 254              		.cfi_startproc
+ 255              		@ args = 0, pretend = 0, frame = 192
+ 256              		@ frame_needed = 0, uses_anonymous_args = 0
+ 257 0000 00B5     		push	{lr}
+ 258              	.LCFI5:
+ 259              		.cfi_def_cfa_offset 4
+ARM GAS  /tmp/ccCLxiLb.s 			page 14
+
+
+ 260              		.cfi_offset 14, -4
+ 261 0002 B1B0     		sub	sp, sp, #196
+ 262              	.LCFI6:
+ 263              		.cfi_def_cfa_offset 200
+ 200:../../CM4/Core/Src/main.c **** 
+ 264              		.loc 1 200 3 view .LVU44
+ 200:../../CM4/Core/Src/main.c **** 
+ 265              		.loc 1 200 28 is_stmt 0 view .LVU45
+ 266 0004 C022     		movs	r2, #192
+ 267 0006 0021     		movs	r1, #0
+ 268 0008 6846     		mov	r0, sp
+ 269 000a FFF7FEFF 		bl	memset
+ 270              	.LVL11:
+ 204:../../CM4/Core/Src/main.c ****   PeriphClkInitStruct.CkperClockSelection = RCC_CLKPSOURCE_HSI;
+ 271              		.loc 1 204 3 is_stmt 1 view .LVU46
+ 204:../../CM4/Core/Src/main.c ****   PeriphClkInitStruct.CkperClockSelection = RCC_CLKPSOURCE_HSI;
+ 272              		.loc 1 204 44 is_stmt 0 view .LVU47
+ 273 000e 4FF00042 		mov	r2, #-2147483648
+ 274 0012 0023     		movs	r3, #0
+ 275 0014 CDE90023 		strd	r2, [sp]
+ 205:../../CM4/Core/Src/main.c ****   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+ 276              		.loc 1 205 3 is_stmt 1 view .LVU48
+ 206:../../CM4/Core/Src/main.c ****   {
+ 277              		.loc 1 206 3 view .LVU49
+ 206:../../CM4/Core/Src/main.c ****   {
+ 278              		.loc 1 206 7 is_stmt 0 view .LVU50
+ 279 0018 6846     		mov	r0, sp
+ 280 001a FFF7FEFF 		bl	HAL_RCCEx_PeriphCLKConfig
+ 281              	.LVL12:
+ 206:../../CM4/Core/Src/main.c ****   {
+ 282              		.loc 1 206 6 discriminator 1 view .LVU51
+ 283 001e 10B9     		cbnz	r0, .L21
+ 210:../../CM4/Core/Src/main.c **** 
+ 284              		.loc 1 210 1 view .LVU52
+ 285 0020 31B0     		add	sp, sp, #196
+ 286              	.LCFI7:
+ 287              		.cfi_remember_state
+ 288              		.cfi_def_cfa_offset 4
+ 289              		@ sp needed
+ 290 0022 5DF804FB 		ldr	pc, [sp], #4
+ 291              	.L21:
+ 292              	.LCFI8:
+ 293              		.cfi_restore_state
+ 208:../../CM4/Core/Src/main.c ****   }
+ 294              		.loc 1 208 5 is_stmt 1 view .LVU53
+ 295 0026 FFF7FEFF 		bl	Error_Handler
+ 296              	.LVL13:
+ 297              		.cfi_endproc
+ 298              	.LFE140:
+ 300              		.global	defaultTask_attributes
+ 301              		.section	.rodata.str1.4,"aMS",%progbits,1
+ 302              		.align	2
+ 303              	.LC0:
+ 304 0000 64656661 		.ascii	"defaultTask\000"
+ 304      756C7454 
+ 304      61736B00 
+ 305              		.section	.rodata.defaultTask_attributes,"a"
+ARM GAS  /tmp/ccCLxiLb.s 			page 15
+
+
+ 306              		.align	2
+ 309              	defaultTask_attributes:
+ 310 0000 00000000 		.word	.LC0
+ 311 0004 00000000 		.space	16
+ 311      00000000 
+ 311      00000000 
+ 311      00000000 
+ 312 0014 00020000 		.word	512
+ 313 0018 18000000 		.word	24
+ 314 001c 00000000 		.space	8
+ 314      00000000 
+ 315              		.global	defaultTaskHandle
+ 316              		.section	.bss.defaultTaskHandle,"aw",%nobits
+ 317              		.align	2
+ 320              	defaultTaskHandle:
+ 321 0000 00000000 		.space	4
+ 322              		.global	TxConfig
+ 323              		.section	.bss.TxConfig,"aw",%nobits
+ 324              		.align	2
+ 327              	TxConfig:
+ 328 0000 00000000 		.space	56
+ 328      00000000 
+ 328      00000000 
+ 328      00000000 
+ 328      00000000 
+ 329              		.global	DMATxDscrTab
+ 330              		.section	.TxDescripSection,"aw"
+ 331              		.align	2
+ 334              	DMATxDscrTab:
+ 335 0000 00000000 		.space	96
+ 335      00000000 
+ 335      00000000 
+ 335      00000000 
+ 335      00000000 
+ 336              		.global	DMARxDscrTab
+ 337              		.section	.RxDescripSection,"aw"
+ 338              		.align	2
+ 341              	DMARxDscrTab:
+ 342 0000 00000000 		.space	96
+ 342      00000000 
+ 342      00000000 
+ 342      00000000 
+ 342      00000000 
+ 343              		.text
+ 344              	.Letext0:
+ 345              		.file 3 "/usr/lib/gcc/arm-none-eabi/13.2.1/include/stdint.h"
+ 346              		.file 4 "../../Drivers/CMSIS/Include/core_cm4.h"
+ 347              		.file 5 "../../Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h755xx.h"
+ 348              		.file 6 "../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h"
+ 349              		.file 7 "../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc_ex.h"
+ 350              		.file 8 "../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_eth.h"
+ 351              		.file 9 "../../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h"
+ 352              		.file 10 "../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h"
+ 353              		.file 11 "../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pwr_ex.h"
+ 354              		.file 12 "../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_hsem.h"
+ 355              		.file 13 "<built-in>"
+ARM GAS  /tmp/ccCLxiLb.s 			page 16
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 main.c
+     /tmp/ccCLxiLb.s:21     .text.MX_DMA_Init:00000000 $t
+     /tmp/ccCLxiLb.s:26     .text.MX_DMA_Init:00000000 MX_DMA_Init
+     /tmp/ccCLxiLb.s:61     .text.MX_DMA_Init:00000020 $d
+     /tmp/ccCLxiLb.s:66     .text.StartDefaultTask:00000000 $t
+     /tmp/ccCLxiLb.s:72     .text.StartDefaultTask:00000000 StartDefaultTask
+     /tmp/ccCLxiLb.s:99     .text.main:00000000 $t
+     /tmp/ccCLxiLb.s:105    .text.main:00000000 main
+     /tmp/ccCLxiLb.s:197    .text.main:0000007c $d
+     /tmp/ccCLxiLb.s:309    .rodata.defaultTask_attributes:00000000 defaultTask_attributes
+     /tmp/ccCLxiLb.s:320    .bss.defaultTaskHandle:00000000 defaultTaskHandle
+     /tmp/ccCLxiLb.s:207    .text.Error_Handler:00000000 $t
+     /tmp/ccCLxiLb.s:213    .text.Error_Handler:00000000 Error_Handler
+     /tmp/ccCLxiLb.s:245    .text.PeriphCommonClock_Config:00000000 $t
+     /tmp/ccCLxiLb.s:251    .text.PeriphCommonClock_Config:00000000 PeriphCommonClock_Config
+     /tmp/ccCLxiLb.s:302    .rodata.str1.4:00000000 $d
+     /tmp/ccCLxiLb.s:306    .rodata.defaultTask_attributes:00000000 $d
+     /tmp/ccCLxiLb.s:317    .bss.defaultTaskHandle:00000000 $d
+     /tmp/ccCLxiLb.s:327    .bss.TxConfig:00000000 TxConfig
+     /tmp/ccCLxiLb.s:324    .bss.TxConfig:00000000 $d
+     /tmp/ccCLxiLb.s:334    .TxDescripSection:00000000 DMATxDscrTab
+     /tmp/ccCLxiLb.s:331    .TxDescripSection:00000000 $d
+     /tmp/ccCLxiLb.s:341    .RxDescripSection:00000000 DMARxDscrTab
+     /tmp/ccCLxiLb.s:338    .RxDescripSection:00000000 $d
+
+UNDEFINED SYMBOLS
+osDelay
+HAL_HSEM_ActivateNotification
+HAL_PWREx_ClearPendingEvent
+HAL_PWREx_EnterSTOPMode
+HAL_Init
+osKernelInitialize
+osThreadNew
+osKernelStart
+memset
+HAL_RCCEx_PeriphCLKConfig

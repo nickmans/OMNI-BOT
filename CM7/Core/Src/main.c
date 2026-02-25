@@ -104,7 +104,7 @@ const osThreadAttr_t remote_att = {
 osThreadId_t ethernet_id;
 const osThreadAttr_t ethernet_att = {
   .name = "ethernet_t",
-  .stack_size = 1024 * 4,
+  .stack_size = 1024 * 8,
   .priority = (osPriority_t) osPriorityLow,
 };
 
@@ -506,7 +506,7 @@ static void MX_ADC1_Init(void)
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConv = ADC_EXTERNALTRIG_T6_TRGO;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_RISING;
-  hadc1.Init.ConversionDataManagement = ADC_CONVERSIONDATA_DR;
+  hadc1.Init.ConversionDataManagement = ADC_CONVERSIONDATA_DMA_CIRCULAR;
   hadc1.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
   hadc1.Init.LeftBitShift = ADC_LEFTBITSHIFT_NONE;
   hadc1.Init.OversamplingMode = DISABLE;
@@ -1174,7 +1174,7 @@ static HAL_StatusTypeDef ReadMotorCurrentAdcRaw(uint16_t adc_raw_out[3])
 
 static const float kMotorCurrentAdcVref = 3.3f;
 static const float kMotorCurrentAdcFullScale = 4095.0f;
-static const float kMotorCurrentSensitivityVPerA[3] = {0.185f, 0.185f, 0.185f};
+static const float kMotorCurrentSensitivityVPerA[3] = {0.0264f, 0.0264f, 0.0264f};
 static float s_motorCurrentOffsetRaw[3] = {2048.0f, 2048.0f, 2048.0f};
 static float s_motorCurrentBiasA[3] = {0.0f, 0.0f, 0.0f};
 
@@ -1220,12 +1220,48 @@ static float MotorCurrentRawToAmps(uint16_t raw, uint8_t channel_index)
 
   const float adc_lsb_v = kMotorCurrentAdcVref / kMotorCurrentAdcFullScale;
   const float delta_v = ((float)raw - s_motorCurrentOffsetRaw[idx]) * adc_lsb_v;
-  return delta_v / kMotorCurrentSensitivityVPerA[idx];
+  return (delta_v / kMotorCurrentSensitivityVPerA[idx]) - s_motorCurrentBiasA[idx];
+}
+
+static void CalibrateMotorCurrentBiasA(uint16_t sample_count)
+{
+  if (sample_count == 0u)
+  {
+    return;
+  }
+
+  float accum_a[3] = {0.0f, 0.0f, 0.0f};
+  uint16_t adc_raw[3] = {0u, 0u, 0u};
+  uint16_t valid_samples = 0u;
+
+  for (uint16_t i = 0u; i < sample_count; ++i)
+  {
+    if (ReadMotorCurrentAdcRaw(adc_raw) == HAL_OK)
+    {
+      const float adc_lsb_v = kMotorCurrentAdcVref / kMotorCurrentAdcFullScale;
+      const float delta_v0 = ((float)adc_raw[0] - s_motorCurrentOffsetRaw[0]) * adc_lsb_v;
+      const float delta_v1 = ((float)adc_raw[1] - s_motorCurrentOffsetRaw[1]) * adc_lsb_v;
+      const float delta_v2 = ((float)adc_raw[2] - s_motorCurrentOffsetRaw[2]) * adc_lsb_v;
+
+      accum_a[0] += (delta_v0 / kMotorCurrentSensitivityVPerA[0]);
+      accum_a[1] += (delta_v1 / kMotorCurrentSensitivityVPerA[1]);
+      accum_a[2] += (delta_v2 / kMotorCurrentSensitivityVPerA[2]);
+      ++valid_samples;
+    }
+
+    vTaskDelay(pdMS_TO_TICKS(2));
+  }
+
+  if (valid_samples > 0u)
+  {
+    s_motorCurrentBiasA[0] = accum_a[0] / (float)valid_samples;
+    s_motorCurrentBiasA[1] = accum_a[1] / (float)valid_samples;
+    s_motorCurrentBiasA[2] = accum_a[2] / (float)valid_samples;
+  }
 }
 
 #include "math.h"
 double yaw = 0,yawrate = 0,ax = 0,ay = 0,az = 0;
-static int counter = 0;
 double battery_v = 24;
 void remote(void *argument)
 {
@@ -1234,28 +1270,31 @@ void remote(void *argument)
 	TickType_t lastWakeTime = xTaskGetTickCount();
   const TickType_t posePeriod = pdMS_TO_TICKS(200); // 5 Hz pose heartbeat
   TickType_t lastPoseTick = xTaskGetTickCount();
-  const TickType_t rpmPrintPeriod = pdMS_TO_TICKS(200);
-  TickType_t lastRpmPrintTick = xTaskGetTickCount();
   const TickType_t batteryPeriod = pdMS_TO_TICKS(10000);
   TickType_t lastBatteryTick = xTaskGetTickCount();
+  uint16_t current_adc_raw[3] = {0u, 0u, 0u};
+  float current_a[3] = {0.0f, 0.0f, 0.0f};
 
     const float dt = (float)(period * portTICK_PERIOD_MS) * 1e-3f;
 	
     //CMD_Send("Remote task started\n");
     CalibrateMotorCurrentOffset(200u);
-	uint16_t loop_cnt = 0;
+    CalibrateMotorCurrentBiasA(1000u);
+  uint16_t current_sample_count = 0u;
+  float current_sum_a[3] = {0.0f, 0.0f, 0.0f};
 	for (;;)
 	{
 	    vTaskDelayUntil(&lastWakeTime, period);
 	    
 	    static double rpm[3] = {0};
-      static uint16_t current_adc_raw[3] = {0u, 0u, 0u};
-      static float current_a[3] = {0.0f, 0.0f, 0.0f};
 
 	    // Get IMU data with linear acceleration (gravity compensated)
 	    BNO_RVC_UpdateMain(&yaw, &yawrate, &ax, &ay, &az);
 
 	    enc(dt,rpm);
+      /*rpm[0] = speed[0]*60/2*M_PI;
+      rpm[1] = speed[1]*60/2*M_PI;
+      rpm[2] = speed[2]*60/2*M_PI;*/
 
       TickType_t nowTick = xTaskGetTickCount();
       if ((nowTick - lastBatteryTick) >= batteryPeriod)
@@ -1274,40 +1313,13 @@ void remote(void *argument)
         }
       }
 
-      if ((nowTick - lastRpmPrintTick) >= rpmPrintPeriod)
+      if (ReadMotorCurrentAdcRaw(current_adc_raw) == HAL_OK)
       {
-        if (ReadMotorCurrentAdcRaw(current_adc_raw) == HAL_OK)
-        {
-          current_a[0] = MotorCurrentRawToAmps(current_adc_raw[0], 0u);
-          current_a[1] = MotorCurrentRawToAmps(current_adc_raw[1], 1u);
-          current_a[2] = MotorCurrentRawToAmps(current_adc_raw[2], 2u);
-        }
-
-        if (wheel_test_mode)
-        {
-          int idx = (wheel_test_index >= 0 && wheel_test_index < 3) ? wheel_test_index : 0;
-           double target_rpm = wheel_test_target_rpm;
-           double measured_rpm = rpm[idx];
-           double err_rpm = target_rpm - measured_rpm;
-          printf("WTEST w%d target=%.2f rpm measured=%.2f rpm err=%.2f\r\n",
-                 idx + 1,
-                 target_rpm,
-             measured_rpm,
-                 err_rpm,
-                 (double)current_a[0],
-                 (double)current_a[1],
-                 (double)current_a[2]);
-        }
-        else
-        {
-          /*printf("RPM: %.2f %.2f %.2f Heading: %.2f \r\n",
-                 rpm[0],
-                 rpm[1],
-                 rpm[2],
-				 yaw);*/
-        }
-        lastRpmPrintTick = nowTick;
+        current_a[0] = MotorCurrentRawToAmps(current_adc_raw[0], 0u);
+        current_a[1] = MotorCurrentRawToAmps(current_adc_raw[1], 1u);
+        current_a[2] = MotorCurrentRawToAmps(current_adc_raw[2], 2u);
       }
+
 	    
       static uint8_t last_traj_mode = 0u;
       const uint8_t cur_traj_mode = traj_mode;
@@ -1350,19 +1362,6 @@ void remote(void *argument)
           vd[1] = vyd;
           vd[2] = yawrated;
           Controller_Step(x, xd, vd, 0, dt);  // selector=0 for velocity control
-          /*static int countter = 0;
-          static float sum1 = 0.0f, sum2 = 0.0f, sum3 = 0.0f;
-
-          sum1 += current_a[0];
-          sum2 += current_a[1];
-          sum3 += current_a[2];
-          countter++;
-
-          if (countter >= 50) {
-              printf("%.3f %.3f %.3f\n", sum1 / countter, sum2 / countter, sum3 / countter);
-              countter = 0;
-              sum1 = sum2 = sum3 = 0.0f;
-          }*/
       }
       else
       {
@@ -1435,6 +1434,37 @@ void remote(void *argument)
 
           // Use trajectory mode selector=1
           Controller_Step(x, xd, vd, 1, dt);
+      }
+
+      if (wheel_test_mode || (cur_traj_mode == 0u))
+      {
+        current_sum_a[0] += current_a[0];
+        current_sum_a[1] += current_a[1];
+        current_sum_a[2] += current_a[2];
+        current_sample_count++;
+
+        if (current_sample_count >= 50u)
+        {
+          char current_msg[96];
+          (void)snprintf(current_msg,
+                         sizeof(current_msg),
+                         "%.1f %.1f %.1f\r\n",
+                         current_sum_a[0] / (float)current_sample_count,
+                         current_sum_a[1] / (float)current_sample_count,
+                         current_sum_a[2] / (float)current_sample_count);
+          CMD_Send(current_msg);
+          current_sample_count = 0u;
+          current_sum_a[0] = 0.0f;
+          current_sum_a[1] = 0.0f;
+          current_sum_a[2] = 0.0f;
+        }
+      }
+      else
+      {
+        current_sample_count = 0u;
+        current_sum_a[0] = 0.0f;
+        current_sum_a[1] = 0.0f;
+        current_sum_a[2] = 0.0f;
       }
 
       PWM(rpm,dt);
@@ -1519,7 +1549,11 @@ void StartDefaultTask(void *argument)
   {
 
 	  BSP_LED_Toggle(LED_GREEN);
-	  osDelay(333);
+	  osDelay(150);
+    BSP_LED_Toggle(LED_YELLOW);
+    osDelay(150);
+    BSP_LED_Toggle(LED_RED);
+    osDelay(150);
   }
   /* USER CODE END 5 */
 }

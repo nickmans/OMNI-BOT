@@ -1,5 +1,5 @@
 Middlewares/Third_Party/LwIP/lowpan6_common.o: \
- C:/Users/Loren/Documents/H7code/OMNI-BOT/Middlewares/Third_Party/LwIP/src/netif/lowpan6_common.c \
+ ../../Middlewares/Third_Party/LwIP/src/netif/lowpan6_common.c \
  ../../Middlewares/Third_Party/LwIP/src/include/netif/lowpan6_common.h \
  ../../Middlewares/Third_Party/LwIP/src/include/netif/lowpan6_opts.h \
  ../../Middlewares/Third_Party/LwIP/src/include/lwip/opt.h \
