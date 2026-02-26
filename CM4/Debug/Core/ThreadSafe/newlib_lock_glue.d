@@ -1,8 +1,8 @@
 Core/ThreadSafe/newlib_lock_glue.o: \
- C:/Users/Loren/Documents/H7code/OMNI-BOT/ThreadSafe/newlib_lock_glue.c \
+ /home/nickolas/OMNI-BOT/ThreadSafe/newlib_lock_glue.c \
  ../../Drivers/CMSIS/Include/cmsis_compiler.h \
  ../../Drivers/CMSIS/Include/cmsis_gcc.h \
- C:/Users/Loren/Documents/H7code/OMNI-BOT/ThreadSafe/stm32_lock.h \
+ /home/nickolas/OMNI-BOT/ThreadSafe/stm32_lock.h \
  ../../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h \
  ../Core/Inc/FreeRTOSConfig.h \
  ../../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h \
@@ -14,7 +14,7 @@ Core/ThreadSafe/newlib_lock_glue.o: \
  ../../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
 ../../Drivers/CMSIS/Include/cmsis_compiler.h:
 ../../Drivers/CMSIS/Include/cmsis_gcc.h:
-C:/Users/Loren/Documents/H7code/OMNI-BOT/ThreadSafe/stm32_lock.h:
+/home/nickolas/OMNI-BOT/ThreadSafe/stm32_lock.h:
 ../../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
 ../Core/Inc/FreeRTOSConfig.h:
 ../../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h:

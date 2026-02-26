@@ -1374,7 +1374,8 @@ void remote(void *argument)
               float x;
               float y;
               float yaw;
-              float velocity;
+              float vx;
+              float vy;
           } Pi5TrajectoryKnot;
 
           static Pi5TrajectoryKnot knots[UDP_MAX_TRAJ_KNOTS];
@@ -1415,21 +1416,9 @@ void remote(void *argument)
               xd[1] = (double)k->y;
               xd[2] = (double)k->yaw;
 
-              // Feedforward velocity in world frame
-              if ((idx + 1u) < (uint32_t)n_knots)
-              {
-                  const Pi5TrajectoryKnot *k2 = &knots[idx + 1u];
-                  const double dtx = (double)knot_dt;
-                  xd[3] = ((double)k2->x - (double)k->x) / dtx;
-                  xd[4] = ((double)k2->y - (double)k->y) / dtx;
-              }
-              else
-              {
-                  const double c = cos((double)k->yaw);
-                  const double s = sin((double)k->yaw);
-                  xd[3] = (double)k->velocity * c;
-                  xd[4] = (double)k->velocity * s;
-              }
+              // Use feedforward velocities directly from Pi5 trajectory planner
+              xd[3] = (double)k->vx;
+              xd[4] = (double)k->vy;
           }
 
           // Use trajectory mode selector=1

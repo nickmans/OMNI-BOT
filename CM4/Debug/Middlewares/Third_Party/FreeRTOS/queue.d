@@ -1,5 +1,5 @@
 Middlewares/Third_Party/FreeRTOS/queue.o: \
- C:/Users/Loren/Documents/H7code/OMNI-BOT/Middlewares/Third_Party/FreeRTOS/Source/queue.c \
+ /home/nickolas/OMNI-BOT/Middlewares/Third_Party/FreeRTOS/Source/queue.c \
  ../../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h \
  ../Core/Inc/FreeRTOSConfig.h \
  ../../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h \

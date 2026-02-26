@@ -1,5 +1,5 @@
 Middlewares/Third_Party/FreeRTOS/list.o: \
- C:/Users/Loren/Documents/H7code/OMNI-BOT/Middlewares/Third_Party/FreeRTOS/Source/list.c \
+ /home/nickolas/OMNI-BOT/Middlewares/Third_Party/FreeRTOS/Source/list.c \
  ../../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h \
  ../Core/Inc/FreeRTOSConfig.h \
  ../../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h \
