@@ -1148,7 +1148,6 @@ static void enc(double dt, double rpm[3])
     rpm_filt[i] += alpha * (rpm_meas - rpm_filt[i]);
     rpm[i] = rpm_filt[i];
   }
-
 }
 
 static HAL_StatusTypeDef ReadMotorCurrentAdcRaw(uint16_t adc_raw_out[3])
@@ -1261,17 +1260,45 @@ static void CalibrateMotorCurrentBiasA(uint16_t sample_count)
 }
 
 #include "math.h"
+
+static double wrap_to_pi(double a)
+{
+  while (a > M_PI) { a -= 2.0 * M_PI; }
+  while (a < -M_PI) { a += 2.0 * M_PI; }
+  return a;
+}
+
+static double lerp(double a, double b, double t)
+{
+  return a + (b - a) * t;
+}
+
+static double lerp_angle(double a, double b, double t)
+{
+  const double da = wrap_to_pi(b - a);
+  return wrap_to_pi(a + (da * t));
+}
+
 double yaw = 0,yawrate = 0,ax = 0,ay = 0,az = 0;
 double battery_v = 24;
 void remote(void *argument)
 {
 	int tick = 10;
+  const uint32_t trajDeadmanTimeoutMs = 700u;
 	const TickType_t period = pdMS_TO_TICKS(tick); // 100 Hz
+	const TickType_t wheelStallHoldTime = pdMS_TO_TICKS(500);
+	const TickType_t yawKickTime = pdMS_TO_TICKS(200);
+	const double wheelStallRpmThreshold = 3.0;
+	const double movingSpeedThreshold = 1e-3;
 	TickType_t lastWakeTime = xTaskGetTickCount();
   const TickType_t posePeriod = pdMS_TO_TICKS(200); // 5 Hz pose heartbeat
   TickType_t lastPoseTick = xTaskGetTickCount();
   const TickType_t batteryPeriod = pdMS_TO_TICKS(10000);
   TickType_t lastBatteryTick = xTaskGetTickCount();
+  TickType_t wheelStallStartTick = 0;
+  TickType_t yawKickEndTick = 0;
+  uint8_t yawKickActive = 0u;
+  double yawrateBeforeKick = 0.0;
   uint16_t current_adc_raw[3] = {0u, 0u, 0u};
   float current_a[3] = {0.0f, 0.0f, 0.0f};
 
@@ -1282,6 +1309,10 @@ void remote(void *argument)
     CalibrateMotorCurrentBiasA(1000u);
   uint16_t current_sample_count = 0u;
   float current_sum_a[3] = {0.0f, 0.0f, 0.0f};
+  // Boot in trajectory-follow mode and request a fresh stream from Pi5.
+  UDP_Client_InvalidateLatestTraj();
+  traj_mode = 1u;
+  UDP_Client_RequestCmd(CMD_START_TRAJ);
 	for (;;)
 	{
 	    vTaskDelayUntil(&lastWakeTime, period);
@@ -1291,13 +1322,13 @@ void remote(void *argument)
 	    // Get IMU data with linear acceleration (gravity compensated)
 	    BNO_RVC_UpdateMain(&yaw, &yawrate, &ax, &ay, &az);
 
-	    enc(dt,rpm);
-      /*rpm[0] = speed[0]*60/2*M_PI;
-      rpm[1] = speed[1]*60/2*M_PI;
-      rpm[2] = speed[2]*60/2*M_PI;*/
+	    //enc(dt,rpm);
+      rpm[0] = speed[0]*60/(2*M_PI);
+      rpm[1] = speed[1]*60/(2*M_PI);
+      rpm[2] = speed[2]*60/(2*M_PI);
 
       TickType_t nowTick = xTaskGetTickCount();
-      if ((nowTick - lastBatteryTick) >= batteryPeriod)
+      /*if ((nowTick - lastBatteryTick) >= batteryPeriod)
       {
         battery_v = (double)BatteryMonitor_ReadVoltage_V();
         const double battery_scaled_max_rpm = (2.5 * battery_v) + 70.0;
@@ -1311,7 +1342,7 @@ void remote(void *argument)
         {
           CMD_Send("Charge The Bot !!!\n");
         }
-      }
+      }*/
 
       if (ReadMotorCurrentAdcRaw(current_adc_raw) == HAL_OK)
       {
@@ -1324,17 +1355,67 @@ void remote(void *argument)
       static uint8_t last_traj_mode = 0u;
       const uint8_t cur_traj_mode = traj_mode;
 
+      if (yawKickActive)
+      {
+        if ((nowTick - yawKickEndTick) < ((TickType_t)0xFFFFFFFF / 2u))
+        {
+          yawrated = yawrateBeforeKick;
+          yawKickActive = 0u;
+          wheelStallStartTick = 0;
+        }
+        else
+        {
+          yawrated = 1.0;
+        }
+      }
+
       const double yaw_rad = yaw * pion180 + yaw_shifter;
 
       // Rising edge: enter trajectory-follow mode
       if ((last_traj_mode == 0u) && (cur_traj_mode == 1u))
       {
-          StateEstimator_Reset(0.0, 0.0, 0.0);
-          StateEstimator_ZeroImuYaw(yaw_rad);
-          // Clear any stale desired state
+          // Preserve estimator state when switching/reenabling trajectories.
+          // Only clear the desired vector to avoid carrying stale commands.
           for (int i = 0; i < 5; i++) { xd[i] = 0.0; }
       }
       last_traj_mode = cur_traj_mode;
+
+      if ((cur_traj_mode == 0u) && !wheel_test_mode && !yawKickActive)
+      {
+        const uint8_t moving =
+            (fabs(speed[0]) > movingSpeedThreshold) ||
+            (fabs(speed[1]) > movingSpeedThreshold) ||
+            (fabs(speed[2]) > movingSpeedThreshold);
+
+        const uint8_t wheelSlow =
+            (fabs(rpm[0]) <= wheelStallRpmThreshold) ||
+            (fabs(rpm[1]) <= wheelStallRpmThreshold) ||
+            (fabs(rpm[2]) <= wheelStallRpmThreshold);
+
+        if (moving && wheelSlow)
+        {
+          if (wheelStallStartTick == 0)
+          {
+            wheelStallStartTick = nowTick;
+          }
+          else if ((nowTick - wheelStallStartTick) >= wheelStallHoldTime)
+          {
+            yawrateBeforeKick = yawrated;
+            yawrated = 1.0;
+            yawKickEndTick = nowTick + yawKickTime;
+            yawKickActive = 1u;
+            wheelStallStartTick = 0;
+          }
+        }
+        else
+        {
+          wheelStallStartTick = 0;
+        }
+      }
+      else if ((cur_traj_mode != 0u) || wheel_test_mode)
+      {
+        wheelStallStartTick = 0;
+      }
 
       // Always run the state estimator so pose is available in both modes.
       // Convert measured wheel speeds (rpm) to rad/s for estimator.
@@ -1393,32 +1474,56 @@ void remote(void *argument)
                                                     &traj_t0_ms,
                                                     &traj_seq);
 
-          // Default: 0'd / hold trajectory (no motion) until a valid traj arrives
-          xd[0] = 0.0;
-          xd[1] = 0.0;
-          xd[2] = 0.0;
+            uint32_t traj_age_ms = UDP_Client_GetLatestTrajAgeMs();
+            if (traj_age_ms > trajDeadmanTimeoutMs)
+            {
+              have_traj = false;
+            }
+
+          // Default to pose-hold with zero feedforward so stale/missing traj commands a stop.
+          xd[0] = x[0];
+          xd[1] = x[1];
+          xd[2] = x[2];
           xd[3] = 0.0;
           xd[4] = 0.0;
 
           if (have_traj && (n_knots > 0u) && (knot_dt > 0.0f))
           {
               uint32_t now_ms = HAL_GetTick();
-              uint32_t dt_ms = (uint32_t)(knot_dt * 1000.0f);
-              if (dt_ms == 0u) { dt_ms = 1u; }
+              float elapsed_s = 0.0f;
+              if (now_ms >= traj_t0_ms)
+              {
+                elapsed_s = ((float)(now_ms - traj_t0_ms)) * 1e-3f;
+              }
 
-              // Select knot by time since trajectory start
-              uint32_t elapsed_ms = (now_ms >= traj_t0_ms) ? (now_ms - traj_t0_ms) : 0u;
-              uint32_t idx = elapsed_ms / dt_ms;
-              if (idx >= (uint32_t)n_knots) { idx = (uint32_t)n_knots - 1u; }
+              // Interpolate by time to avoid 100 Hz control jitter from nearest-knot sampling.
+              float sample = elapsed_s / knot_dt;
+              uint32_t idx0 = (uint32_t)sample;
+              if (idx0 >= (uint32_t)n_knots)
+              {
+                idx0 = (uint32_t)n_knots - 1u;
+              }
 
-              const Pi5TrajectoryKnot *k = &knots[idx];
-              xd[0] = (double)k->x;
-              xd[1] = (double)k->y;
-              xd[2] = (double)k->yaw;
+              uint32_t idx1 = idx0 + 1u;
+              if (idx1 >= (uint32_t)n_knots)
+              {
+                idx1 = idx0;
+              }
+
+              float alpha = sample - (float)idx0;
+              if (alpha < 0.0f) { alpha = 0.0f; }
+              if (alpha > 1.0f) { alpha = 1.0f; }
+
+              const Pi5TrajectoryKnot *k0 = &knots[idx0];
+              const Pi5TrajectoryKnot *k1 = &knots[idx1];
+
+              xd[0] = lerp((double)k0->x, (double)k1->x, (double)alpha);
+              xd[1] = lerp((double)k0->y, (double)k1->y, (double)alpha);
+              xd[2] = lerp_angle((double)k0->yaw, (double)k1->yaw, (double)alpha);
 
               // Use feedforward velocities directly from Pi5 trajectory planner
-              xd[3] = (double)k->vx;
-              xd[4] = (double)k->vy;
+              xd[3] = lerp((double)k0->vx, (double)k1->vx, (double)alpha);
+              xd[4] = lerp((double)k0->vy, (double)k1->vy, (double)alpha);
           }
 
           // Use trajectory mode selector=1
@@ -1427,7 +1532,7 @@ void remote(void *argument)
 
       if (wheel_test_mode || (cur_traj_mode == 0u))
       {
-        current_sum_a[0] += current_a[0];
+        /*current_sum_a[0] += current_a[0];
         current_sum_a[1] += current_a[1];
         current_sum_a[2] += current_a[2];
         current_sample_count++;
@@ -1446,7 +1551,7 @@ void remote(void *argument)
           current_sum_a[0] = 0.0f;
           current_sum_a[1] = 0.0f;
           current_sum_a[2] = 0.0f;
-        }
+        }*/
       }
       else
       {
@@ -1462,26 +1567,24 @@ void remote(void *argument)
       if ((nowTick - lastPoseTick) >= posePeriod)
       {
     	    PosePayload pose;
+            double vel_body[3] = {0.0, 0.0, 0.0};
     	    pose.pose_t_ms = HAL_GetTick();
           // Publish estimated pose in both manual and trajectory modes.
           pose.x = (float)x[0];
           pose.y = (float)x[1];
           pose.yaw = (float)x[2];
-    	    pose.vx = 0.0f;
-    	    pose.vy = 0.0f;
-    	    pose.wz = 0.0f;
+          StateEstimator_GetBodyVelocity(vel_body);
+          pose.vx = (float)vel_body[0];
+          pose.vy = (float)vel_body[1];
+          pose.wz = (float)vel_body[2];
 
     	    queue_pose(&pose);
 
           /*char imu_msg[96];
-          (void)snprintf(imu_msg,
-                         sizeof(imu_msg),
-                         "imu yaw=%.2f yawrate=%.4f\r\n",
-                         yaw,
-                         yawrate);
+          (void)snprintf(imu_msg,sizeof(imu_msg),"%.1f %.1f, %.1f %.1f\r\n",x[0],xd[0],x[1],xd[1]);
           CMD_Send(imu_msg);*/
-		  //UDP_Client_SendZeroPose();
-    	  lastPoseTick = nowTick;
+		      //UDP_Client_SendZeroPose();
+    	    lastPoseTick = nowTick;
       }
 
 

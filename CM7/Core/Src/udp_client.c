@@ -12,6 +12,7 @@
 #include "lwip/netif.h"
 #include "lwip/errno.h"
 
+#include <math.h>
 #include <string.h>
 
 extern struct netif gnetif;
@@ -30,6 +31,16 @@ extern struct netif gnetif;
 #ifndef UDP_MAX_TRAJ_KNOTS
 #define UDP_MAX_TRAJ_KNOTS          64u
 #endif
+
+#define TRAJ_FLAG_IDLE              0x0001u
+#define TRAJ_DT_MIN_S               0.001f
+#define TRAJ_DT_MAX_S               0.200f
+#define TRAJ_MIN_LOOKAHEAD_S        0.050f
+#define TRAJ_MAX_LOOKAHEAD_S        1.200f
+#define TRAJ_MAX_ABS_POS_M          10000.0f
+#define TRAJ_MAX_ABS_VEL_MPS        20.0f
+#define TRAJ_MAX_ABS_YAW_RAD        1000.0f
+#define TRAJ_SEQ_RESYNC_TIMEOUT_MS  1000u
 
 typedef struct __attribute__((packed))
 {
@@ -59,7 +70,8 @@ typedef struct __attribute__((packed))
     float x;
     float y;
     float yaw;
-    float velocity;
+    float vx;
+    float vy;
 } TrajectoryKnot;
 
 typedef struct __attribute__((packed))
@@ -92,10 +104,46 @@ static TrajectoryKnot s_last_traj_knots[UDP_MAX_TRAJ_KNOTS];
 static volatile uint16_t s_last_traj_count = 0;
 static volatile bool s_last_traj_valid = false;
 static volatile uint32_t s_last_traj_seq = 0;
+static volatile uint32_t s_last_traj_rx_t_ms = 0;
 
 static bool time_elapsed(uint32_t now, uint32_t start, uint32_t interval_ms)
 {
     return (uint32_t)(now - start) >= interval_ms;
+}
+
+static bool seq_is_newer(uint32_t seq, uint32_t prev_seq)
+{
+    return (int32_t)(seq - prev_seq) > 0;
+}
+
+static bool knot_is_valid(const TrajectoryKnot *k)
+{
+    if (k == NULL)
+    {
+        return false;
+    }
+
+    if (!isfinite(k->x) || !isfinite(k->y) || !isfinite(k->yaw) || !isfinite(k->vx) || !isfinite(k->vy))
+    {
+        return false;
+    }
+
+    if (fabsf(k->x) > TRAJ_MAX_ABS_POS_M || fabsf(k->y) > TRAJ_MAX_ABS_POS_M)
+    {
+        return false;
+    }
+
+    if (fabsf(k->vx) > TRAJ_MAX_ABS_VEL_MPS || fabsf(k->vy) > TRAJ_MAX_ABS_VEL_MPS)
+    {
+        return false;
+    }
+
+    if (fabsf(k->yaw) > TRAJ_MAX_ABS_YAW_RAD)
+    {
+        return false;
+    }
+
+    return true;
 }
 
 static void pack_message(uint16_t msg_type, uint32_t seq, const void *payload, uint32_t payload_len, uint8_t *out_buffer)
@@ -145,19 +193,31 @@ static bool parse_message(const uint8_t *buffer, uint32_t len, MessageHeader *ou
     return true;
 }
 
-static void handle_traj_message(const uint8_t *payload, uint32_t payload_len)
+static void handle_traj_message(const MessageHeader *msg_hdr, const uint8_t *payload, uint32_t payload_len)
 {
-    if (payload_len < sizeof(TrajectoryHeader))
+    if (msg_hdr == NULL || payload == NULL || payload_len < sizeof(TrajectoryHeader))
     {
         return;
     }
 
     const TrajectoryHeader *hdr = (const TrajectoryHeader *)payload;
-    uint32_t expected_size = sizeof(TrajectoryHeader) + (uint32_t)hdr->n_knots * sizeof(TrajectoryKnot);
-    if (payload_len < expected_size)
+    if (hdr->n_knots == 0u)
     {
         return;
     }
+
+    if (!isfinite(hdr->dt) || hdr->dt < TRAJ_DT_MIN_S || hdr->dt > TRAJ_DT_MAX_S)
+    {
+        return;
+    }
+
+    uint32_t expected_size = sizeof(TrajectoryHeader) + (uint32_t)hdr->n_knots * sizeof(TrajectoryKnot);
+    if (payload_len != expected_size)
+    {
+        return;
+    }
+
+    const TrajectoryKnot *incoming_knots = (const TrajectoryKnot *)(payload + sizeof(TrajectoryHeader));
 
     uint16_t count = hdr->n_knots;
     if (count > UDP_MAX_TRAJ_KNOTS)
@@ -165,10 +225,38 @@ static void handle_traj_message(const uint8_t *payload, uint32_t payload_len)
         count = UDP_MAX_TRAJ_KNOTS;
     }
 
+    const float lookahead_s = hdr->dt * (float)count;
+    if (((hdr->flags & TRAJ_FLAG_IDLE) == 0u) &&
+        (lookahead_s < TRAJ_MIN_LOOKAHEAD_S || lookahead_s > TRAJ_MAX_LOOKAHEAD_S))
+    {
+        return;
+    }
+
+    for (uint16_t i = 0; i < count; ++i)
+    {
+        if (!knot_is_valid(&incoming_knots[i]))
+        {
+            return;
+        }
+    }
+
     taskENTER_CRITICAL();
+    if (s_last_traj_valid && !seq_is_newer(msg_hdr->seq, s_last_traj_seq))
+    {
+        const uint32_t now_ms = HAL_GetTick();
+        const uint32_t age_ms = now_ms - s_last_traj_rx_t_ms;
+        if (age_ms <= TRAJ_SEQ_RESYNC_TIMEOUT_MS)
+        {
+            taskEXIT_CRITICAL();
+            return;
+        }
+    }
+
     s_last_traj_hdr = *hdr;
-    memcpy(s_last_traj_knots, payload + sizeof(TrajectoryHeader), count * sizeof(TrajectoryKnot));
+    memcpy(s_last_traj_knots, incoming_knots, count * sizeof(TrajectoryKnot));
     s_last_traj_count = count;
+    s_last_traj_seq = msg_hdr->seq;
+    s_last_traj_rx_t_ms = HAL_GetTick();
     s_last_traj_valid = true;
     taskEXIT_CRITICAL();
 }
@@ -201,10 +289,7 @@ static void handle_received_message(const MessageHeader *hdr, const uint8_t *pay
 {
     if (hdr->msg_type == MSG_TYPE_TRAJ)
     {
-        taskENTER_CRITICAL();
-        s_last_traj_seq = hdr->seq;
-        taskEXIT_CRITICAL();
-        handle_traj_message(payload, payload_len);
+        handle_traj_message(hdr, payload, payload_len);
     }
     else if (hdr->msg_type == MSG_TYPE_CMD)
     {
@@ -427,12 +512,13 @@ bool UDP_Client_CopyLatestTraj(void *out_buf,
         return false;
     }
 
+    taskENTER_CRITICAL();
     if (!s_last_traj_valid)
     {
+        taskEXIT_CRITICAL();
         return false;
     }
 
-    taskENTER_CRITICAL();
     uint16_t count = s_last_traj_count;
     if (count > UDP_MAX_TRAJ_KNOTS)
     {
@@ -470,6 +556,35 @@ bool UDP_Client_CopyLatestTraj(void *out_buf,
     taskEXIT_CRITICAL();
 
     return true;
+}
+
+void UDP_Client_InvalidateLatestTraj(void)
+{
+    taskENTER_CRITICAL();
+    s_last_traj_valid = false;
+    s_last_traj_count = 0u;
+    s_last_traj_seq = 0u;
+    s_last_traj_rx_t_ms = 0u;
+    memset(&s_last_traj_hdr, 0, sizeof(s_last_traj_hdr));
+    taskEXIT_CRITICAL();
+}
+
+uint32_t UDP_Client_GetLatestTrajAgeMs(void)
+{
+    uint32_t rx_t_ms = 0;
+    bool valid = false;
+
+    taskENTER_CRITICAL();
+    rx_t_ms = s_last_traj_rx_t_ms;
+    valid = s_last_traj_valid;
+    taskEXIT_CRITICAL();
+
+    if (!valid || rx_t_ms == 0u)
+    {
+        return UINT32_MAX;
+    }
+
+    return HAL_GetTick() - rx_t_ms;
 }
 
 void UDP_Client_Task(void *argument)

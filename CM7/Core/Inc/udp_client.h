@@ -30,7 +30,11 @@ typedef enum {
     CMD_START_TRAJ = 1,
     CMD_STOP_TRAJ  = 2,
     CMD_START_RESTART_ROS2 = 3,
-    CMD_SHUTDOWN_PI5 = 4
+    CMD_SHUTDOWN_PI5 = 4,
+    CMD_START_MAPPING = 5,
+    CMD_FINISH_MAPPING = 6,
+    CMD_USE_LIVE_MAP = 7,
+    CMD_USE_FROZEN_MAP = 8
 } CommandID;
 
 typedef struct __attribute__((packed))
@@ -56,5 +60,13 @@ bool UDP_Client_CopyLatestTraj(void *out_buf,
                               uint16_t *out_flags,
                               uint32_t *out_traj_t0_ms,
                               uint32_t *out_traj_seq);
+
+/* Drop any cached trajectory so control falls back to local pose-hold
+ * until a fresh TRAJ packet arrives from Pi5. */
+void UDP_Client_InvalidateLatestTraj(void);
+
+/* Returns age in ms of the most recently received TRAJ packet.
+ * Returns UINT32_MAX when no valid trajectory has ever been received. */
+uint32_t UDP_Client_GetLatestTrajAgeMs(void);
 
 #endif

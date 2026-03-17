@@ -5,11 +5,13 @@
 #include "cmd.h"
 
 // Definitions for globals declared in controller.h
+static const double TRAJ_CORR_CAP_MS = 0.25;
+
 double k_p = 0.5;          // position P gain in body frame (small correction only)
 double aumax_body = 0.5;   // max translational accel in body frame (m/s^2)
 double umax = 11; // max wheel speed = 100 rpm
 double aumax = 1/0.075; // max wheel angular accel (rad/s^2)
-double jerkmax = 200*0.01; // max wheel angular jerk (rad/s^3)
+double jerkmax = 200; // max wheel angular jerk (rad/s^3)
 double wmax = 2;         // max yaw rate (rad/s)
 double dwmax = 1;        // max yaw accel (rad/s^2)
 
@@ -42,7 +44,7 @@ ALWAYS_INLINE double wrapPi(double a) {
     while (a <= -M_PI) a += TWO_PI;
     return a;
 }
-
+ 
 ALWAYS_INLINE double norm2_2(const double v[2]) {
     /* Use sqrt(x*x + y*y) which is usually faster than hypot on embedded targets */
     const double x = v[0];
@@ -77,6 +79,7 @@ ALWAYS_INLINE void inverse_kinematics(double vx_body, double vy_body, double ome
 static double du_prev[3] = {0};       // previous wheel delta (for jerk limiting)
 static double yawrate_prev = 0.0;     // previous omega (yaw rate)
 static double u_prev[3] = {0};        // previous wheel command u
+static double u_trans_prev[3] = {0};  // previous translational wheel component
 
 void Controller_Step(const double           x[3],
                      const double           xd[5],
@@ -131,10 +134,11 @@ void Controller_Step(const double           x[3],
 		v_des_body[0] = v_ff_body[0] + v_corr_body[0];
 		v_des_body[1] = v_ff_body[1] + v_corr_body[1];
 
-		// Limit correction to avoid fighting trajectory (max 0.1 m/s)
+        // Limit correction to avoid fighting trajectory while still allowing
+        // enough authority to recover tracking error in traj mode.
 		const double v_corr_mag = norm2_2(v_corr_body);
-		if (v_corr_mag > 0.1) {
-			const double scale = 0.1 / v_corr_mag;
+        if (v_corr_mag > TRAJ_CORR_CAP_MS) {
+            const double scale = TRAJ_CORR_CAP_MS / v_corr_mag;
 			v_corr_body[0] *= scale;
 			v_corr_body[1] *= scale;
 			v_des_body[0] = v_ff_body[0] + v_corr_body[0];
@@ -151,7 +155,7 @@ void Controller_Step(const double           x[3],
         v_des_body[1] = -s*vd[0] + c*vd[1];
 	}
     
-    // No translational accel limiting - using velocity directly
+    // Translational slew limiting is applied in wheel space below
     const double vx_body = v_des_body[0];
     const double vy_body = v_des_body[1];
 
@@ -196,6 +200,14 @@ void Controller_Step(const double           x[3],
     double u_rot[3], u_trans[3];
     inverse_kinematics(0.0,     0.0,     omega, u_rot);
     inverse_kinematics(vx_body, vy_body, 0.0,   u_trans);
+
+    // Enforce translational wheel slew so direction changes remain feasible.
+    const double du_trans_max = aumax * dt;
+    for (int i = 0; i < 3; i++) {
+        const double du_i = u_trans[i] - u_trans_prev[i];
+        const double du_i_limited = clampd(du_i, -du_trans_max, du_trans_max);
+        u_trans[i] = u_trans_prev[i] + du_i_limited;
+    }
 
     // Find max s in [0,1] such that |u_rot + s*u_trans| <= umax for all wheels
     double s_lo = 0.0;
@@ -268,7 +280,7 @@ void Controller_Step(const double           x[3],
         du_acc[2] - du_prev[2]
     };
 
-    const double ddu_max = jerkmax * dt;
+    const double ddu_max = jerkmax * dt * dt;
     const double ddu_inf = maxabs3(ddu);
 
     if (ddu_inf > ddu_max && ddu_inf > 0.0) {
@@ -311,4 +323,9 @@ void Controller_Step(const double           x[3],
     u_prev[0]  = u_cmd[0];
     u_prev[1]  = u_cmd[1];
     u_prev[2]  = u_cmd[2];
+
+    // Keep translational state aligned with what was actually commanded.
+    u_trans_prev[0] = u_cmd[0] - u_rot[0];
+    u_trans_prev[1] = u_cmd[1] - u_rot[1];
+    u_trans_prev[2] = u_cmd[2] - u_rot[2];
 }

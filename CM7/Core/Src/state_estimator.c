@@ -36,6 +36,10 @@
 #include <math.h>
 #include <stdint.h>
 
+#ifndef M_PI
+#define M_PI (3.14159265358979323846)
+#endif
+
 /* Optional per-wheel sign corrections (define in main.h if needed). */
 #ifndef STATE_EST_W1_SIGN
 #define STATE_EST_W1_SIGN (1.0)
@@ -51,6 +55,11 @@
 static double se_x_m   = 0.0;
 static double se_y_m   = 0.0;
 static double se_yaw_r = 0.0;
+static double se_vx_body_mps = 0.0;
+static double se_vy_body_mps = 0.0;
+static double se_wz_body_rps = 0.0;
+static double se_vx_world_mps = 0.0;
+static double se_vy_world_mps = 0.0;
 
 static double se_imu_yaw_zero_r = 0.0;  /* subtract from IMU yaw (rad) */
 static uint8_t se_inited = 0u;
@@ -71,6 +80,11 @@ void StateEstimator_Reset(double x0_m, double y0_m, double yaw0_rad)
   se_x_m   = x0_m;
   se_y_m   = y0_m;
   se_yaw_r = wrap_pi(yaw0_rad);
+  se_vx_body_mps = 0.0;
+  se_vy_body_mps = 0.0;
+  se_wz_body_rps = 0.0;
+  se_vx_world_mps = 0.0;
+  se_vy_world_mps = 0.0;
   se_inited = 1u;
 }
 
@@ -89,6 +103,14 @@ void StateEstimator_GetPose(double pose_out[3])
   pose_out[0] = se_x_m;
   pose_out[1] = se_y_m;
   pose_out[2] = se_yaw_r;
+}
+
+void StateEstimator_GetBodyVelocity(double vel_body_out[3])
+{
+  if (!vel_body_out) { return; }
+  vel_body_out[0] = se_vx_body_mps;
+  vel_body_out[1] = se_vy_body_mps;
+  vel_body_out[2] = se_wz_body_rps;
 }
 
 /* Update estimator (yaw from IMU only).
@@ -138,6 +160,7 @@ void StateEstimator_Update(const double w_rad_s[3],
   const double k_s3 = 0.57735026918962576451; /* sqrt(3)/3 */
   const double vx_body = r * (k_s3 * (w2 - w3));
   const double vy_body = r * ((2.0/3.0) * w1 - (1.0/3.0) * (w2 + w3));
+  const double wz_body = r * (w1 + w2 + w3) / (3.0 * Leff);
 
   /* Yaw is ground truth from IMU (optionally zeroed). */
   const double yaw = wrap_pi(imu_yaw_rad - se_imu_yaw_zero_r);
@@ -148,6 +171,12 @@ void StateEstimator_Update(const double w_rad_s[3],
   const double s = sin(yaw);
   const double vx_world =  vx_body * c - vy_body * s;
   const double vy_world =  vx_body * s + vy_body * c;
+
+  se_vx_body_mps = vx_body;
+  se_vy_body_mps = vy_body;
+  se_wz_body_rps = wz_body;
+  se_vx_world_mps = vx_world;
+  se_vy_world_mps = vy_world;
 
   /* Integrate position (Euler). */
   se_x_m += dt_s * vx_world;
