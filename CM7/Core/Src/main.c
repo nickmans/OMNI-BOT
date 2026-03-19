@@ -1309,10 +1309,9 @@ void remote(void *argument)
     CalibrateMotorCurrentBiasA(1000u);
   uint16_t current_sample_count = 0u;
   float current_sum_a[3] = {0.0f, 0.0f, 0.0f};
-  // Boot in trajectory-follow mode and request a fresh stream from Pi5.
+  // Boot in manual mode (traj 0).
   UDP_Client_InvalidateLatestTraj();
-  traj_mode = 1u;
-  UDP_Client_RequestCmd(CMD_START_TRAJ);
+  traj_mode = 0u;
 	for (;;)
 	{
 	    vTaskDelayUntil(&lastWakeTime, period);
