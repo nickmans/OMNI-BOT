@@ -95,6 +95,16 @@ make all -j$(nproc)
 4. Confirm trajectory messages are received from Pi (UDP path healthy).
 5. Validate wheel response at low speed before full-motion testing.
 
+## Command mode transitions (`traj` / `map`)
+
+Current STM32 behavior:
+
+- `traj 1`: requests trajectory generation/recording and **keeps manual mode enabled** (`traj_mode=0`) so the robot can still be driven while mapping.
+- `map 0`: finishes mapping and switches to **trajectory-follow mode only** (`traj_mode=1`).
+- `traj 0`: returns to **manual mode** (`traj_mode=0`).
+
+This sequence is intended for "drive while mapping, then lock to trajectory" workflow.
+
 ## Troubleshooting
 
 ### Flash fails / cannot connect ST-LINK

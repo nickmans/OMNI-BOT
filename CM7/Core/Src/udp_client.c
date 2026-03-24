@@ -690,7 +690,7 @@ void UDP_Client_Task(void *argument)
 
         udp_receive_nonblocking();
 
-        if (time_elapsed(now, next_diag_log_ms, 0))
+        /*if (time_elapsed(now, next_diag_log_ms, 0))
         {
             TaskHandle_t udp_task = xTaskGetCurrentTaskHandle();
             TaskHandle_t tcp_task = xTaskGetHandle("tcpip_thread");
@@ -706,7 +706,7 @@ void UDP_Client_Task(void *argument)
                    (unsigned long)ethif_hwm);
 
             next_diag_log_ms = now + 5000u;
-        }
+        }*/
 
         osDelay(UDP_TASK_DELAY_MS);
     }

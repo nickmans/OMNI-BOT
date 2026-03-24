@@ -19,4 +19,4 @@
 ../Core/Src/udp_client.c:502:6:UDP_Client_CopyLatestTraj	32	static
 ../Core/Src/udp_client.c:561:6:UDP_Client_InvalidateLatestTraj	8	static
 ../Core/Src/udp_client.c:572:10:UDP_Client_GetLatestTrajAgeMs	16	static
-../Core/Src/udp_client.c:590:6:UDP_Client_Task	144	static
+../Core/Src/udp_client.c:590:6:UDP_Client_Task	120	static

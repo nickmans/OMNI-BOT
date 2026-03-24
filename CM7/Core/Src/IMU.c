@@ -136,6 +136,7 @@ void BNO_RVC_UpdateMain(double *yaw_out, double *yawrate_out,
 {
   bno_rvc_sample_t imu;
   if (!BNO_RVC_GetLatest(&imu)) return;
+  const double robot_yaw_deg = (double)wrap180f(-imu.yaw_deg);
   
   // Convert angles to radians
   const double deg2rad = M_PI / 180.0;
@@ -162,7 +163,7 @@ void BNO_RVC_UpdateMain(double *yaw_out, double *yawrate_out,
   const double az_linear = (double)imu.az_mps2 - gz;
   
   // Write to output variables
-  if (yaw_out) *yaw_out = -(double)imu.yaw_deg;
+  if (yaw_out) *yaw_out = robot_yaw_deg;
   if (yawrate_out) *yawrate_out = -(double)imu.yawrate_rad_s;
   if (ax_out) *ax_out = ax_linear;
   if (ay_out) *ay_out = ay_linear;

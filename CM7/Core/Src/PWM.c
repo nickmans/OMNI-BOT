@@ -30,6 +30,9 @@ static const double KP_FAST_MULT = 1.35;
 static const double KI_FAST_MULT = 1.60;
 static const double BREAKAWAY_RPM = 20.0;
 static const double NEG_INTEG_CAP_RATIO = 0.50;
+static const double ENC_LOSS_CMD_RPM = 8.0;
+static const double ENC_LOSS_MEAS_RPM = 0.6;
+static const double ENC_LOSS_TIMEOUT_S = 1.0;
 
 // Helper function to set motor direction via GPIO
 static inline void set_motor_dir(int motor_idx, int direction)
@@ -72,6 +75,7 @@ void PWM(double rpm[3], double dt)
     enum { N_MOTORS = 3 };
     const double rpm_limit = fmax(s_dynamic_rpm_limit, 1.0);
     const double breakaway_pwm = (double)PWM_RANGE * 0.045;
+    const double dt_pos = (dt > 0.0) ? dt : 0.0;
 
     // Per-wheel direction latch (+1 / -1)
     static int dir_state[N_MOTORS] = { +1, +1, +1 };
@@ -79,6 +83,8 @@ void PWM(double rpm[3], double dt)
 
     // Store previous *signed* duty cycle command (0 to PWM_RANGE)
     static double cmd_prev[N_MOTORS] = {0};
+    static double enc_loss_time_s[N_MOTORS] = {0.0, 0.0, 0.0};
+    static uint8_t enc_loss_latched[N_MOTORS] = {0u, 0u, 0u};
 
     const double FLIP_THRESH_RPM   = 10.0;                 // must be near-stop to reverse
     const double FLIP_THRESH_CMD   = (double)PWM_RANGE * 0.05; // must be near-zero to reverse
@@ -142,6 +148,32 @@ void PWM(double rpm[3], double dt)
 
         const double y_meas = fabs(rpm[i]);   // magnitude feedback
 
+        if ((sp_mag > ENC_LOSS_CMD_RPM) && (y_meas < ENC_LOSS_MEAS_RPM))
+        {
+            enc_loss_time_s[i] += dt_pos;
+        }
+        else
+        {
+            enc_loss_time_s[i] = 0.0;
+            enc_loss_latched[i] = 0u;
+        }
+
+        if (enc_loss_time_s[i] >= ENC_LOSS_TIMEOUT_S)
+        {
+            integ[i] = 0.0;
+            cmd_prev[i] = 0.0;
+            __HAL_TIM_SET_COMPARE(&htim2, CH[i], 0);
+
+            if (enc_loss_latched[i] == 0u)
+            {
+                char warn_msg[48];
+                (void)snprintf(warn_msg, sizeof(warn_msg), "WARN encoder loss on wheel %d\r\n", i + 1);
+                CMD_Send(warn_msg);
+                enc_loss_latched[i] = 1u;
+            }
+            continue;
+        }
+
         // PI on magnitude
         const double err  = sp_mag - y_meas;
         const double rpm_fs_i = fmax(fmin(RPM_FS[i], rpm_limit), 1.0);
@@ -179,7 +211,6 @@ void PWM(double rpm[3], double dt)
 
         // --- Slew limiting (RPM-based, magnitude domain) ---
         const double SLEW_RPM_PER_SEC = 130.0;
-        const double dt_pos = (dt > 0.0) ? dt : 0.0;
         const double slew_rpm_step = SLEW_RPM_PER_SEC * dt_pos; // 1.3 rpm @ 10 ms
         double slew_pwm_step = ((double)PWM_RANGE * slew_rpm_step) / rpm_limit;
         if (slew_pwm_step < 0.0) slew_pwm_step = 0.0;

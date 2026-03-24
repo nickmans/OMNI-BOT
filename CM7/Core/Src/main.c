@@ -1293,7 +1293,7 @@ void remote(void *argument)
 	TickType_t lastWakeTime = xTaskGetTickCount();
   const TickType_t posePeriod = pdMS_TO_TICKS(200); // 5 Hz pose heartbeat
   TickType_t lastPoseTick = xTaskGetTickCount();
-  const TickType_t batteryPeriod = pdMS_TO_TICKS(10000);
+  const TickType_t batteryPeriod = pdMS_TO_TICKS(60000);
   TickType_t lastBatteryTick = xTaskGetTickCount();
   TickType_t wheelStallStartTick = 0;
   TickType_t yawKickEndTick = 0;
@@ -1321,13 +1321,13 @@ void remote(void *argument)
 	    // Get IMU data with linear acceleration (gravity compensated)
 	    BNO_RVC_UpdateMain(&yaw, &yawrate, &ax, &ay, &az);
 
-	    //enc(dt,rpm);
-      rpm[0] = speed[0]*60/(2*M_PI);
+	    enc(dt,rpm);
+      /*rpm[0] = speed[0]*60/(2*M_PI);
       rpm[1] = speed[1]*60/(2*M_PI);
-      rpm[2] = speed[2]*60/(2*M_PI);
+      rpm[2] = speed[2]*60/(2*M_PI);*/
 
       TickType_t nowTick = xTaskGetTickCount();
-      /*if ((nowTick - lastBatteryTick) >= batteryPeriod)
+      if ((nowTick - lastBatteryTick) >= batteryPeriod)
       {
         battery_v = (double)BatteryMonitor_ReadVoltage_V();
         const double battery_scaled_max_rpm = (2.5 * battery_v) + 70.0;
@@ -1341,7 +1341,7 @@ void remote(void *argument)
         {
           CMD_Send("Charge The Bot !!!\n");
         }
-      }*/
+      }
 
       if (ReadMotorCurrentAdcRaw(current_adc_raw) == HAL_OK)
       {
@@ -1432,6 +1432,12 @@ void remote(void *argument)
           speed[1] = 0.0;
           speed[2] = 0.0;
           speed[idx] = (WHEEL_TEST_CMD_SIGN * wheel_test_target_rpm) * twopion60;
+          static int cunttter = 0;
+          if (cunttter++ > 50)
+          {
+              cunttter = 0;
+              printf("%.1f %.1f %.1f\n", rpm[0], rpm[1], rpm[2]);
+          }
         }
         else if (cur_traj_mode == 0u)
       {
