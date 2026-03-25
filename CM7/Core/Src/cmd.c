@@ -136,11 +136,11 @@ static const cmd_entry_t s_cmdTable[] =
 	{ 5, "Medium",  "Move Wheel Mediumly",  cmd_med  },
 	{ 6, "dir",  "dir + #",  cmd_dir  },
 	{ 7, "w",  "w + #",  cmd_rotate  },
-    { 8, "traj",  "traj 1=record/manual, 0=manual",  cmd_traj  },
-    { 9, "traj2", "traj2 2=start/restart ros2", cmd_traj2 },
+    { 8, "traj",  "traj 1=autonomous localization, 0=idle/manual",  cmd_traj  },
+    { 9, "traj2", "traj2 2=manual mode + AMCL localization", cmd_traj2 },
     { 10, "shutdown", "shutdown pi5", cmd_shutdown },
     { 11, "wtest", "wtest <wheel:1..3> <rpm> | wtest off", cmd_wtest },
-    { 12, "map", "map 1=start map, 0=follow traj, 2=live, 3=frozen", cmd_map },
+    { 12, "map", "map 1=start mapping, 0=finish mapping+autonomous, 2=live, 3=frozen", cmd_map },
 
 };
 static const size_t s_cmdTableCount = sizeof(s_cmdTable) / sizeof(s_cmdTable[0]);
@@ -571,12 +571,17 @@ static void cmd_traj(const char *args)
 
     if (value == 1)
     {
-        /* Always require a fresh stream after enabling traj mode. */
+        /* traj 1: autonomous localization mode (Pi localizes + sends traj). */
         UDP_Client_InvalidateLatestTraj();
-        /* Keep manual driving enabled while mapping/recording. */
-        traj_mode = 0u;
+        wheel_test_mode = 0u;
+        wheel_test_index = 0;
+        vdes = 0.0;
+        vxd = 0.0;
+        vyd = 0.0;
+        yawrated = 0.0;
+        traj_mode = 1u;
         UDP_Client_RequestCmd(CMD_START_TRAJ);
-        CMD_Send("traj start (manual mode)\r\n");
+        CMD_Send("traj 1: autonomous localization command sent\r\n");
     }
     else if (value == 0)
     {
@@ -584,7 +589,7 @@ static void cmd_traj(const char *args)
         UDP_Client_InvalidateLatestTraj();
         traj_mode = 0u;
         UDP_Client_RequestCmd(CMD_STOP_TRAJ);
-        CMD_Send("traj stop\r\n");
+        CMD_Send("traj 0: idle/manual command sent\r\n");
     }
     else
     {
@@ -611,8 +616,11 @@ static void cmd_traj2(const char *args)
 
     if (value == 2)
     {
+        /* Leave trajectory following immediately; STM32 should be manual-only. */
+        UDP_Client_InvalidateLatestTraj();
+        traj_mode = 0u;
         UDP_Client_RequestCmd(CMD_START_RESTART_ROS2);
-        CMD_Send("traj2 start/restart ros2\r\n");
+        CMD_Send("traj2 manual mode + AMCL localization command sent\r\n");
     }
     else
     {
@@ -708,14 +716,20 @@ static void cmd_map(const char *args)
         traj_mode = 0u;
         UDP_Client_InvalidateLatestTraj();
         UDP_Client_RequestCmd(CMD_START_MAPPING);
-        CMD_Send("mapping start command sent\r\n");
+        CMD_Send("map 1: mapping mode command sent\r\n");
     }
     else if (value == 0)
     {
-        /* Mapping finished: switch to trajectory-follow only mode. */
+        /* Mapping finished: switch to autonomous localization + trajectory follow. */
+        wheel_test_mode = 0u;
+        wheel_test_index = 0;
+        vdes = 0.0;
+        vxd = 0.0;
+        vyd = 0.0;
+        yawrated = 0.0;
         traj_mode = 1u;
         UDP_Client_RequestCmd(CMD_FINISH_MAPPING);
-        CMD_Send("mapping finish command sent (traj mode)\r\n");
+        CMD_Send("map 0: finish mapping + autonomous localization command sent\r\n");
     }
     else if (value == 2)
     {

@@ -23,7 +23,7 @@
 ../Core/Src/cmd.c:524:13:cmd_reset	16	static
 ../Core/Src/cmd.c:539:13:cmd_help	24	static
 ../Core/Src/cmd.c:556:13:cmd_traj	24	static
-../Core/Src/cmd.c:596:13:cmd_traj2	24	static
-../Core/Src/cmd.c:623:13:cmd_shutdown	16	static
-../Core/Src/cmd.c:630:13:cmd_wtest	40	static
-../Core/Src/cmd.c:689:13:cmd_map	24	static
+../Core/Src/cmd.c:601:13:cmd_traj2	24	static
+../Core/Src/cmd.c:631:13:cmd_shutdown	16	static
+../Core/Src/cmd.c:638:13:cmd_wtest	40	static
+../Core/Src/cmd.c:697:13:cmd_map	24	static

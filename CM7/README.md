@@ -99,11 +99,12 @@ make all -j$(nproc)
 
 Current STM32 behavior:
 
-- `traj 1`: requests trajectory generation/recording and **keeps manual mode enabled** (`traj_mode=0`) so the robot can still be driven while mapping.
-- `map 0`: finishes mapping and switches to **trajectory-follow mode only** (`traj_mode=1`).
-- `traj 0`: returns to **manual mode** (`traj_mode=0`).
+- `map 1`: enters dedicated mapping mode and keeps **manual drive enabled** (`traj_mode=0`).
+- `traj 1`: switches to autonomous localization/follow mode (`traj_mode=1`) using the current saved map.
+- `traj2 2`: switches to manual + localization mode (`traj_mode=0`) for manual driving with AMCL active.
+- `traj 0`: returns to idle/manual standby mode (`traj_mode=0`).
 
-This sequence is intended for "drive while mapping, then lock to trajectory" workflow.
+This sequence supports explicit mapping, autonomous localization, and manual-localization operation.
 
 ## Troubleshooting
 

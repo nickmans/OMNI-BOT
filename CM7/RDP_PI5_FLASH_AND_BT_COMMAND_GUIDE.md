@@ -121,29 +121,40 @@ Both are supported:
 - `6 <deg>` or `dir <deg>` → set move direction in degrees
 - `7 <yaw_rate>` or `w <yaw_rate>` → set yaw rate command
 - `8 <0|1>` or `traj <0|1>`
-  - `traj 1` start trajectory-follow mode (requests Pi START_TRAJ)
-  - `traj 0` stop trajectory-follow mode
-- `9 2` or `traj2 2` → request Pi ROS2 start/restart
+   - `traj 1` autonomous localization mode (Pi uses saved map and enables trajectory output)
+   - `traj 0` idle/manual standby mode (trajectory output disabled)
+- `9 2` or `traj2 2` → manual + localization mode (Pi localization active, trajectory output disabled)
 - `10` or `shutdown` → request Pi5 shutdown
 - `11 <wheel 1..3> <rpm>` or `wtest <wheel> <rpm>` → single-wheel RPM test mode
 - `11 off` or `wtest off` → exit wheel test mode
 - `12 <mode>` or `map <mode>` mapping control:
-  - `map 1` start mapping
-  - `map 0` finish mapping
+   - `map 1` start dedicated mapping mode
+   - `map 0` finish mapping and switch to autonomous localization mode
   - `map 2` use live map
   - `map 3` use frozen map
 
 ### D. Typical operator command sequence
 
-#### Bringup and trajectory mode
+#### Bringup and autonomous localization
 
 ```text
 help
-traj2 2
+map 1
+
+# drive manually while mapping
+map 0
+
+# autonomous localization/follow mode
 traj 1
 ```
 
-#### Stop trajectory mode
+#### Manual-localization mode
+
+```text
+traj2 2
+```
+
+#### Return to idle/manual
 
 ```text
 traj 0
@@ -189,7 +200,8 @@ map 2
 4. Send:
    ```text
    help
-   traj2 2
+   map 1
+   map 0
    traj 1
    ```
 5. When done:
