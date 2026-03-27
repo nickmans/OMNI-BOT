@@ -34,7 +34,8 @@ typedef enum {
     CMD_START_MAPPING = 5,
     CMD_FINISH_MAPPING = 6,
     CMD_USE_LIVE_MAP = 7,
-    CMD_USE_FROZEN_MAP = 8
+    CMD_USE_FROZEN_MAP = 8,
+    CMD_START_TRAJ_LOCAL = 9
 } CommandID;
 
 typedef struct __attribute__((packed))

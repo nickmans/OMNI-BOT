@@ -120,6 +120,7 @@ static void cmd_traj2(const char *args);
 static void cmd_shutdown(const char *args);
 static void cmd_wtest(const char *args);
 static void cmd_map(const char *args);
+static void cmd_speed(const char *args);
 
 /* -------------------------- Command table ----------------------------- */
 /*
@@ -136,11 +137,12 @@ static const cmd_entry_t s_cmdTable[] =
 	{ 5, "Medium",  "Move Wheel Mediumly",  cmd_med  },
 	{ 6, "dir",  "dir + #",  cmd_dir  },
 	{ 7, "w",  "w + #",  cmd_rotate  },
-    { 8, "traj",  "traj 1=start 0=stop",  cmd_traj  },
-    { 9, "traj2", "traj2 2=start/restart ros2", cmd_traj2 },
+    { 8, "traj",  "traj 1=autonomous localization, 3=autonomous local-blank-map, 0=idle/manual",  cmd_traj  },
+    { 9, "traj2", "traj2 2=manual mode + AMCL localization", cmd_traj2 },
     { 10, "shutdown", "shutdown pi5", cmd_shutdown },
     { 11, "wtest", "wtest <wheel:1..3> <rpm> | wtest off", cmd_wtest },
-    { 12, "map", "map 1=start, 0=finish, 2=live, 3=frozen", cmd_map },
+    { 12, "map", "map 1=start mapping, 0=finish mapping+autonomous, 2=live, 3=frozen", cmd_map },
+    { 13, "speed", "speed <mps> sets cmd_slow speed (default 0.4)", cmd_speed },
 
 };
 static const size_t s_cmdTableCount = sizeof(s_cmdTable) / sizeof(s_cmdTable[0]);
@@ -460,6 +462,7 @@ volatile uint8_t wheel_test_mode = 0;
 volatile int8_t wheel_test_index = 0;
 volatile double wheel_test_target_rpm = 38.2;
 double vdes = 0;
+static double s_cmd_slow_speed_mps = 0.4;
 static void cmd_rotate(const char *args)
 {
     if (!args) return;
@@ -489,7 +492,7 @@ static void cmd_slow(const char *args)
 {
     (void)args;
     CMD_Send("Slow\r\n");
-    vdes = 0.4;
+    vdes = s_cmd_slow_speed_mps;
     vxd = vdes * cos(direction);
     vyd = vdes * sin(direction);
 	//__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, SLOW);
@@ -557,7 +560,7 @@ static void cmd_traj(const char *args)
 {
     if (!args)
     {
-        CMD_Send("traj requires arg 0 or 1\r\n");
+        CMD_Send("traj requires arg 0, 1, or 3\r\n");
         return;
     }
 
@@ -571,11 +574,17 @@ static void cmd_traj(const char *args)
 
     if (value == 1)
     {
-        /* Always require a fresh stream after enabling traj mode. */
+        /* traj 1: autonomous localization mode (Pi localizes + sends traj). */
         UDP_Client_InvalidateLatestTraj();
+        wheel_test_mode = 0u;
+        wheel_test_index = 0;
+        vdes = 0.0;
+        vxd = 0.0;
+        vyd = 0.0;
+        yawrated = 0.0;
         traj_mode = 1u;
         UDP_Client_RequestCmd(CMD_START_TRAJ);
-        CMD_Send("traj start\r\n");
+        CMD_Send("traj 1: autonomous localization command sent\r\n");
     }
     else if (value == 0)
     {
@@ -583,11 +592,26 @@ static void cmd_traj(const char *args)
         UDP_Client_InvalidateLatestTraj();
         traj_mode = 0u;
         UDP_Client_RequestCmd(CMD_STOP_TRAJ);
-        CMD_Send("traj stop\r\n");
+        CMD_Send("traj 0: idle/manual command sent\r\n");
+    }
+    else if (value == 3)
+    {
+        /* traj 3: autonomous trajectory mode on a blank global map.
+         * Local obstacle avoidance remains live on Pi-side costmap. */
+        UDP_Client_InvalidateLatestTraj();
+        wheel_test_mode = 0u;
+        wheel_test_index = 0;
+        vdes = 0.0;
+        vxd = 0.0;
+        vyd = 0.0;
+        yawrated = 0.0;
+        traj_mode = 1u;
+        UDP_Client_RequestCmd(CMD_START_TRAJ_LOCAL);
+        CMD_Send("traj 3: autonomous local blank-map command sent\r\n");
     }
     else
     {
-        CMD_Send("traj arg must be 0 or 1\r\n");
+        CMD_Send("traj arg must be 0, 1, or 3\r\n");
     }
 }
 
@@ -610,8 +634,11 @@ static void cmd_traj2(const char *args)
 
     if (value == 2)
     {
+        /* Leave trajectory following immediately; STM32 should be manual-only. */
+        UDP_Client_InvalidateLatestTraj();
+        traj_mode = 0u;
         UDP_Client_RequestCmd(CMD_START_RESTART_ROS2);
-        CMD_Send("traj2 start/restart ros2\r\n");
+        CMD_Send("traj2 manual mode + AMCL localization command sent\r\n");
     }
     else
     {
@@ -707,14 +734,20 @@ static void cmd_map(const char *args)
         traj_mode = 0u;
         UDP_Client_InvalidateLatestTraj();
         UDP_Client_RequestCmd(CMD_START_MAPPING);
-        CMD_Send("mapping start command sent\r\n");
+        CMD_Send("map 1: mapping mode command sent\r\n");
     }
     else if (value == 0)
     {
-        traj_mode = 0u;
-        UDP_Client_InvalidateLatestTraj();
+        /* Mapping finished: switch to autonomous localization + trajectory follow. */
+        wheel_test_mode = 0u;
+        wheel_test_index = 0;
+        vdes = 0.0;
+        vxd = 0.0;
+        vyd = 0.0;
+        yawrated = 0.0;
+        traj_mode = 1u;
         UDP_Client_RequestCmd(CMD_FINISH_MAPPING);
-        CMD_Send("mapping finish command sent\r\n");
+        CMD_Send("map 0: finish mapping + autonomous localization command sent\r\n");
     }
     else if (value == 2)
     {
@@ -734,4 +767,24 @@ static void cmd_map(const char *args)
     {
         CMD_Send("map arg must be 0, 1, 2, or 3\r\n");
     }
+}
+
+static void cmd_speed(const char *args)
+{
+    if (!args)
+    {
+        CMD_Printf("speed current=%.3f m/s\r\n", s_cmd_slow_speed_mps);
+        return;
+    }
+
+    char *end = NULL;
+    double value = strtod(args, &end);
+    if (end == args)
+    {
+        CMD_Send("speed invalid arg\r\n");
+        return;
+    }
+
+    s_cmd_slow_speed_mps = value;
+    CMD_Printf("speed set: cmd_slow=%.3f m/s\r\n", s_cmd_slow_speed_mps);
 }

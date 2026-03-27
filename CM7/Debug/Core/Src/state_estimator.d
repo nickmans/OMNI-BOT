@@ -39,7 +39,8 @@ Core/Src/state_estimator.o: ../Core/Src/state_estimator.c \
  ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h \
  ../../Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo.h \
  ../Core/Inc/stm32h7xx_nucleo_conf.h \
- ../../Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo_errno.h
+ ../../Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo_errno.h \
+ ../Core/Inc/cmd.h
 ../Core/Inc/main.h:
 ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
 ../Core/Inc/stm32h7xx_hal_conf.h:
@@ -81,3 +82,4 @@ Core/Src/state_estimator.o: ../Core/Src/state_estimator.c \
 ../../Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo.h:
 ../Core/Inc/stm32h7xx_nucleo_conf.h:
 ../../Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo_errno.h:
+../Core/Inc/cmd.h:

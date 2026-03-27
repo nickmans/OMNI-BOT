@@ -31,12 +31,19 @@ void Controller_Step( const double           x[3],
 void StateEstimator_Update(const double w_rad_s[3],
                            double dt_s,
                            double imu_yaw_rad,
+                           double imu_ax_body_mps2,
+                           double imu_ay_body_mps2,
                            double pose_out[3]);
 
 void StateEstimator_Reset(double x0_m, double y0_m, double yaw0_rad);
-void StateEstimator_ZeroImuYaw(double imu_yaw_rad);
 void StateEstimator_GetPose(double pose_out[3]);
 void StateEstimator_GetBodyVelocity(double vel_body_out[3]);
+/* out: [slip_ratio, w_enc, w_imu, slip_innovation, ax_bias, ay_bias] */
+void StateEstimator_GetSlipDebug(double debug_out[6]);
+/* out: [cmd_abs_max, wheel_deadband, v_enc_mag, stationary_now, stationary_for_bias, stationary_time_s] */
+void StateEstimator_GetTuningDebug(double debug_out[6]);
+/* out: [w_enc, w_imu, vx_enc_body, vy_enc_body, vx_fused_body, vy_fused_body] */
+void StateEstimator_GetFuseDebug(double debug_out[6]);
 
 
 #endif

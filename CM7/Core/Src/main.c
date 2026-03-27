@@ -1285,15 +1285,15 @@ void remote(void *argument)
 {
 	int tick = 10;
   const uint32_t trajDeadmanTimeoutMs = 700u;
-	const TickType_t period = pdMS_TO_TICKS(tick); // 100 Hz
+  const TickType_t period = pdMS_TO_TICKS(tick); // 100 Hz
 	const TickType_t wheelStallHoldTime = pdMS_TO_TICKS(500);
 	const TickType_t yawKickTime = pdMS_TO_TICKS(200);
 	const double wheelStallRpmThreshold = 3.0;
 	const double movingSpeedThreshold = 1e-3;
 	TickType_t lastWakeTime = xTaskGetTickCount();
-  const TickType_t posePeriod = pdMS_TO_TICKS(200); // 5 Hz pose heartbeat
+  const TickType_t posePeriod = pdMS_TO_TICKS(100); // 10 Hz pose heartbeat
   TickType_t lastPoseTick = xTaskGetTickCount();
-  const TickType_t batteryPeriod = pdMS_TO_TICKS(10000);
+  const TickType_t batteryPeriod = pdMS_TO_TICKS(60000);
   TickType_t lastBatteryTick = xTaskGetTickCount();
   TickType_t wheelStallStartTick = 0;
   TickType_t yawKickEndTick = 0;
@@ -1309,10 +1309,9 @@ void remote(void *argument)
     CalibrateMotorCurrentBiasA(1000u);
   uint16_t current_sample_count = 0u;
   float current_sum_a[3] = {0.0f, 0.0f, 0.0f};
-  // Boot in trajectory-follow mode and request a fresh stream from Pi5.
+  // Boot in manual mode (traj 0).
   UDP_Client_InvalidateLatestTraj();
-  traj_mode = 1u;
-  UDP_Client_RequestCmd(CMD_START_TRAJ);
+  traj_mode = 0u;
 	for (;;)
 	{
 	    vTaskDelayUntil(&lastWakeTime, period);
@@ -1322,13 +1321,13 @@ void remote(void *argument)
 	    // Get IMU data with linear acceleration (gravity compensated)
 	    BNO_RVC_UpdateMain(&yaw, &yawrate, &ax, &ay, &az);
 
-	    //enc(dt,rpm);
-      rpm[0] = speed[0]*60/(2*M_PI);
+	    enc(dt,rpm);
+      /*rpm[0] = speed[0]*60/(2*M_PI);
       rpm[1] = speed[1]*60/(2*M_PI);
-      rpm[2] = speed[2]*60/(2*M_PI);
+      rpm[2] = speed[2]*60/(2*M_PI);*/
 
       TickType_t nowTick = xTaskGetTickCount();
-      /*if ((nowTick - lastBatteryTick) >= batteryPeriod)
+      if ((nowTick - lastBatteryTick) >= batteryPeriod)
       {
         battery_v = (double)BatteryMonitor_ReadVoltage_V();
         const double battery_scaled_max_rpm = (2.5 * battery_v) + 70.0;
@@ -1342,7 +1341,7 @@ void remote(void *argument)
         {
           CMD_Send("Charge The Bot !!!\n");
         }
-      }*/
+      }
 
       if (ReadMotorCurrentAdcRaw(current_adc_raw) == HAL_OK)
       {
@@ -1423,7 +1422,47 @@ void remote(void *argument)
       w_rad_s[0] = rpm[0] * twopion60;
       w_rad_s[1] = rpm[1] * twopion60;
       w_rad_s[2] = rpm[2] * twopion60;
-      StateEstimator_Update(w_rad_s, (double)dt, yaw_rad, x);
+      StateEstimator_Update(w_rad_s, (double)dt, yaw_rad, ax, ay, x);
+
+      /*{
+        static int slip_dbg_counter = 0;
+        if (++slip_dbg_counter >= 50) // ~0.5 s at 100 Hz
+        {
+          slip_dbg_counter = 0;
+          double slip_dbg[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+          double tune_dbg[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+          double fuse_dbg[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+          StateEstimator_GetSlipDebug(slip_dbg);
+          StateEstimator_GetTuningDebug(tune_dbg);
+          StateEstimator_GetFuseDebug(fuse_dbg);
+               printf("SLIP sr=%.2f we=%.2f wi=%.2f in=%.2f b=(%.2f,%.2f) a=(%.2f,%.2f) p=(%.2f,%.2f,%.2f)\n",
+                 slip_dbg[0],
+                 slip_dbg[1],
+                 slip_dbg[2],
+                 slip_dbg[3],
+                 slip_dbg[4],
+                 slip_dbg[5],
+                 ax,
+               ay,
+               x[0],
+               x[1],
+               x[2]);
+               printf("EST c=%.2f db=%.2f ve=%.2f st=%u sb=%u tt=%.2f\n",
+                 tune_dbg[0],
+                 tune_dbg[1],
+                 tune_dbg[2],
+                 (unsigned int)tune_dbg[3],
+                 (unsigned int)tune_dbg[4],
+                 tune_dbg[5]);
+               printf("FUSE we=%.2f wi=%.2f ve=(%.2f,%.2f) vf=(%.2f,%.2f)\n",
+               fuse_dbg[0],
+               fuse_dbg[1],
+               fuse_dbg[2],
+               fuse_dbg[3],
+               fuse_dbg[4],
+               fuse_dbg[5]);
+        }
+      }*/
 
         if (wheel_test_mode)
         {
@@ -1433,9 +1472,21 @@ void remote(void *argument)
           speed[1] = 0.0;
           speed[2] = 0.0;
           speed[idx] = (WHEEL_TEST_CMD_SIGN * wheel_test_target_rpm) * twopion60;
+          static int cunttter = 0;
+          if (cunttter++ > 50)
+          {
+              cunttter = 0;
+              printf("%.1f %.1f %.1f\n", rpm[0], rpm[1], rpm[2]);
+          }
         }
         else if (cur_traj_mode == 0u)
       {
+          /*static int cuunttter = 0;
+          if (cuunttter++ > 50)
+          {
+              cuunttter = 0;
+              printf("%.2f %.2f %.2f\n", x[0], x[1], x[2]);
+          }*/
           // =====================
           // traj 0: remote/manual
           // =====================
@@ -1563,7 +1614,7 @@ void remote(void *argument)
 
       PWM(rpm,dt);
 
-      // Push pose to Pi5 at 5 Hz to keep link alive and avoid stale data
+      // Push pose to Pi5 at 10 Hz to align pose cadence with Pi LiDAR update rate
       if ((nowTick - lastPoseTick) >= posePeriod)
       {
     	    PosePayload pose;

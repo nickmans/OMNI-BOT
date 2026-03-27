@@ -48,6 +48,15 @@ Defaults from `udp_client.h`:
 
 If network settings change, update both CM7 and Pi server sides.
 
+## Frame convention contract
+
+- ROS2/navigation convention in this project is: `base_link` +x forward, +y left, +z up.
+- CM7 sends pose to Pi as `PosePayload {x, y, yaw, vx, vy, wz}` from the onboard estimator.
+- IMU source is **BNO086 in UART-RVC mode** (`Core/Src/IMU.c`), and estimator yaw comes from IMU yaw.
+- Pi bridge applies a configurable STM32→ROS frame conversion before publishing `/odom`.
+  - Current robust runtime default is a `-90 deg` planar rotation at the bridge.
+- Long-term target is to make CM7 pose output natively match ROS convention so bridge rotation can be set to `0 deg`.
+
 ## Prerequisites
 
 Install required tools on development machine:
@@ -94,6 +103,17 @@ make all -j$(nproc)
 3. Power robot and verify encoder/IMU telemetry is updating.
 4. Confirm trajectory messages are received from Pi (UDP path healthy).
 5. Validate wheel response at low speed before full-motion testing.
+
+## Command mode transitions (`traj` / `map`)
+
+Current STM32 behavior:
+
+- `map 1`: enters dedicated mapping mode and keeps **manual drive enabled** (`traj_mode=0`).
+- `traj 1`: switches to autonomous localization/follow mode (`traj_mode=1`) using the current saved map.
+- `traj2 2`: switches to manual + localization mode (`traj_mode=0`) for manual driving with AMCL active.
+- `traj 0`: returns to idle/manual standby mode (`traj_mode=0`).
+
+This sequence supports explicit mapping, autonomous localization, and manual-localization operation.
 
 ## Troubleshooting
 

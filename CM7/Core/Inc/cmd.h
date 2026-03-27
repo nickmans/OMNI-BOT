@@ -26,8 +26,9 @@ void CMD_Send(const char *s);
 // Legacy nominal operating point kept for compatibility with existing tuning
 #define SATURN5303_NO_LOAD_RPM          SATURN5303_NO_LOAD_RPM_20V
 
-// Encoder resolution (datasheet): 3895.9 PPR at output shaft
-// If your timer count is 4x this value, set QUAD_FACTOR to 4.0.
+// Encoder resolution (datasheet): 3895.9 PPR at output shaft.
+// With STM32 timer encoder interface mode (TI1+TI2), keep channel polarity at
+// the standard non-inverted setting and treat this as full output-shaft CPR.
 #define SATURN5303_ENCODER_PPR_OUTPUT   3895.9
 #define SATURN5303_ENCODER_QUAD_FACTOR  1.0
 #define SATURN5303_OUTPUT_CPR           (SATURN5303_ENCODER_PPR_OUTPUT * SATURN5303_ENCODER_QUAD_FACTOR)
