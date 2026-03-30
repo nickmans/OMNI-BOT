@@ -40,6 +40,7 @@ Core/Src/udp_client.o: ../Core/Src/udp_client.c ../Core/Inc/udp_client.h \
  ../../Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo.h \
  ../Core/Inc/stm32h7xx_nucleo_conf.h \
  ../../Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo_errno.h \
+ ../Core/Inc/cmd.h \
  ../../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h \
  ../../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h \
  ../Core/Inc/FreeRTOSConfig.h \
@@ -122,6 +123,7 @@ Core/Src/udp_client.o: ../Core/Src/udp_client.c ../Core/Inc/udp_client.h \
 ../../Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo.h:
 ../Core/Inc/stm32h7xx_nucleo_conf.h:
 ../../Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo_errno.h:
+../Core/Inc/cmd.h:
 ../../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h:
 ../../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
 ../Core/Inc/FreeRTOSConfig.h:

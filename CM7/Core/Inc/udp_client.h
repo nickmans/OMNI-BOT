@@ -35,7 +35,10 @@ typedef enum {
     CMD_FINISH_MAPPING = 6,
     CMD_USE_LIVE_MAP = 7,
     CMD_USE_FROZEN_MAP = 8,
-    CMD_START_TRAJ_LOCAL = 9
+    CMD_START_TRAJ_LOCAL = 9,
+    CMD_START_TERMINAL_PASSTHROUGH = 10,
+    CMD_TERMINAL_PASSTHROUGH_DATA = 11,
+    CMD_STOP_TERMINAL_PASSTHROUGH = 12
 } CommandID;
 
 typedef struct __attribute__((packed))
@@ -51,6 +54,7 @@ typedef struct __attribute__((packed))
 
 void UDP_Client_Task(void *argument);
 void UDP_Client_RequestCmd(CommandID cmd_id);
+void UDP_Client_QueueTerminalData(const uint8_t *data, uint16_t len);
 void UDP_Client_SendZeroPose(void);
 void queue_pose(const PosePayload *pose);
 

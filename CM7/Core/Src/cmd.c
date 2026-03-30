@@ -93,6 +93,7 @@ static SemaphoreHandle_t s_txMutex = NULL;
 static uint8_t  s_rb[CMD_RX_RING_SIZE];
 static volatile uint16_t s_rbHead = 0;
 static volatile uint16_t s_rbTail = 0;
+static volatile bool s_terminal_passthrough_active = false;
 
 /* -------------------------- Forward decls ----------------------------- */
 
@@ -121,6 +122,7 @@ static void cmd_shutdown(const char *args);
 static void cmd_wtest(const char *args);
 static void cmd_map(const char *args);
 static void cmd_speed(const char *args);
+static void cmd_term(const char *args);
 
 /* -------------------------- Command table ----------------------------- */
 /*
@@ -143,6 +145,7 @@ static const cmd_entry_t s_cmdTable[] =
     { 11, "wtest", "wtest <wheel:1..3> <rpm> | wtest off", cmd_wtest },
     { 12, "map", "map 1=start mapping, 0=finish mapping+autonomous, 2=live, 3=frozen", cmd_map },
     { 13, "speed", "speed <mps> sets cmd_slow speed (default 0.4)", cmd_speed },
+    { 14, "term", "Open Pi terminal passthrough; send * to exit", cmd_term },
 
 };
 static const size_t s_cmdTableCount = sizeof(s_cmdTable) / sizeof(s_cmdTable[0]);
@@ -282,6 +285,20 @@ static void CMD_Task(void *argument)
         uint8_t b;
         while (rb_pop(&b))
         {
+            if (s_terminal_passthrough_active)
+            {
+                if (b == '*')
+                {
+                    s_terminal_passthrough_active = false;
+                    UDP_Client_RequestCmd(CMD_STOP_TERMINAL_PASSTHROUGH);
+                    CMD_Send("\r\n[terminal passthrough exit requested]\r\n");
+                    continue;
+                }
+
+                UDP_Client_QueueTerminalData(&b, 1u);
+                continue;
+            }
+
         #if CMD_ECHO_RAW_TO_PC
             // Echo raw UART1 stream to the PC console (printf retarget).
             // This runs in the task context (safe), not in the ISR.
@@ -424,9 +441,9 @@ static const cmd_entry_t *CMD_FindByName(const char *name)
 
 /* -------------------------- TX helper funcs --------------------------- */
 
-void CMD_Send(const char *s)
+void CMD_SendRaw(const uint8_t *data, uint16_t len)
 {
-    if (!s_huart || !s) return;
+    if (!s_huart || !data || len == 0u) return;
 
     // Use 100ms timeout instead of blocking forever to prevent deadlock
     if (s_txMutex) {
@@ -434,8 +451,25 @@ void CMD_Send(const char *s)
             return;  // Timeout, skip this send
         }
     }
-    (void)HAL_UART_Transmit(s_huart, (uint8_t*)s, (uint16_t)strlen(s), 100);
+    (void)HAL_UART_Transmit(s_huart, (uint8_t*)data, len, 100);
     if (s_txMutex) (void)xSemaphoreGive(s_txMutex);
+}
+
+void CMD_Send(const char *s)
+{
+    if (!s) return;
+    CMD_SendRaw((const uint8_t *)s, (uint16_t)strlen(s));
+}
+
+void CMD_TerminalPassthroughRemoteClosed(void)
+{
+    if (!s_terminal_passthrough_active)
+    {
+        return;
+    }
+
+    s_terminal_passthrough_active = false;
+    CMD_Send("\r\n[pi terminal passthrough closed]\r\n");
 }
 
 static void CMD_Printf(const char *fmt, ...)
@@ -651,6 +685,19 @@ static void cmd_shutdown(const char *args)
     (void)args;
     UDP_Client_RequestCmd(CMD_SHUTDOWN_PI5);
     CMD_Send("shutdown request sent to pi5\r\n");
+}
+
+static void cmd_term(const char *args)
+{
+    if (args && args[0] != '\0')
+    {
+        CMD_Send("term takes no args\r\n");
+        return;
+    }
+
+    s_terminal_passthrough_active = true;
+    UDP_Client_RequestCmd(CMD_START_TERMINAL_PASSTHROUGH);
+    CMD_Send("terminal passthrough requested; send * to exit\r\n");
 }
 
 static void cmd_wtest(const char *args)

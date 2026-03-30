@@ -132,6 +132,9 @@ Both are supported:
    - `map 0` finish mapping and switch to autonomous localization mode
   - `map 2` use live map
   - `map 3` use frozen map
+- `14` or `term` → start Pi terminal passthrough over Bluetooth
+   - While active, UART1 switches from line-command parsing to raw terminal forwarding
+   - Send `*` from the phone to exit passthrough and return to normal command mode
 
 ### D. Typical operator command sequence
 

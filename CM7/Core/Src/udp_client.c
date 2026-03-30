@@ -1,5 +1,6 @@
 #include "udp_client.h"
 #include "main.h"
+#include "cmd.h"
 
 #include "cmsis_os.h"
 #include "FreeRTOS.h"
@@ -31,6 +32,9 @@ extern struct netif gnetif;
 #ifndef UDP_MAX_TRAJ_KNOTS
 #define UDP_MAX_TRAJ_KNOTS          64u
 #endif
+#define UDP_TERM_TX_RING_SIZE       512u
+#define UDP_TERM_CHUNK_MAX          64u
+#define UDP_CMD_MAX_ARG_SIZE        UDP_TERM_CHUNK_MAX
 
 #define TRAJ_FLAG_IDLE              0x0001u
 #define TRAJ_DT_MIN_S               0.001f
@@ -95,9 +99,14 @@ static volatile uint32_t s_cmd_seq = 0;
 static volatile uint16_t s_cmd_id = 0;
 static volatile uint32_t s_cmd_last_tx_ms = 0;
 static volatile uint32_t s_cmd_retry_left = 0;
+static uint32_t s_term_seq = 0;
 
 static PosePayload s_pending_pose;
 static volatile bool s_pose_pending = false;
+
+static uint8_t s_term_tx_ring[UDP_TERM_TX_RING_SIZE];
+static volatile uint16_t s_term_tx_head = 0;
+static volatile uint16_t s_term_tx_tail = 0;
 
 static TrajectoryHeader s_last_traj_hdr;
 static TrajectoryKnot s_last_traj_knots[UDP_MAX_TRAJ_KNOTS];
@@ -114,6 +123,37 @@ static bool time_elapsed(uint32_t now, uint32_t start, uint32_t interval_ms)
 static bool seq_is_newer(uint32_t seq, uint32_t prev_seq)
 {
     return (int32_t)(seq - prev_seq) > 0;
+}
+
+static inline uint16_t term_rb_next(uint16_t idx)
+{
+    return (uint16_t)((idx + 1u) % UDP_TERM_TX_RING_SIZE);
+}
+
+static bool term_rb_push(uint8_t b)
+{
+    uint16_t next = term_rb_next(s_term_tx_head);
+    if (next == s_term_tx_tail)
+    {
+        return false;
+    }
+
+    s_term_tx_ring[s_term_tx_head] = b;
+    s_term_tx_head = next;
+    return true;
+}
+
+static uint16_t term_rb_pop_chunk(uint8_t *out, uint16_t max_len)
+{
+    uint16_t count = 0u;
+
+    while (count < max_len && s_term_tx_tail != s_term_tx_head)
+    {
+        out[count++] = s_term_tx_ring[s_term_tx_tail];
+        s_term_tx_tail = term_rb_next(s_term_tx_tail);
+    }
+
+    return count;
 }
 
 static bool knot_is_valid(const TrajectoryKnot *k)
@@ -261,7 +301,7 @@ static void handle_traj_message(const MessageHeader *msg_hdr, const uint8_t *pay
     taskEXIT_CRITICAL();
 }
 
-static void handle_cmd_ack(const MessageHeader *hdr, const uint8_t *payload, uint32_t payload_len)
+static void handle_cmd_message(const MessageHeader *hdr, const uint8_t *payload, uint32_t payload_len)
 {
     if (payload_len < sizeof(CommandPayload))
     {
@@ -269,20 +309,35 @@ static void handle_cmd_ack(const MessageHeader *hdr, const uint8_t *payload, uin
     }
 
     const CommandPayload *cmd = (const CommandPayload *)payload;
-    if (cmd->cmd_id != s_cmd_id)
+    const uint16_t arg_len = cmd->arg_len;
+    if (payload_len < (sizeof(CommandPayload) + (uint32_t)arg_len))
     {
         return;
     }
 
-    if (hdr->seq != s_cmd_seq)
-    {
-        return;
-    }
+    const uint8_t *arg = payload + sizeof(CommandPayload);
 
     taskENTER_CRITICAL();
-    s_cmd_pending = false;
-    s_cmd_retry_left = 0;
+    if (cmd->cmd_id == s_cmd_id && hdr->seq == s_cmd_seq)
+    {
+        s_cmd_pending = false;
+        s_cmd_retry_left = 0;
+    }
     taskEXIT_CRITICAL();
+
+    if (cmd->cmd_id == CMD_TERMINAL_PASSTHROUGH_DATA)
+    {
+        if (arg_len > 0u)
+        {
+            CMD_SendRaw(arg, arg_len);
+        }
+        return;
+    }
+
+    if (cmd->cmd_id == CMD_STOP_TERMINAL_PASSTHROUGH)
+    {
+        CMD_TerminalPassthroughRemoteClosed();
+    }
 }
 
 static void handle_received_message(const MessageHeader *hdr, const uint8_t *payload, uint32_t payload_len)
@@ -293,7 +348,7 @@ static void handle_received_message(const MessageHeader *hdr, const uint8_t *pay
     }
     else if (hdr->msg_type == MSG_TYPE_CMD)
     {
-        handle_cmd_ack(hdr, payload, payload_len);
+        handle_cmd_message(hdr, payload, payload_len);
     }
 }
 
@@ -412,16 +467,34 @@ void UDP_Client_SendZeroPose(void)
     queue_pose(&pose);
 }
 
-static void send_cmd_to_pi5(uint16_t cmd_id, uint32_t seq)
+static void send_cmd_packet(uint16_t cmd_id, uint32_t seq, const uint8_t *arg, uint16_t arg_len)
 {
+    if (arg_len > UDP_CMD_MAX_ARG_SIZE)
+    {
+        return;
+    }
+
     CommandPayload payload;
     payload.cmd_id = cmd_id;
-    payload.arg_len = 0;
+    payload.arg_len = arg_len;
 
-    uint8_t buffer[HEADER_SIZE + sizeof(CommandPayload)];
-    pack_message(MSG_TYPE_CMD, seq, &payload, sizeof(payload), buffer);
+    uint8_t buffer[HEADER_SIZE + sizeof(CommandPayload) + UDP_CMD_MAX_ARG_SIZE];
+    MessageHeader *hdr = (MessageHeader *)buffer;
+    hdr->magic = MAGIC;
+    hdr->version = VERSION;
+    hdr->msg_type = MSG_TYPE_CMD;
+    hdr->seq = seq;
+    hdr->t_ms = HAL_GetTick();
+    hdr->payload_len = sizeof(payload) + arg_len;
+    hdr->crc32 = 0;
 
-    udp_send_nonblocking(buffer, sizeof(buffer));
+    memcpy(buffer + HEADER_SIZE, &payload, sizeof(payload));
+    if (arg_len > 0u && arg != NULL)
+    {
+        memcpy(buffer + HEADER_SIZE + sizeof(payload), arg, arg_len);
+    }
+
+    udp_send_nonblocking(buffer, HEADER_SIZE + sizeof(payload) + arg_len);
 
     if (cmd_id == CMD_START_RESTART_ROS2) {
         // This command signals the Pi5 to start or restart the ROS2 stack
@@ -429,6 +502,8 @@ static void send_cmd_to_pi5(uint16_t cmd_id, uint32_t seq)
     } else if (cmd_id == CMD_SHUTDOWN_PI5) {
         // This command signals the Pi5 to run its shutdown script
         printf("Pi5 shutdown command sent\r\n");
+    } else if (cmd_id == CMD_START_TERMINAL_PASSTHROUGH) {
+        printf("Pi5 terminal passthrough request sent\r\n");
     }
 }
 
@@ -496,6 +571,24 @@ void UDP_Client_RequestCmd(CommandID cmd_id)
     s_cmd_pending = true;
     s_cmd_retry_left = UDP_CMD_RETRY_COUNT;
     s_cmd_last_tx_ms = 0;
+    taskEXIT_CRITICAL();
+}
+
+void UDP_Client_QueueTerminalData(const uint8_t *data, uint16_t len)
+{
+    if (data == NULL || len == 0u)
+    {
+        return;
+    }
+
+    taskENTER_CRITICAL();
+    for (uint16_t i = 0u; i < len; ++i)
+    {
+        if (!term_rb_push(data[i]))
+        {
+            break;
+        }
+    }
     taskEXIT_CRITICAL();
 }
 
@@ -666,7 +759,7 @@ void UDP_Client_Task(void *argument)
         {
             if (s_cmd_retry_left > 0 && time_elapsed(now, s_cmd_last_tx_ms, UDP_CMD_RETRY_INTERVAL_MS))
             {
-                send_cmd_to_pi5(s_cmd_id, s_cmd_seq);
+                send_cmd_packet(s_cmd_id, s_cmd_seq, NULL, 0u);
                 s_cmd_last_tx_ms = now;
                 s_cmd_retry_left--;
                 if (s_cmd_retry_left == 0)
@@ -686,6 +779,22 @@ void UDP_Client_Task(void *argument)
             taskEXIT_CRITICAL();
 
             send_pose_payload(&pose);
+        }
+
+        if (link_up)
+        {
+            uint8_t chunk[UDP_TERM_CHUNK_MAX];
+            uint16_t chunk_len = 0u;
+
+            taskENTER_CRITICAL();
+            chunk_len = term_rb_pop_chunk(chunk, UDP_TERM_CHUNK_MAX);
+            taskEXIT_CRITICAL();
+
+            if (chunk_len > 0u)
+            {
+                s_term_seq++;
+                send_cmd_packet(CMD_TERMINAL_PASSTHROUGH_DATA, s_term_seq, chunk, chunk_len);
+            }
         }
 
         udp_receive_nonblocking();

@@ -9,6 +9,8 @@
 void CMD_Init(UART_HandleTypeDef *huart);
 bool CMD_StartTask(void);
 void CMD_Send(const char *s);
+void CMD_SendRaw(const uint8_t *data, uint16_t len);
+void CMD_TerminalPassthroughRemoteClosed(void);
 
 // MD20A motor driver with Saturn 5303 motors
 // PWM: 0-100% duty cycle (TIM2 ARR=7371)
