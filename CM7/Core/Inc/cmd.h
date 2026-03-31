@@ -12,44 +12,45 @@ void CMD_Send(const char *s);
 void CMD_SendRaw(const uint8_t *data, uint16_t len);
 void CMD_TerminalPassthroughRemoteClosed(void);
 
-// MD20A motor driver with Saturn 5303 motors
+// MD20A motor driver with Pololu 37D 24V 50:1 motors
 // PWM: 0-100% duty cycle (TIM2 ARR=7371)
 #define PWM_PERIOD 7371
 #define PWM_MIN 0
 #define PWM_MAX PWM_PERIOD
 #define PWM_RANGE PWM_PERIOD  // Full range for duty cycle
 
-// Saturn 5303 planetary gearmotor (output shaft) configuration
-// Datasheet no-load speeds: 70 RPM @12V, 120 RPM @20V, 130 RPM @24V
-#define SATURN5303_NO_LOAD_RPM_12V      70.0
-#define SATURN5303_NO_LOAD_RPM_20V      120.0
-#define SATURN5303_NO_LOAD_RPM_24V      130.0
+// Pololu 37D 24V 50:1 output shaft configuration.
+// Bench data: 0.95 PWM gave ~157 RPM with old CPR=3895.9. Corrected to CPR=3200,
+// this is ~191.2 RPM at 95% duty, so use ~201 RPM nominal at 24V.
+#define POLULU37D50_NO_LOAD_RPM_24V     201.0
+#define POLULU37D50_NO_LOAD_RPM          POLULU37D50_NO_LOAD_RPM_24V
 
-// Legacy nominal operating point kept for compatibility with existing tuning
-#define SATURN5303_NO_LOAD_RPM          SATURN5303_NO_LOAD_RPM_20V
+// Output shaft encoder CPR for these motors.
+#define POLULU37D50_OUTPUT_CPR           3200.0
+#define POLULU37D50_GEAR_RATIO           50.0
 
-// Encoder resolution (datasheet): 3895.9 PPR at output shaft.
-// With STM32 timer encoder interface mode (TI1+TI2), keep channel polarity at
-// the standard non-inverted setting and treat this as full output-shaft CPR.
-#define SATURN5303_ENCODER_PPR_OUTPUT   3895.9
-#define SATURN5303_ENCODER_QUAD_FACTOR  1.0
-#define SATURN5303_OUTPUT_CPR           (SATURN5303_ENCODER_PPR_OUTPUT * SATURN5303_ENCODER_QUAD_FACTOR)
-
-// Gear ratio from datasheet formula: (1 + 46/11)^3
-#define SATURN5303_GEAR_RATIO           ((1.0 + (46.0/11.0)) * (1.0 + (46.0/11.0)) * (1.0 + (46.0/11.0)))
+// Backward-compatible aliases used in existing source files.
+#define SATURN5303_NO_LOAD_RPM           POLULU37D50_NO_LOAD_RPM
+#define SATURN5303_OUTPUT_CPR            POLULU37D50_OUTPUT_CPR
 
 // Wheel sign convention (model space):
 // +1.0 means electrical forward matches positive model wheel rotation.
 // -1.0 means wheel is mechanically/electrically inverted relative to model.
-#define WHEEL1_SIGN                     (-1.0)
-#define WHEEL2_SIGN                     (-1.0)
-#define WHEEL3_SIGN                     (-1.0)
+#define WHEEL1_SIGN                     (+1.0)
+#define WHEEL2_SIGN                     (+1.0)
+#define WHEEL3_SIGN                     (+1.0)
 
 // Wheel-test command polarity:
 // +1.0 => positive `wtest` RPM uses normal internal sign
 // -1.0 => positive `wtest` RPM flips internal sign (useful when bench test
 //         positive command currently produces negative measured RPM)
 #define WHEEL_TEST_CMD_SIGN             (+1.0)
+
+// Encoder polarity from raw timer counts -> model wheel frame.
+// Set to -1.0 when a wheel's physical clockwise spin reports negative counts.
+#define ENC_WHEEL1_SIGN                 (-1.0)
+#define ENC_WHEEL2_SIGN                 (-1.0)
+#define ENC_WHEEL3_SIGN                 (-1.0)
 
 extern volatile double speed[3];
 extern volatile double vxd;
@@ -58,6 +59,8 @@ extern volatile double yawrated;
 extern volatile uint8_t wheel_test_mode;
 extern volatile int8_t wheel_test_index;
 extern volatile double wheel_test_target_rpm;
+extern volatile uint8_t pwm_test_mode;
+extern volatile double pwm_test_ratio[3];
 
 // 0 = remote/manual velocity control, 1 = follow incoming Pi5 trajectory
 extern volatile uint8_t traj_mode;

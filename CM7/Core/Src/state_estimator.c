@@ -118,25 +118,13 @@
 
 /* Optional per-wheel sign corrections (define in main.h if needed). */
 #ifndef STATE_EST_W1_SIGN
-#ifdef WHEEL1_SIGN
-#define STATE_EST_W1_SIGN (WHEEL1_SIGN)
-#else
 #define STATE_EST_W1_SIGN (1.0)
 #endif
-#endif
 #ifndef STATE_EST_W2_SIGN
-#ifdef WHEEL2_SIGN
-#define STATE_EST_W2_SIGN (WHEEL2_SIGN)
-#else
 #define STATE_EST_W2_SIGN (1.0)
 #endif
-#endif
 #ifndef STATE_EST_W3_SIGN
-#ifdef WHEEL3_SIGN
-#define STATE_EST_W3_SIGN (WHEEL3_SIGN)
-#else
 #define STATE_EST_W3_SIGN (1.0)
-#endif
 #endif
 
 /* Internal state (double everywhere) */
@@ -355,10 +343,17 @@ void StateEstimator_Update(const double w_rad_s[3],
   const double w2 = deadbandd(w2_raw, wheel_deadband_radps);
   const double w3 = deadbandd(w3_raw, wheel_deadband_radps);
 
-  /* Body-frame velocities from encoders (matches your MATLAB kinematics). */
+  /*
+   * Wheel-model translational frame from the kiwi equations is rotated
+   * relative to the robot body convention we want to publish/use:
+   *   desired body frame: +x forward, +y left
+   * Apply a fixed -90 deg rotation from wheel-model -> desired body.
+   */
   const double k_s3 = 0.57735026918962576451; /* sqrt(3)/3 */
-  const double vx_enc_body = r * (k_s3 * (w2 - w3));
-  const double vy_enc_body = r * ((2.0/3.0) * w1 - (1.0/3.0) * (w2 + w3));
+  const double vx_enc_kin = r * (k_s3 * (w2 - w3));
+  const double vy_enc_kin = r * ((2.0/3.0) * w1 - (1.0/3.0) * (w2 + w3));
+  const double vx_enc_body = -vy_enc_kin;
+  const double vy_enc_body = vx_enc_kin;
   const double wz_body = r * (w1 + w2 + w3) / (3.0 * Leff);
   se_vx_enc_body_last = vx_enc_body;
   se_vy_enc_body_last = vy_enc_body;

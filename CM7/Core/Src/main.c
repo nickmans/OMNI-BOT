@@ -34,8 +34,8 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-// Omni geometry
-double rw = 0.075;       // wheel radius (m)
+// Omni geometry (180 mm wheel diameter => 0.09 m radius)
+double rw = 0.09;        // wheel radius (m)
 double L = 0.2;          // distance from robot center to wheel contact line (m)
 static const double CPR = SATURN5303_OUTPUT_CPR;
 const int32_t CNT_MID = 32768;  // 0x8000
@@ -1104,6 +1104,7 @@ static void enc(double dt, double rpm[3])
   static double rpm_filt[3] = {0.0, 0.0, 0.0};
 
   const int32_t delta[3] = {delta1, delta2, delta3};
+  const double enc_sign[3] = {ENC_WHEEL1_SIGN, ENC_WHEEL2_SIGN, ENC_WHEEL3_SIGN};
   const double rpm_per_count = 60.0 / (CPR * dt);
   const double pulse_timeout_s = 0.25;
   const double alpha = 0.35;
@@ -1113,7 +1114,8 @@ static void enc(double dt, double rpm[3])
     t_since_edge_s[i] += dt;
 
     const int32_t d = delta[i];
-    double rpm_window = (double)d * rpm_per_count;
+  const double d_signed = enc_sign[i] * (double)d;
+  double rpm_window = d_signed * rpm_per_count;
     double rpm_meas = rpm_window;
 
     if (d != 0)
@@ -1121,7 +1123,7 @@ static void enc(double dt, double rpm[3])
       const int32_t mag = (d >= 0) ? d : -d;
       if (t_since_edge_s[i] > 0.0)
       {
-        rpm_period[i] = ((double)d * 60.0) / (CPR * t_since_edge_s[i]);
+        rpm_period[i] = (d_signed * 60.0) / (CPR * t_since_edge_s[i]);
       }
       t_since_edge_s[i] = 0.0;
 
@@ -1288,6 +1290,7 @@ void remote(void *argument)
   const TickType_t period = pdMS_TO_TICKS(tick); // 100 Hz
 	const TickType_t wheelStallHoldTime = pdMS_TO_TICKS(500);
 	const TickType_t yawKickTime = pdMS_TO_TICKS(200);
+  const TickType_t pwmEncPrintPeriod = pdMS_TO_TICKS(500);
 	const double wheelStallRpmThreshold = 3.0;
 	const double movingSpeedThreshold = 1e-3;
 	TickType_t lastWakeTime = xTaskGetTickCount();
@@ -1295,6 +1298,7 @@ void remote(void *argument)
   TickType_t lastPoseTick = xTaskGetTickCount();
   const TickType_t batteryPeriod = pdMS_TO_TICKS(60000);
   TickType_t lastBatteryTick = xTaskGetTickCount();
+  TickType_t lastPwmEncPrintTick = xTaskGetTickCount();
   TickType_t wheelStallStartTick = 0;
   TickType_t yawKickEndTick = 0;
   uint8_t yawKickActive = 0u;
@@ -1330,7 +1334,7 @@ void remote(void *argument)
       if ((nowTick - lastBatteryTick) >= batteryPeriod)
       {
         battery_v = (double)BatteryMonitor_ReadVoltage_V();
-        const double battery_scaled_max_rpm = (2.5 * battery_v) + 70.0;
+        const double battery_scaled_max_rpm = (battery_v / 24.8) * POLULU37D50_NO_LOAD_RPM_24V;
         PWM_SetMaxRpmLimit(battery_scaled_max_rpm);
         lastBatteryTick = nowTick;
         //printf(" Battery: %.2f V \n",battery_v);
@@ -1379,7 +1383,7 @@ void remote(void *argument)
       }
       last_traj_mode = cur_traj_mode;
 
-      if ((cur_traj_mode == 0u) && !wheel_test_mode && !yawKickActive)
+      if ((cur_traj_mode == 0u) && !wheel_test_mode && !pwm_test_mode && !yawKickActive)
       {
         const uint8_t moving =
             (fabs(speed[0]) > movingSpeedThreshold) ||
@@ -1411,7 +1415,7 @@ void remote(void *argument)
           wheelStallStartTick = 0;
         }
       }
-      else if ((cur_traj_mode != 0u) || wheel_test_mode)
+      else if ((cur_traj_mode != 0u) || wheel_test_mode || pwm_test_mode)
       {
         wheelStallStartTick = 0;
       }
@@ -1464,7 +1468,26 @@ void remote(void *argument)
         }
       }*/
 
-        if (wheel_test_mode)
+        if (pwm_test_mode)
+        {
+          speed[0] = 0.0;
+          speed[1] = 0.0;
+          speed[2] = 0.0;
+
+          if ((nowTick - lastPwmEncPrintTick) >= pwmEncPrintPeriod)
+          {
+            lastPwmEncPrintTick = nowTick;
+            char enc_msg[96];
+            (void)snprintf(enc_msg,
+                           sizeof(enc_msg),
+                           "enc %.1f %.1f %.1f\r\n",
+                           rpm[0],
+                           rpm[1],
+                           rpm[2]);
+            CMD_Send(enc_msg);
+          }
+        }
+        else if (wheel_test_mode)
         {
           int idx = (wheel_test_index >= 0 && wheel_test_index < 3) ? wheel_test_index : 0;
 
@@ -1581,7 +1604,7 @@ void remote(void *argument)
           Controller_Step(x, xd, vd, 1, dt);
       }
 
-      if (wheel_test_mode || (cur_traj_mode == 0u))
+      if (wheel_test_mode || pwm_test_mode || (cur_traj_mode == 0u))
       {
         /*current_sum_a[0] += current_a[0];
         current_sum_a[1] += current_a[1];
@@ -1612,7 +1635,29 @@ void remote(void *argument)
         current_sum_a[2] = 0.0f;
       }
 
-      PWM(rpm,dt);
+      if (pwm_test_mode)
+      {
+        const uint32_t ch[3] = { TIM_CHANNEL_1, TIM_CHANNEL_2, TIM_CHANNEL_3 };
+        GPIO_TypeDef *dir_ports[3] = { DIR1_GPIO_Port, DIR2_GPIO_Port, DIR3_GPIO_Port };
+        uint16_t dir_pins[3] = { DIR1_Pin, DIR2_Pin, DIR3_Pin };
+
+        for (int i = 0; i < 3; ++i)
+        {
+          double ratio = pwm_test_ratio[i];
+          if (ratio > 1.0) ratio = 1.0;
+          if (ratio < -1.0) ratio = -1.0;
+
+          HAL_GPIO_WritePin(dir_ports[i], dir_pins[i], (ratio < 0.0) ? GPIO_PIN_SET : GPIO_PIN_RESET);
+
+          double duty = fabs(ratio) * (double)PWM_RANGE;
+          if (duty > (double)PWM_MAX) duty = (double)PWM_MAX;
+          __HAL_TIM_SET_COMPARE(&htim2, ch[i], (uint32_t)duty);
+        }
+      }
+      else
+      {
+        PWM(rpm,dt);
+      }
 
       // Push pose to Pi5 at 10 Hz to align pose cadence with Pi LiDAR update rate
       if ((nowTick - lastPoseTick) >= posePeriod)

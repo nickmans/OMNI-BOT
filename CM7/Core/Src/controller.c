@@ -10,7 +10,7 @@ static const double TRAJ_CORR_CAP_MS = 0.25;
 double k_p = 0.5;          // position P gain in body frame (small correction only)
 double aumax_body = 0.5;   // max translational accel in body frame (m/s^2)
 double umax = 11; // max wheel speed = 100 rpm
-double aumax = 1/0.075; // max wheel angular accel (rad/s^2)
+double aumax = 1.0/0.09; // max wheel angular accel (rad/s^2) for 180 mm diameter wheels
 double jerkmax = 200; // max wheel angular jerk (rad/s^3)
 double wmax = 2;         // max yaw rate (rad/s)
 double dwmax = 1;        // max yaw accel (rad/s^2)
@@ -58,6 +58,17 @@ ALWAYS_INLINE double maxabs3(const double v[3]) {
     const double a2 = fabs(v[2]);
     double m = (a0 > a1) ? a0 : a1;
     return (m > a2) ? m : a2;
+}
+
+/*
+ * Convert desired robot body frame (+x forward, +y left) to the kiwi
+ * wheel-model translational frame used by inverse_kinematics.
+ */
+ALWAYS_INLINE void body_desired_to_kin(double vx_body, double vy_body,
+                                       double *vx_kin, double *vy_kin)
+{
+    *vx_kin = vy_body;
+    *vy_kin = -vx_body;
 }
 
 // Omni 3-wheel (0,120,240) inverse kinematics consistent with your forward equations:
@@ -197,9 +208,13 @@ void Controller_Step(const double           x[3],
     // ================================
     // 4) INVERSE KINEMATICS + SATURATION SPLIT
     // ================================
+    double vx_kin = 0.0;
+    double vy_kin = 0.0;
+    body_desired_to_kin(vx_body, vy_body, &vx_kin, &vy_kin);
+
     double u_rot[3], u_trans[3];
     inverse_kinematics(0.0,     0.0,     omega, u_rot);
-    inverse_kinematics(vx_body, vy_body, 0.0,   u_trans);
+    inverse_kinematics(vx_kin,  vy_kin,  0.0,   u_trans);
 
     // Enforce translational wheel slew so direction changes remain feasible.
     const double du_trans_max = aumax * dt;

@@ -120,6 +120,7 @@ static void cmd_traj(const char *args);
 static void cmd_traj2(const char *args);
 static void cmd_shutdown(const char *args);
 static void cmd_wtest(const char *args);
+static void cmd_pwm(const char *args);
 static void cmd_map(const char *args);
 static void cmd_speed(const char *args);
 static void cmd_term(const char *args);
@@ -146,6 +147,7 @@ static const cmd_entry_t s_cmdTable[] =
     { 12, "map", "map 1=start mapping, 0=finish mapping+autonomous, 2=live, 3=frozen", cmd_map },
     { 13, "speed", "speed <mps> sets cmd_slow speed (default 0.4)", cmd_speed },
     { 14, "term", "Open Pi terminal passthrough; send * to exit", cmd_term },
+    { 15, "pwm", "pwm <wheel:1..3> <ratio:-1..1> | pwm off", cmd_pwm },
 
 };
 static const size_t s_cmdTableCount = sizeof(s_cmdTable) / sizeof(s_cmdTable[0]);
@@ -495,8 +497,11 @@ volatile uint8_t traj_mode = 0;
 volatile uint8_t wheel_test_mode = 0;
 volatile int8_t wheel_test_index = 0;
 volatile double wheel_test_target_rpm = 38.2;
+volatile uint8_t pwm_test_mode = 0;
+volatile double pwm_test_ratio[3] = {0.0, 0.0, 0.0};
 double vdes = 0;
 static double s_cmd_slow_speed_mps = 0.4;
+
 static void cmd_rotate(const char *args)
 {
     if (!args) return;
@@ -757,6 +762,76 @@ static void cmd_wtest(const char *args)
     CMD_Printf("wtest on wheel=%ld target=%.2f rpm\r\n",
                wheel,
                wheel_test_target_rpm);
+}
+
+static void cmd_pwm(const char *args)
+{
+    if (!args)
+    {
+        CMD_Send("pwm usage: pwm <wheel:1..3> <ratio:-1..1> | pwm off\r\n");
+        return;
+    }
+
+    while (isspace((unsigned char)*args)) { args++; }
+
+    if (strcmp(args, "off") == 0)
+    {
+        pwm_test_mode = 0u;
+        pwm_test_ratio[0] = 0.0;
+        pwm_test_ratio[1] = 0.0;
+        pwm_test_ratio[2] = 0.0;
+        speed[0] = 0.0;
+        speed[1] = 0.0;
+        speed[2] = 0.0;
+        CMD_Send("pwm off\r\n");
+        return;
+    }
+
+    char *end = NULL;
+    long wheel = strtol(args, &end, 10);
+    if (end == args)
+    {
+        CMD_Send("pwm invalid wheel index\r\n");
+        return;
+    }
+
+    while (isspace((unsigned char)*end)) { end++; }
+
+    char *end_ratio = NULL;
+    double ratio = strtod(end, &end_ratio);
+    if (end_ratio == end)
+    {
+        CMD_Send("pwm invalid ratio\r\n");
+        return;
+    }
+
+    if (wheel < 1 || wheel > 3)
+    {
+        CMD_Send("pwm wheel must be 1..3\r\n");
+        return;
+    }
+
+    if (ratio < -1.0 || ratio > 1.0)
+    {
+        CMD_Send("pwm ratio must be within -1..1\r\n");
+        return;
+    }
+
+    // Enter direct PWM mode and disable all other drive command modes.
+    wheel_test_mode = 0u;
+    wheel_test_index = 0;
+    traj_mode = 0u;
+    vxd = 0.0;
+    vyd = 0.0;
+    yawrated = 0.0;
+    speed[0] = 0.0;
+    speed[1] = 0.0;
+    speed[2] = 0.0;
+
+    pwm_test_ratio[(uint32_t)(wheel - 1)] = ratio;
+    pwm_test_mode = 1u;
+
+    CMD_Printf("pwm on wheel=%ld ratio=%.3f\r\n", wheel, ratio);
 }
 
 static void cmd_map(const char *args)
