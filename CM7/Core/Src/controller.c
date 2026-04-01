@@ -9,7 +9,7 @@ static const double TRAJ_CORR_CAP_MS = 0.25;
 
 double k_p = 0.5;          // position P gain in body frame (small correction only)
 double aumax_body = 0.5;   // max translational accel in body frame (m/s^2)
-double umax = 11; // max wheel speed = 100 rpm
+double umax = 16; // max wheel speed = 100 rpm
 double aumax = 1.0/0.09; // max wheel angular accel (rad/s^2) for 180 mm diameter wheels
 double jerkmax = 200; // max wheel angular jerk (rad/s^3)
 double wmax = 2;         // max yaw rate (rad/s)

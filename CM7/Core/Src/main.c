@@ -1288,8 +1288,8 @@ void remote(void *argument)
 	int tick = 10;
   const uint32_t trajDeadmanTimeoutMs = 700u;
   const TickType_t period = pdMS_TO_TICKS(tick); // 100 Hz
-	const TickType_t wheelStallHoldTime = pdMS_TO_TICKS(500);
-	const TickType_t yawKickTime = pdMS_TO_TICKS(200);
+	const TickType_t wheelStallHoldTime = pdMS_TO_TICKS(250);
+	const TickType_t yawKickTime = pdMS_TO_TICKS(400);
   const TickType_t pwmEncPrintPeriod = pdMS_TO_TICKS(500);
 	const double wheelStallRpmThreshold = 3.0;
 	const double movingSpeedThreshold = 1e-3;
@@ -1404,7 +1404,7 @@ void remote(void *argument)
           else if ((nowTick - wheelStallStartTick) >= wheelStallHoldTime)
           {
             yawrateBeforeKick = yawrated;
-            yawrated = 1.0;
+            yawrated = 1.5;
             yawKickEndTick = nowTick + yawKickTime;
             yawKickActive = 1u;
             wheelStallStartTick = 0;

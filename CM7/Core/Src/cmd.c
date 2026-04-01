@@ -124,6 +124,7 @@ static void cmd_pwm(const char *args);
 static void cmd_map(const char *args);
 static void cmd_speed(const char *args);
 static void cmd_term(const char *args);
+static void cmd_wp(const char *args);
 
 /* -------------------------- Command table ----------------------------- */
 /*
@@ -148,6 +149,7 @@ static const cmd_entry_t s_cmdTable[] =
     { 13, "speed", "speed <mps> sets cmd_slow speed (default 0.4)", cmd_speed },
     { 14, "term", "Open Pi terminal passthrough; send * to exit", cmd_term },
     { 15, "pwm", "pwm <wheel:1..3> <ratio:-1..1> | pwm off", cmd_pwm },
+    { 16, "wp", "wp t = generate 50 centered test waypoints on Pi", cmd_wp },
 
 };
 static const size_t s_cmdTableCount = sizeof(s_cmdTable) / sizeof(s_cmdTable[0]);
@@ -540,7 +542,7 @@ static void cmd_med(const char *args)
 {
     (void)args;
     CMD_Send("Medium\r\n");
-    vdes = 0.78;
+    vdes = 0.9;
     vxd = vdes * cos(direction);
     vyd = vdes * sin(direction);
 	//__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, MED);
@@ -889,6 +891,26 @@ static void cmd_map(const char *args)
     {
         CMD_Send("map arg must be 0, 1, 2, or 3\r\n");
     }
+}
+
+static void cmd_wp(const char *args)
+{
+    if (!args)
+    {
+        CMD_Send("wp requires arg t\r\n");
+        return;
+    }
+
+    while (isspace((unsigned char)*args)) { args++; }
+
+    if (strcmp(args, "t") == 0)
+    {
+        UDP_Client_RequestCmd(CMD_WP_TEST_PATTERN);
+        CMD_Send("wp t: test waypoint pattern request sent\r\n");
+        return;
+    }
+
+    CMD_Send("wp arg must be t\r\n");
 }
 
 static void cmd_speed(const char *args)
