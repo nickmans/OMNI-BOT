@@ -1,167 +1,167 @@
-# OMNI-BOT CM7 Firmware
+# OMNI CM7 Firmware
 
-This folder contains the STM32H755 CM7 firmware for motor control, sensing, command parsing, networking, and real-time robot execution.
+This directory contains the active STM32H755 CM7 runtime for the robot.
 
-## What this firmware does
+CM4 project files exist elsewhere in the repository, but CM4 is not the normal runtime path for the robot. The checked-in robot runtime is CM7.
 
-- Runs the main real-time control loop on **CM7** (FreeRTOS-based).
-- Reads wheel encoders and IMU data.
-- Computes robot state and control outputs.
-- Drives 3 motor channels (PWM + direction).
-- Exchanges trajectory/command data with the Pi5 over Ethernet UDP.
+## What CM7 does
 
-## Folder overview
+The CM7 firmware handles the real-time side of the robot:
 
-- `Core/Inc`, `Core/Src` — application code (control, command, sensors, networking)
-- `LWIP/` — Ethernet/LwIP integration
-- `Debug/` — generated build output (`OMNI-BOT_CM7.elf`, object files, makefiles)
-- `build_flash_cm7.sh` — one-command build + flash via ST-LINK/OpenOCD
-- `STM32H755ZITX_FLASH.ld`, `STM32H755ZITX_RAM.ld` — linker scripts
+- 3-wheel kiwi / omni control
+- state estimation
+- motor PWM output
+- encoder processing
+- IMU integration
+- UDP communication with the Raspberry Pi
+- command shell handling
+- battery voltage monitoring and RPM limiting
 
-## Key modules
+Normal boot behavior is manual mode:
+
+- `traj_mode = 0` on boot
+- cached trajectories are invalidated before entering `traj 1` and `traj 3`
+
+## Major modules
+
+These are the main checked-in CM7 source modules:
 
 - `Core/Src/main.c`
-  - HAL + clock + peripheral bring-up
-  - UART RX interrupt rearm logic
-  - timer/PWM/encoder initialization
-  - FreeRTOS task start
-- `Core/Src/controller.c` / `Core/Inc/controller.h`
-  - motion/controller step
-  - state estimator integration
-- `Core/Src/cmd.c` / `Core/Inc/cmd.h`
-  - serial command parser and motor command interfaces
-  - PWM conversion and limits
-- `Core/Src/udp_client.c` / `Core/Inc/udp_client.h`
-  - UDP protocol to Pi5 (`192.168.1.100:9000`)
-  - sends pose, receives trajectory/commands
-- `Core/Src/IMU.c`, `Core/Src/sensor.c`, `Core/Src/battery_monitor.c`
-  - IMU decode, sensor processing, battery monitoring
+  - system bringup
+  - task creation
+  - 100 Hz `remote()` control loop
+  - 10 Hz pose heartbeat to the Pi
 
-## Network contract (CM7 ↔ Pi5)
+- `Core/Src/cmd.c`
+  - USART1 command shell
+  - `traj`, `traj2`, `map`, `wp`, `term`, `shutdown` commands
 
-Defaults from `udp_client.h`:
+- `Core/Src/controller.c`
+  - main motion controller
 
-- STM32 static IP: `192.168.1.10`
-- Pi5 server IP: `192.168.1.100`
-- UDP port: `9000`
-- Shared header magic/version used for packet validation
+- `Core/Src/state_estimator.c`
+  - robot state estimation used for outgoing pose and control
 
-If network settings change, update both CM7 and Pi server sides.
+- `Core/Src/PWM.c`
+  - motor output handling
 
-## Frame convention contract
+- `Core/Src/udp_client.c`
+  - lwIP UDP client
+  - command send/ack handling
+  - latest trajectory cache
 
-- ROS2/navigation convention in this project is: `base_link` +x forward, +y left, +z up.
-- CM7 sends pose to Pi as `PosePayload {x, y, yaw, vx, vy, wz}` from the onboard estimator.
-- IMU source is **BNO086 in UART-RVC mode** (`Core/Src/IMU.c`), and estimator yaw comes from IMU yaw.
-- Pi bridge applies a configurable STM32→ROS frame conversion before publishing `/odom`.
-  - Current robust runtime default is a `-90 deg` planar rotation at the bridge.
-- Long-term target is to make CM7 pose output natively match ROS convention so bridge rotation can be set to `0 deg`.
+- `Core/Src/IMU.c`
+  - BNO RVC IMU handling
 
-## Prerequisites
+- `Core/Src/battery_monitor.c`
+  - ADC-based battery measurement
+  - scales max RPM by battery voltage
 
-Install required tools on development machine:
 
-- `arm-none-eabi-gcc` toolchain
-- `make`
-- `openocd`
-- ST-LINK connected to target board
+## Runtime interfaces
 
-Quick checks:
+### USART1 command shell
 
-```bash
-arm-none-eabi-gcc --version
-openocd --version
-```
+- Command shell path: `USART1`
+- Initialized by `CMD_Init(&huart1)` in `main.c`
+- Used for remote/manual commands and mode changes
+
+### USART2 IMU path
+
+- IMU path: `USART2`
+- Uses the `BNO_RVC_*` API in `IMU.c`
+
+### Ethernet / UDP path
+
+- lwIP UDP client in `udp_client.c`
+- Pi defaults:
+  - `192.168.1.100:9000`
+- STM32 default IP:
+  - `192.168.1.10`
+
+### Motion I/O
+
+- encoder timers feed the estimator and controller
+- PWM motor outputs drive the 3-wheel platform
+
+## Runtime timing
+
+Checked-in timing in the CM7 runtime:
+
+- control loop in `remote()` runs at `100 Hz`
+- pose heartbeat to the Pi runs at `10 Hz`
+- trajectory deadman timeout is `700 ms`
+
+## Pi communication path
+
+Normal data flow with the Pi is:
+
+1. CM7 estimates pose.
+2. CM7 sends `POSE` packets to the Pi.
+3. Pi publishes pose into ROS 2.
+4. Pi planner publishes `/planned_path` and `/planned_path_velocities`.
+5. Pi UDP server packages those into `TRAJ` packets.
+6. CM7 follows the incoming trajectory when `traj_mode = 1`.
+
+## Shell commands
+
+These are the main checked-in shell commands and meanings.
+
+- `traj 0`
+  - manual / standby mode
+  - stop consuming cached trajectories immediately
+
+- `traj 1`
+  - autonomous localization mode
+  - Pi localizes and streams trajectories back to the STM32
+  - invalidates old trajectories before switching
+
+- `traj 3`
+  - autonomous mode using blank global map behavior on the Pi
+  - local obstacle avoidance stays live on the Pi side
+  - invalidates old trajectories before switching
+
+- `traj2 2`
+  - manual drive on STM32 while Pi runs localization
+  - trajectory following disabled on STM32
+
+- `map 1`
+  - start mapping mode on the Pi
+  - disables trajectory following on STM32
+
+- `map 0`
+  - finish mapping and return to autonomous localization mode
+
+- `map 2`
+  - switch Pi to live-map mode
+
+- `map 3`
+  - switch Pi to frozen/localization mode
+
+- `wp t`
+  - request centered waypoint test pattern generation on the Pi
+
+- `term`
+  - start Pi terminal passthrough
+
+- `shutdown`
+  - request Pi shutdown
 
 ## Build and flash
 
-### Recommended (one command)
-
-From this folder:
+Use the checked-in helper script:
 
 ```bash
+cd CM7
 ./build_flash_cm7.sh
 ```
 
-Script behavior:
-
-1. Builds in `Debug/` (`make all -j$(nproc)`)
-2. Programs `Debug/OMNI-BOT_CM7.elf` via OpenOCD
-3. Verifies and resets the MCU
-
-### Build only
-
-```bash
-cd Debug
-make all -j$(nproc)
-```
-
-## Typical bring-up flow
-
-1. Build/flash CM7 firmware.
-2. Ensure Pi server is running and reachable at `192.168.1.100:9000`.
-3. Power robot and verify encoder/IMU telemetry is updating.
-4. Confirm trajectory messages are received from Pi (UDP path healthy).
-5. Validate wheel response at low speed before full-motion testing.
-
-## Command mode transitions (`traj` / `map`)
-
-Current STM32 behavior:
-
-- `map 1`: enters dedicated mapping mode and keeps **manual drive enabled** (`traj_mode=0`).
-- `traj 1`: switches to autonomous localization/follow mode (`traj_mode=1`) using the current saved map.
-- `traj2 2`: switches to manual + localization mode (`traj_mode=0`) for manual driving with AMCL active.
-- `traj 0`: returns to idle/manual standby mode (`traj_mode=0`).
-
-This sequence supports explicit mapping, autonomous localization, and manual-localization operation.
-
-## Troubleshooting
-
-### Flash fails / cannot connect ST-LINK
-
-- Check USB cable and target power.
-- Ensure no other debugger session is holding the probe.
-- Retry OpenOCD command from `build_flash_cm7.sh` manually to inspect detailed errors.
-
-### Build errors in `Debug/`
-
-- Clean and rebuild:
-
-```bash
-cd Debug
-make clean
-make all -j$(nproc)
-```
-
-- Verify toolchain binaries are in `PATH`.
-
-### No trajectory coming from Pi
-
-- Verify Pi server is running and bound to the expected port.
-- Confirm CM7 and Pi IP settings match expected subnet.
-- Check Ethernet link and switch/cable.
-
-### Robot not moving as expected
-
-- Verify command mode (`traj_mode` vs manual command path).
-- Check encoder sign/direction conventions and wheel sign constants in `cmd.h`.
-- Validate IMU yaw feed and estimator outputs before tuning controller gains.
+That script builds the `Debug` target and flashes `Debug/OMNI-BOT_CM7.elf` through OpenOCD.
 
 ## Safety notes
 
-- Start with robot lifted or wheels clear of ground for first motion tests.
-- Use conservative speed/acceleration limits during tuning.
-- Keep an emergency stop path available during bring-up.
+- Start with the robot lifted or otherwise off the ground.
+- Verify wheel sign conventions before commanding larger motion.
+- Verify low-speed response first.
+- Confirm that `traj 0` gives you predictable manual behavior before enabling `traj 1` or `traj 3`.
 
-## Related workspace
-
-- CM7 firmware here: `/home/nickolas/OMNI-BOT/CM7`
-- ROS2 + Pi stack: `/home/nickolas/ros2_ws/src/omni_src`
-
-Use CM7 + Pi/ROS2 together for full closed-loop operation.
-
-## Operator guide
-
-For day-to-day Pi5 remote flashing and Bluetooth control workflow, see:
-
-- `RDP_PI5_FLASH_AND_BT_COMMAND_GUIDE.md`

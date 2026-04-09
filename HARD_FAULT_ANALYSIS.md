@@ -144,7 +144,7 @@ ETH_POSE: State=3, Heap=XXX      ← System running normally
 - [x] All buffers passed to lwIP aligned to 4 bytes
 - [ ] No Hard Fault after link up
 - [ ] TCP connection establishes successfully
-- [ ] POSE messages sent at 5 Hz
+- [ ] POSE messages sent at 10 Hz
 - [ ] TRAJ messages received correctly
 - [ ] System stable for extended operation
 
