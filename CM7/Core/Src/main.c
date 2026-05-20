@@ -1326,6 +1326,12 @@ void remote(void *argument)
 	    BNO_RVC_UpdateMain(&yaw, &yawrate, &ax, &ay, &az);
 
 	    enc(dt,rpm);
+      /*static int cunttter = 0;
+      if (cunttter++ > 50)
+      {
+        cunttter = 0;
+        printf("%.1f %.1f %.1f\n", rpm[0], rpm[1], rpm[2]);
+      }*/
       /*rpm[0] = speed[0]*60/(2*M_PI);
       rpm[1] = speed[1]*60/(2*M_PI);
       rpm[2] = speed[2]*60/(2*M_PI);*/

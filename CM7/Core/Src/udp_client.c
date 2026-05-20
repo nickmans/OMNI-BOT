@@ -46,6 +46,16 @@ extern struct netif gnetif;
 #define TRAJ_MAX_ABS_YAW_RAD        1000.0f
 #define TRAJ_SEQ_RESYNC_TIMEOUT_MS  1000u
 
+#define STM32_CMD_LISTEN_PORT       9001u
+
+#define JOY_CMD_MODE_ON             100u
+#define JOY_CMD_MODE_OFF            101u
+#define JOY_CMD_VECTOR              102u
+#define JOY_VECTOR_ARG_LEN          3u
+#define JOY_STREAM_TIMEOUT_MS       300u
+#define JOY_MAX_SPEED_MPS           0.90
+#define JOY_DIR_OFFSET_RAD          0.2617993877991494
+
 typedef struct __attribute__((packed))
 {
     uint32_t magic;
@@ -87,6 +97,16 @@ typedef struct __attribute__((packed))
 extern double x[3];
 extern double vd[3];
 extern double yawrate;
+extern volatile double vxd;
+extern volatile double vyd;
+extern volatile double yawrated;
+extern volatile uint8_t traj_mode;
+extern volatile uint8_t wheel_test_mode;
+extern volatile uint8_t pwm_test_mode;
+extern volatile uint8_t joystick_mode;
+extern double direction;
+extern double vdes;
+extern const double pion180;
 
 static int s_udp_socket = -1;
 static struct sockaddr_in s_dst_addr;
@@ -114,6 +134,94 @@ static volatile uint16_t s_last_traj_count = 0;
 static volatile bool s_last_traj_valid = false;
 static volatile uint32_t s_last_traj_seq = 0;
 static volatile uint32_t s_last_traj_rx_t_ms = 0;
+static volatile uint32_t s_last_joy_rx_t_ms = 0;
+static volatile bool s_joy_stream_live = false;
+
+static bool addr_is_pi5(const struct sockaddr_in *src)
+{
+    if (src == NULL)
+    {
+        return false;
+    }
+
+    return (src->sin_addr.s_addr == inet_addr(PI5_IP_ADDR));
+}
+
+static void stop_joystick_motion(void)
+{
+    taskENTER_CRITICAL();
+    vdes = 0.0;
+    vxd = 0.0;
+    vyd = 0.0;
+    yawrated = 0.0;
+    taskEXIT_CRITICAL();
+}
+
+static void apply_joystick_vector(uint16_t angle_deg, uint8_t speed_pct)
+{
+    if (speed_pct > 100u)
+    {
+        speed_pct = 100u;
+    }
+
+    const double speed_mps = ((double)speed_pct / 100.0) * JOY_MAX_SPEED_MPS;
+    const double dir_rad = ((double)angle_deg * pion180) + JOY_DIR_OFFSET_RAD;
+
+    taskENTER_CRITICAL();
+    traj_mode = 0u;
+    wheel_test_mode = 0u;
+    pwm_test_mode = 0u;
+    direction = dir_rad;
+    vdes = speed_mps;
+    vxd = speed_mps * cos(dir_rad);
+    vyd = speed_mps * sin(dir_rad);
+    yawrated = 0.0;
+    taskEXIT_CRITICAL();
+}
+
+static void handle_joy_stream_cmd(uint16_t cmd_id,
+                                  const uint8_t *arg,
+                                  uint16_t arg_len,
+                                  const struct sockaddr_in *src)
+{
+    if (!addr_is_pi5(src))
+    {
+        return;
+    }
+
+    if (!joystick_mode)
+    {
+        return;
+    }
+
+    if (cmd_id == JOY_CMD_MODE_OFF)
+    {
+        stop_joystick_motion();
+        s_joy_stream_live = false;
+        return;
+    }
+
+    if (cmd_id == JOY_CMD_MODE_ON)
+    {
+        return;
+    }
+
+    if (cmd_id != JOY_CMD_VECTOR)
+    {
+        return;
+    }
+
+    if (arg == NULL || arg_len < JOY_VECTOR_ARG_LEN)
+    {
+        return;
+    }
+
+    const uint16_t angle_deg = (uint16_t)arg[0] | ((uint16_t)arg[1] << 8);
+    const uint8_t speed_pct = arg[2];
+    apply_joystick_vector(angle_deg, speed_pct);
+    s_last_joy_rx_t_ms = HAL_GetTick();
+    s_joy_stream_live = true;
+}
 
 static bool time_elapsed(uint32_t now, uint32_t start, uint32_t interval_ms)
 {
@@ -301,7 +409,10 @@ static void handle_traj_message(const MessageHeader *msg_hdr, const uint8_t *pay
     taskEXIT_CRITICAL();
 }
 
-static void handle_cmd_message(const MessageHeader *hdr, const uint8_t *payload, uint32_t payload_len)
+static void handle_cmd_message(const MessageHeader *hdr,
+                               const uint8_t *payload,
+                               uint32_t payload_len,
+                               const struct sockaddr_in *src)
 {
     if (payload_len < sizeof(CommandPayload))
     {
@@ -316,6 +427,8 @@ static void handle_cmd_message(const MessageHeader *hdr, const uint8_t *payload,
     }
 
     const uint8_t *arg = payload + sizeof(CommandPayload);
+
+    handle_joy_stream_cmd(cmd->cmd_id, arg, arg_len, src);
 
     taskENTER_CRITICAL();
     if (cmd->cmd_id == s_cmd_id && hdr->seq == s_cmd_seq)
@@ -340,7 +453,10 @@ static void handle_cmd_message(const MessageHeader *hdr, const uint8_t *payload,
     }
 }
 
-static void handle_received_message(const MessageHeader *hdr, const uint8_t *payload, uint32_t payload_len)
+static void handle_received_message(const MessageHeader *hdr,
+                                    const uint8_t *payload,
+                                    uint32_t payload_len,
+                                    const struct sockaddr_in *src)
 {
     if (hdr->msg_type == MSG_TYPE_TRAJ)
     {
@@ -348,7 +464,7 @@ static void handle_received_message(const MessageHeader *hdr, const uint8_t *pay
     }
     else if (hdr->msg_type == MSG_TYPE_CMD)
     {
-        handle_cmd_message(hdr, payload, payload_len);
+        handle_cmd_message(hdr, payload, payload_len, src);
     }
 }
 
@@ -388,7 +504,7 @@ static void udp_receive_nonblocking(void)
             }
 
             uint32_t total = HEADER_SIZE + hdr.payload_len;
-            handle_received_message(&hdr, payload, hdr.payload_len);
+            handle_received_message(&hdr, payload, hdr.payload_len, &src);
             offset += total;
         }
     }
@@ -512,7 +628,7 @@ static int udp_bind_socket(int sock)
     struct sockaddr_in local_addr;
     memset(&local_addr, 0, sizeof(local_addr));
     local_addr.sin_family = AF_INET;
-    local_addr.sin_port = 0;  // Let system assign port for sending
+    local_addr.sin_port = htons(STM32_CMD_LISTEN_PORT);
     local_addr.sin_addr.s_addr = INADDR_ANY;
 
     if (bind(sock, (struct sockaddr *)&local_addr, sizeof(local_addr)) < 0)
@@ -798,6 +914,16 @@ void UDP_Client_Task(void *argument)
         }
 
         udp_receive_nonblocking();
+
+        if (!joystick_mode)
+        {
+            s_joy_stream_live = false;
+        }
+        else if (s_joy_stream_live && time_elapsed(now, s_last_joy_rx_t_ms, JOY_STREAM_TIMEOUT_MS))
+        {
+            stop_joystick_motion();
+            s_joy_stream_live = false;
+        }
 
         /*if (time_elapsed(now, next_diag_log_ms, 0))
         {

@@ -39,7 +39,8 @@ typedef enum {
     CMD_START_TERMINAL_PASSTHROUGH = 10,
     CMD_TERMINAL_PASSTHROUGH_DATA = 11,
     CMD_STOP_TERMINAL_PASSTHROUGH = 12,
-    CMD_WP_TEST_PATTERN = 13
+    CMD_WP_TEST_PATTERN = 13,
+    CMD_TOGGLE_JOYSTICK = 14
 } CommandID;
 
 typedef struct __attribute__((packed))

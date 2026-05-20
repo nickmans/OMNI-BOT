@@ -126,6 +126,8 @@ static void cmd_speed(const char *args);
 static void cmd_term(const char *args);
 static void cmd_wp(const char *args);
 
+static void cmd_joy(const char *args);
+
 /* -------------------------- Command table ----------------------------- */
 /*
  * Edit this table to suit your project.
@@ -150,6 +152,7 @@ static const cmd_entry_t s_cmdTable[] =
     { 14, "term", "Open Pi terminal passthrough; send * to exit", cmd_term },
     { 15, "pwm", "pwm <wheel:1..3> <ratio:-1..1> | pwm off", cmd_pwm },
     { 16, "wp", "wp t = generate 50 centered test waypoints on Pi", cmd_wp },
+    { 17, "joy", "Toggle Pi joystick stream bridge", cmd_joy },
 
 };
 static const size_t s_cmdTableCount = sizeof(s_cmdTable) / sizeof(s_cmdTable[0]);
@@ -501,6 +504,7 @@ volatile int8_t wheel_test_index = 0;
 volatile double wheel_test_target_rpm = 38.2;
 volatile uint8_t pwm_test_mode = 0;
 volatile double pwm_test_ratio[3] = {0.0, 0.0, 0.0};
+volatile uint8_t joystick_mode = 0;
 double vdes = 0;
 static double s_cmd_slow_speed_mps = 0.4;
 
@@ -911,6 +915,34 @@ static void cmd_wp(const char *args)
     }
 
     CMD_Send("wp arg must be t\r\n");
+}
+
+static void cmd_joy(const char *args)
+{
+    if (args)
+    {
+        while (isspace((unsigned char)*args)) { args++; }
+        if (*args != '\0')
+        {
+            CMD_Send("joy takes no args\r\n");
+            return;
+        }
+    }
+
+    joystick_mode = (uint8_t)!joystick_mode;
+    traj_mode = 0u;
+    wheel_test_mode = 0u;
+    pwm_test_mode = 0u;
+    vdes = 0.0;
+    vxd = 0.0;
+    vyd = 0.0;
+    yawrated = 0.0;
+
+    UDP_Client_InvalidateLatestTraj();
+    UDP_Client_RequestCmd(CMD_TOGGLE_JOYSTICK);
+
+    CMD_Printf("joy: joystick bridge toggle sent to Pi5 (%s)\r\n",
+               joystick_mode ? "on" : "off");
 }
 
 static void cmd_speed(const char *args)
