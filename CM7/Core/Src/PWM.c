@@ -7,11 +7,11 @@ extern TIM_HandleTypeDef htim2;
 
 // Unloaded wheel starts near ~8 RPM; keep assist active below that and add
 // margin for on-ground normal force.
-static const double DB_RPM       = 6.5;
-static const double DIR_DB_RPM   = 2.5;
+static const double DB_RPM       = 5.0;
+static const double DIR_DB_RPM   = 3.0;
 
-// MD20A with motor constants from cmd.h (currently Pololu 37D 24V 50:1)
-static const double Kp = 4.4, Ki = 9.5;
+// MD20A with Saturn 5303 motor constants from cmd.h
+static const double Kp = 3.6, Ki = 12.0;
 static const double RPM_FS[3] = {
     SATURN5303_NO_LOAD_RPM,
     SATURN5303_NO_LOAD_RPM,
@@ -27,10 +27,10 @@ static const double sixtyon2pi = 9.54929658551;
 
 #define ZERO_GUARD_RPM  1.0
 
-static const double ERR_FAST_RPM = 24.0;
-static const double KP_FAST_MULT = 1.25;
-static const double KI_FAST_MULT = 1.35;
-static const double BREAKAWAY_RPM = 28.0;
+static const double ERR_FAST_RPM = 18.0;
+static const double KP_FAST_MULT = 1.35;
+static const double KI_FAST_MULT = 1.60;
+static const double BREAKAWAY_RPM = 20.0;
 static const double BREAKAWAY_PWM_GAIN = 0.1;
 static const double NEG_INTEG_CAP_RATIO = 0.50;
 static const double ENC_LOSS_CMD_RPM = 14.0;

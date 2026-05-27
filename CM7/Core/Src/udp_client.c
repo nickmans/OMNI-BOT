@@ -26,8 +26,8 @@ extern struct netif gnetif;
 #define UDP_POSE_PERIOD_MS          1000u
 #define UDP_SOCKET_RETRY_MIN_MS     100u
 #define UDP_SOCKET_RETRY_MAX_MS     5000u
-#define UDP_CMD_RETRY_COUNT         3u
-#define UDP_CMD_RETRY_INTERVAL_MS   100u
+#define UDP_CMD_RETRY_COUNT         120u
+#define UDP_CMD_RETRY_INTERVAL_MS   250u
 #define UDP_RX_BUFFER_SIZE          1500u
 #ifndef UDP_MAX_TRAJ_KNOTS
 #define UDP_MAX_TRAJ_KNOTS          64u
@@ -189,19 +189,33 @@ static void handle_joy_stream_cmd(uint16_t cmd_id,
         return;
     }
 
-    if (!joystick_mode)
-    {
-        return;
-    }
-
     if (cmd_id == JOY_CMD_MODE_OFF)
     {
+        taskENTER_CRITICAL();
+        joystick_mode = 0u;
+        taskEXIT_CRITICAL();
         stop_joystick_motion();
         s_joy_stream_live = false;
         return;
     }
 
     if (cmd_id == JOY_CMD_MODE_ON)
+    {
+        taskENTER_CRITICAL();
+        joystick_mode = 1u;
+        traj_mode = 0u;
+        wheel_test_mode = 0u;
+        pwm_test_mode = 0u;
+        vdes = 0.0;
+        vxd = 0.0;
+        vyd = 0.0;
+        yawrated = 0.0;
+        taskEXIT_CRITICAL();
+        s_joy_stream_live = false;
+        return;
+    }
+
+    if (!joystick_mode)
     {
         return;
     }
@@ -873,13 +887,16 @@ void UDP_Client_Task(void *argument)
 
         if (s_cmd_pending)
         {
-            if (s_cmd_retry_left > 0 && time_elapsed(now, s_cmd_last_tx_ms, UDP_CMD_RETRY_INTERVAL_MS))
+            if (link_up && s_cmd_retry_left > 0 && time_elapsed(now, s_cmd_last_tx_ms, UDP_CMD_RETRY_INTERVAL_MS))
             {
                 send_cmd_packet(s_cmd_id, s_cmd_seq, NULL, 0u);
                 s_cmd_last_tx_ms = now;
                 s_cmd_retry_left--;
                 if (s_cmd_retry_left == 0)
                 {
+                    printf("udp: cmd id=%u seq=%lu timed out (no ack)\r\n",
+                           (unsigned)s_cmd_id,
+                           (unsigned long)s_cmd_seq);
                     s_cmd_pending = false;
                 }
             }

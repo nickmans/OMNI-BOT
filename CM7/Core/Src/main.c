@@ -1085,6 +1085,8 @@ void BSP_PB_Callback(Button_TypeDef Button)
 }
 double x[3] = {0},xd[5] = {0},u_out[3] = {0};
 double vd[3] = {0};
+static volatile int32_t s_enc_delta_raw[3] = {0, 0, 0};
+
 static void enc(double dt, double rpm[3])
 {
 	int32_t cnt1	 = (int32_t)__HAL_TIM_GET_COUNTER(&htim3);
@@ -1098,6 +1100,10 @@ static void enc(double dt, double rpm[3])
 	int32_t cnt3	 = (int32_t)__HAL_TIM_GET_COUNTER(&htim8);
 	int32_t delta3 = cnt3 - CNT_MID;
 	__HAL_TIM_SET_COUNTER(&htim8, CNT_MID);
+
+  s_enc_delta_raw[0] = delta1;
+  s_enc_delta_raw[1] = delta2;
+  s_enc_delta_raw[2] = delta3;
 
   static double t_since_edge_s[3] = {0.0, 0.0, 0.0};
   static double rpm_period[3] = {0.0, 0.0, 0.0};
@@ -1290,7 +1296,6 @@ void remote(void *argument)
   const TickType_t period = pdMS_TO_TICKS(tick); // 100 Hz
 	const TickType_t wheelStallHoldTime = pdMS_TO_TICKS(250);
 	const TickType_t yawKickTime = pdMS_TO_TICKS(400);
-  const TickType_t pwmEncPrintPeriod = pdMS_TO_TICKS(500);
 	const double wheelStallRpmThreshold = 3.0;
 	const double movingSpeedThreshold = 1e-3;
 	TickType_t lastWakeTime = xTaskGetTickCount();
@@ -1298,7 +1303,6 @@ void remote(void *argument)
   TickType_t lastPoseTick = xTaskGetTickCount();
   const TickType_t batteryPeriod = pdMS_TO_TICKS(60000);
   TickType_t lastBatteryTick = xTaskGetTickCount();
-  TickType_t lastPwmEncPrintTick = xTaskGetTickCount();
   TickType_t wheelStallStartTick = 0;
   TickType_t yawKickEndTick = 0;
   uint8_t yawKickActive = 0u;
@@ -1340,7 +1344,7 @@ void remote(void *argument)
       if ((nowTick - lastBatteryTick) >= batteryPeriod)
       {
         battery_v = (double)BatteryMonitor_ReadVoltage_V();
-        const double battery_scaled_max_rpm = (battery_v / 24.8) * POLULU37D50_NO_LOAD_RPM_24V;
+        const double battery_scaled_max_rpm = (battery_v / 24.8) * SATURN5303_NO_LOAD_RPM;
         PWM_SetMaxRpmLimit(battery_scaled_max_rpm);
         lastBatteryTick = nowTick;
         //printf(" Battery: %.2f V \n",battery_v);
@@ -1479,21 +1483,14 @@ void remote(void *argument)
           speed[0] = 0.0;
           speed[1] = 0.0;
           speed[2] = 0.0;
-
-          if ((nowTick - lastPwmEncPrintTick) >= pwmEncPrintPeriod)
+          static int cunttter = 0;
+          if (cunttter++ > 50)
           {
-            lastPwmEncPrintTick = nowTick;
-            char enc_msg[96];
-            (void)snprintf(enc_msg,
-                           sizeof(enc_msg),
-                           "enc %.1f %.1f %.1f\r\n",
-                           rpm[0],
-                           rpm[1],
-                           rpm[2]);
-            CMD_Send(enc_msg);
+              cunttter = 0;
+              printf("%.1f %.1f %.1f\n", rpm[0], rpm[1], rpm[2]);
           }
         }
-        else if (wheel_test_mode)
+        if (wheel_test_mode)
         {
           int idx = (wheel_test_index >= 0 && wheel_test_index < 3) ? wheel_test_index : 0;
 

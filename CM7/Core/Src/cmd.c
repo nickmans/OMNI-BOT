@@ -285,8 +285,8 @@ static void CMD_Task(void *argument)
 
     for (;;)
     {
-        // Sleep until we get at least one byte
-        (void)ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+        // Wake periodically so delayed startup actions can run even without RX traffic.
+        (void)ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(50));
 
         // Drain ring buffer
         uint8_t b;
@@ -833,6 +833,11 @@ static void cmd_pwm(const char *args)
     speed[0] = 0.0;
     speed[1] = 0.0;
     speed[2] = 0.0;
+
+    // Single-wheel pwm test command: clear stale ratios before setting target wheel.
+    pwm_test_ratio[0] = 0.0;
+    pwm_test_ratio[1] = 0.0;
+    pwm_test_ratio[2] = 0.0;
 
     pwm_test_ratio[(uint32_t)(wheel - 1)] = ratio;
     pwm_test_mode = 1u;

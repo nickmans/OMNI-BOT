@@ -30,7 +30,7 @@
 ../Core/Src/cmd.c:701:13:cmd_term	16	static
 ../Core/Src/cmd.c:714:13:cmd_wtest	40	static
 ../Core/Src/cmd.c:773:13:cmd_pwm	40	static
-../Core/Src/cmd.c:843:13:cmd_map	24	static
-../Core/Src/cmd.c:900:13:cmd_wp	16	static
-../Core/Src/cmd.c:920:13:cmd_joy	16	static
-../Core/Src/cmd.c:948:13:cmd_speed	32	static
+../Core/Src/cmd.c:848:13:cmd_map	24	static
+../Core/Src/cmd.c:905:13:cmd_wp	16	static
+../Core/Src/cmd.c:925:13:cmd_joy	16	static
+../Core/Src/cmd.c:953:13:cmd_speed	32	static

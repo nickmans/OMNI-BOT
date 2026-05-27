@@ -13,8 +13,9 @@ void BatteryMonitor_Init(void)
 float BatteryMonitor_ReadVoltage_V(void)
 {
 	const uint32_t adc_full_scale = 65535u;
-	const float vref = 3.3f;
-	const float battery_divider_scale = 11.0f;
+	/* Calibrated from measured points: Vin=24.0V, ADC node=2.22V, reported=25.03V. */
+	const float vref = 3.22f;
+	const float battery_divider_scale = 10.81f;
 
 	if (HAL_ADC_Start(&hadc2) != HAL_OK)
 	{
