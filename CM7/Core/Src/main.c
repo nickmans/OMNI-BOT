@@ -1295,9 +1295,9 @@ void remote(void *argument)
   const uint32_t trajDeadmanTimeoutMs = 700u;
   const TickType_t period = pdMS_TO_TICKS(tick); // 100 Hz
 	const TickType_t wheelStallHoldTime = pdMS_TO_TICKS(250);
-	const TickType_t yawKickTime = pdMS_TO_TICKS(400);
+	const TickType_t yawKickTime = pdMS_TO_TICKS(520);
 	const double wheelStallRpmThreshold = 3.0;
-	const double movingSpeedThreshold = 1e-3;
+  const double requestedMotionThreshold = 1e-3;
 	TickType_t lastWakeTime = xTaskGetTickCount();
   const TickType_t posePeriod = pdMS_TO_TICKS(100); // 10 Hz pose heartbeat
   TickType_t lastPoseTick = xTaskGetTickCount();
@@ -1332,10 +1332,10 @@ void remote(void *argument)
 	    enc(dt,rpm);
       /*static int cunttter = 0;
       if (cunttter++ > 50)
-      {
+      { 
         cunttter = 0;
-        printf("%.1f %.1f %.1f\n", rpm[0], rpm[1], rpm[2]);
-      }*/
+        printf("%.2f %.2f\n", yaw, yawrate);
+      } */
       /*rpm[0] = speed[0]*60/(2*M_PI);
       rpm[1] = speed[1]*60/(2*M_PI);
       rpm[2] = speed[2]*60/(2*M_PI);*/
@@ -1370,7 +1370,13 @@ void remote(void *argument)
 
       if (yawKickActive)
       {
-        if ((nowTick - yawKickEndTick) < ((TickType_t)0xFFFFFFFF / 2u))
+        if (!yaw_kick_enabled)
+        {
+          yawrated = yawrateBeforeKick;
+          yawKickActive = 0u;
+          wheelStallStartTick = 0;
+        }
+        else if ((nowTick - yawKickEndTick) < ((TickType_t)0xFFFFFFFF / 2u))
         {
           yawrated = yawrateBeforeKick;
           yawKickActive = 0u;
@@ -1382,7 +1388,7 @@ void remote(void *argument)
         }
       }
 
-      const double yaw_rad = yaw * pion180 + yaw_shifter;
+      const double yaw_rad = yaw * pion180;
 
       // Rising edge: enter trajectory-follow mode
       if ((last_traj_mode == 0u) && (cur_traj_mode == 1u))
@@ -1393,19 +1399,20 @@ void remote(void *argument)
       }
       last_traj_mode = cur_traj_mode;
 
-      if ((cur_traj_mode == 0u) && !wheel_test_mode && !pwm_test_mode && !yawKickActive)
+      if (yaw_kick_enabled && (cur_traj_mode == 0u) && !wheel_test_mode && !pwm_test_mode && !yawKickActive)
       {
         const uint8_t moving =
-            (fabs(speed[0]) > movingSpeedThreshold) ||
-            (fabs(speed[1]) > movingSpeedThreshold) ||
-            (fabs(speed[2]) > movingSpeedThreshold);
+          (fabs(vxd) > requestedMotionThreshold) ||
+          (fabs(vyd) > requestedMotionThreshold);
 
-        const uint8_t wheelSlow =
-            (fabs(rpm[0]) <= wheelStallRpmThreshold) ||
-            (fabs(rpm[1]) <= wheelStallRpmThreshold) ||
-            (fabs(rpm[2]) <= wheelStallRpmThreshold);
+        const uint8_t wheel0Slow = (fabs(rpm[0]) <= wheelStallRpmThreshold);
+        const uint8_t wheel1Slow = (fabs(rpm[1]) <= wheelStallRpmThreshold);
+        const uint8_t wheel2Slow = (fabs(rpm[2]) <= wheelStallRpmThreshold);
+        const uint8_t slowWheelCount =
+            (uint8_t)wheel0Slow + (uint8_t)wheel1Slow + (uint8_t)wheel2Slow;
+        const uint8_t exactlyOneWheelSlow = (slowWheelCount == 1u);
 
-        if (moving && wheelSlow)
+        if (moving && exactlyOneWheelSlow)
         {
           if (wheelStallStartTick == 0)
           {

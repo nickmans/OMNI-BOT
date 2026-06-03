@@ -1,0 +1,12 @@
+make: Entering directory '/home/nickolas/OMNI-BOT/CM7/Debug'
+arm-none-eabi-gcc "../../Middlewares/Third_Party/LwIP/src/core/altcp.c" -mcpu=cortex-m7 -std=gnu11 -g3 -DDEBUG -DCORE_CM7 -DUSE_HAL_DRIVER -DSTM32H755xx -DUSE_PWR_DIRECT_SMPS_SUPPLY -DUSE_NUCLEO_144 -DSTM32_THREAD_SAFE_STRATEGY=4 -c -I../Core/Inc -I../../Drivers/STM32H7xx_HAL_Driver/Inc -I../../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I../../Drivers/BSP/STM32H7xx_Nucleo -I../../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I../../Drivers/CMSIS/Include -I../Core/ThreadSafe -I../../Middlewares/Third_Party/FreeRTOS/Source/include -I../../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 -I../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F -I../LWIP/App -I../LWIP/Target -I../../Middlewares/Third_Party/LwIP/src/include -I../../Middlewares/Third_Party/LwIP/system -I../../Middlewares/Third_Party/LwIP/src/include/netif/ppp -I../../Middlewares/Third_Party/LwIP/src/include/lwip -I../../Middlewares/Third_Party/LwIP/src/include/lwip/apps -I../../Middlewares/Third_Party/LwIP/src/include/lwip/priv -I../../Middlewares/Third_Party/LwIP/src/include/lwip/prot -I../../Middlewares/Third_Party/LwIP/src/include/netif -I../../Middlewares/Third_Party/LwIP/src/include/compat/posix -I../../Middlewares/Third_Party/LwIP/src/include/compat/posix/arpa -I../../Middlewares/Third_Party/LwIP/src/include/compat/posix/net -I../../Middlewares/Third_Party/LwIP/src/include/compat/posix/sys -I../../Middlewares/Third_Party/LwIP/src/include/compat/stdc -I../../Middlewares/Third_Party/LwIP/system/arch -I../../Drivers/BSP/Components/lan8742 -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage  -MMD -MP -MF"Middlewares/Third_Party/LwIP/altcp.d" -MT"Middlewares/Third_Party/LwIP/altcp.o" --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -o "Middlewares/Third_Party/LwIP/altcp.o"
+In file included from ../../Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo.h:30,
+                 from ../Core/Inc/main.h:32,
+                 from ../LWIP/Target/lwipopts.h:25,
+                 from ../../Middlewares/Third_Party/LwIP/src/include/lwip/opt.h:51,
+                 from ../../Middlewares/Third_Party/LwIP/src/core/altcp.c:117:
+../Core/Inc/stm32h7xx_nucleo_conf.h:47: warning: "USE_NUCLEO_144" redefined
+   47 | #define USE_NUCLEO_144
+      | 
+<command-line>: note: this is the location of the previous definition
+make: Leaving directory '/home/nickolas/OMNI-BOT/CM7/Debug'

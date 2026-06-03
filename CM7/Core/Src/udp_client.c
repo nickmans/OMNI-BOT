@@ -51,7 +51,9 @@ extern struct netif gnetif;
 #define JOY_CMD_MODE_ON             100u
 #define JOY_CMD_MODE_OFF            101u
 #define JOY_CMD_VECTOR              102u
+#define JOY_CMD_SPIN                103u
 #define JOY_VECTOR_ARG_LEN          3u
+#define JOY_SPIN_ARG_LEN            1u
 #define JOY_STREAM_TIMEOUT_MS       300u
 #define JOY_MAX_SPEED_MPS           0.90
 #define JOY_DIR_OFFSET_RAD          0.2617993877991494
@@ -136,6 +138,7 @@ static volatile uint32_t s_last_traj_seq = 0;
 static volatile uint32_t s_last_traj_rx_t_ms = 0;
 static volatile uint32_t s_last_joy_rx_t_ms = 0;
 static volatile bool s_joy_stream_live = false;
+static volatile uint8_t s_joy_spin_level = 0u;
 
 static bool addr_is_pi5(const struct sockaddr_in *src)
 {
@@ -153,6 +156,7 @@ static void stop_joystick_motion(void)
     vdes = 0.0;
     vxd = 0.0;
     vyd = 0.0;
+    s_joy_spin_level = 0u;
     yawrated = 0.0;
     taskEXIT_CRITICAL();
 }
@@ -175,7 +179,15 @@ static void apply_joystick_vector(uint16_t angle_deg, uint8_t speed_pct)
     vdes = speed_mps;
     vxd = speed_mps * cos(dir_rad);
     vyd = speed_mps * sin(dir_rad);
-    yawrated = 0.0;
+    yawrated = (double)s_joy_spin_level;
+    taskEXIT_CRITICAL();
+}
+
+static void apply_joystick_spin(uint8_t spin_on)
+{
+    taskENTER_CRITICAL();
+    s_joy_spin_level = (spin_on > 2u) ? 2u : spin_on;
+    yawrated = (double)s_joy_spin_level;
     taskEXIT_CRITICAL();
 }
 
@@ -193,6 +205,7 @@ static void handle_joy_stream_cmd(uint16_t cmd_id,
     {
         taskENTER_CRITICAL();
         joystick_mode = 0u;
+        s_joy_spin_level = 0u;
         taskEXIT_CRITICAL();
         stop_joystick_motion();
         s_joy_stream_live = false;
@@ -203,6 +216,7 @@ static void handle_joy_stream_cmd(uint16_t cmd_id,
     {
         taskENTER_CRITICAL();
         joystick_mode = 1u;
+        s_joy_spin_level = 0u;
         traj_mode = 0u;
         wheel_test_mode = 0u;
         pwm_test_mode = 0u;
@@ -217,6 +231,19 @@ static void handle_joy_stream_cmd(uint16_t cmd_id,
 
     if (!joystick_mode)
     {
+        return;
+    }
+
+    if (cmd_id == JOY_CMD_SPIN)
+    {
+        if (arg == NULL || arg_len < JOY_SPIN_ARG_LEN)
+        {
+            return;
+        }
+
+        apply_joystick_spin(arg[0]);
+        s_last_joy_rx_t_ms = HAL_GetTick();
+        s_joy_stream_live = true;
         return;
     }
 
