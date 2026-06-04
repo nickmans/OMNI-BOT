@@ -1330,12 +1330,6 @@ void remote(void *argument)
 	    BNO_RVC_UpdateMain(&yaw, &yawrate, &ax, &ay, &az);
 
 	    enc(dt,rpm);
-      /*static int cunttter = 0;
-      if (cunttter++ > 50)
-      { 
-        cunttter = 0;
-        printf("%.2f %.2f\n", yaw, yawrate);
-      } */
       /*rpm[0] = speed[0]*60/(2*M_PI);
       rpm[1] = speed[1]*60/(2*M_PI);
       rpm[2] = speed[2]*60/(2*M_PI);*/
@@ -1389,7 +1383,12 @@ void remote(void *argument)
       }
 
       const double yaw_rad = yaw * pion180;
-
+      /*static int cunttter = 0;
+      if (cunttter++ > 50)
+      { 
+        cunttter = 0;
+        printf("%.2f\n", yaw);
+      } */
       // Rising edge: enter trajectory-follow mode
       if ((last_traj_mode == 0u) && (cur_traj_mode == 1u))
       {

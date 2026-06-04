@@ -38,9 +38,9 @@ void CMD_TerminalPassthroughRemoteClosed(void);
 // Wheel sign convention (model space):
 // +1.0 means electrical forward matches positive model wheel rotation.
 // -1.0 means wheel is mechanically/electrically inverted relative to model.
-#define WHEEL1_SIGN                     (+1.0)
-#define WHEEL2_SIGN                     (+1.0)
-#define WHEEL3_SIGN                     (+1.0)
+#define WHEEL1_SIGN                     (-1.0)
+#define WHEEL2_SIGN                     (-1.0)
+#define WHEEL3_SIGN                     (-1.0)
 
 // Wheel-test command polarity:
 // +1.0 => positive `wtest` RPM uses normal internal sign
@@ -50,9 +50,9 @@ void CMD_TerminalPassthroughRemoteClosed(void);
 
 // Encoder polarity from raw timer counts -> model wheel frame.
 // Set to -1.0 when a wheel's physical clockwise spin reports negative counts.
-#define ENC_WHEEL1_SIGN                 (-1.0)
-#define ENC_WHEEL2_SIGN                 (-1.0)
-#define ENC_WHEEL3_SIGN                 (-1.0)
+#define ENC_WHEEL1_SIGN                 (+1.0)
+#define ENC_WHEEL2_SIGN                 (+1.0)
+#define ENC_WHEEL3_SIGN                 (+1.0)
 
 extern volatile double speed[3];
 extern volatile double vxd;

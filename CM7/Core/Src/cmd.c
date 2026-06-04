@@ -438,12 +438,27 @@ static const cmd_entry_t *CMD_FindById(uint32_t id)
     return NULL;
 }
 
+static bool CMD_EqualsIgnoreCase(const char *a, const char *b)
+{
+    while ((*a != '\0') && (*b != '\0'))
+    {
+        if (tolower((unsigned char)*a) != tolower((unsigned char)*b))
+        {
+            return false;
+        }
+        a++;
+        b++;
+    }
+
+    return ((*a == '\0') && (*b == '\0'));
+}
+
 static const cmd_entry_t *CMD_FindByName(const char *name)
 {
     for (size_t i = 0; i < s_cmdTableCount; i++)
     {
         const char *n = s_cmdTable[i].name;
-        if (n && (strcmp(n, name) == 0)) return &s_cmdTable[i];
+        if (n && CMD_EqualsIgnoreCase(n, name)) return &s_cmdTable[i];
     }
     return NULL;
 }
@@ -559,8 +574,18 @@ void cmd_stop(const char *args)
 {
     (void)args;
     CMD_Send("Stop\r\n");
+    UDP_Client_InvalidateLatestTraj();
+    UDP_Client_RequestCmd(CMD_STOP_TRAJ);
+    traj_mode = 0u;
+    wheel_test_mode = 0u;
+    pwm_test_mode = 0u;
+    vdes = 0.0;
     vxd = 0;
     vyd = 0;
+    yawrated = 0.0;
+    speed[0] = 0.0;
+    speed[1] = 0.0;
+    speed[2] = 0.0;
 	//__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, NEUTRAL);
 }
 
