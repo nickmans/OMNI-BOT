@@ -52,6 +52,7 @@ extern struct netif gnetif;
 #define JOY_CMD_MODE_OFF            101u
 #define JOY_CMD_VECTOR              102u
 #define JOY_CMD_SPIN                103u
+#define JOY_CMD_FOCUS               104u
 #define JOY_VECTOR_ARG_LEN          3u
 #define JOY_SPIN_ARG_LEN            1u
 #define JOY_STREAM_TIMEOUT_MS       300u
@@ -106,6 +107,7 @@ extern volatile uint8_t traj_mode;
 extern volatile uint8_t wheel_test_mode;
 extern volatile uint8_t pwm_test_mode;
 extern volatile uint8_t joystick_mode;
+extern volatile uint8_t point_focus_mode;
 extern double direction;
 extern double vdes;
 extern const double pion180;
@@ -139,16 +141,6 @@ static volatile uint32_t s_last_traj_rx_t_ms = 0;
 static volatile uint32_t s_last_joy_rx_t_ms = 0;
 static volatile bool s_joy_stream_live = false;
 static volatile uint8_t s_joy_spin_level = 0u;
-
-static bool addr_is_pi5(const struct sockaddr_in *src)
-{
-    if (src == NULL)
-    {
-        return false;
-    }
-
-    return (src->sin_addr.s_addr == inet_addr(PI5_IP_ADDR));
-}
 
 static void stop_joystick_motion(void)
 {
@@ -196,18 +188,21 @@ static void handle_joy_stream_cmd(uint16_t cmd_id,
                                   uint16_t arg_len,
                                   const struct sockaddr_in *src)
 {
-    if (!addr_is_pi5(src))
-    {
-        return;
-    }
+    (void)src;
 
     if (cmd_id == JOY_CMD_MODE_OFF)
     {
         taskENTER_CRITICAL();
         joystick_mode = 0u;
+        point_focus_mode = 0u;
         s_joy_spin_level = 0u;
+        traj_mode = 1u;
+        wheel_test_mode = 0u;
+        pwm_test_mode = 0u;
         taskEXIT_CRITICAL();
         stop_joystick_motion();
+        UDP_Client_InvalidateLatestTraj();
+        UDP_Client_RequestCmd(CMD_START_TRAJ_LOCAL);
         s_joy_stream_live = false;
         return;
     }
@@ -216,6 +211,7 @@ static void handle_joy_stream_cmd(uint16_t cmd_id,
     {
         taskENTER_CRITICAL();
         joystick_mode = 1u;
+        point_focus_mode = 0u;
         s_joy_spin_level = 0u;
         traj_mode = 0u;
         wheel_test_mode = 0u;
@@ -225,7 +221,26 @@ static void handle_joy_stream_cmd(uint16_t cmd_id,
         vyd = 0.0;
         yawrated = 0.0;
         taskEXIT_CRITICAL();
+        UDP_Client_InvalidateLatestTraj();
+        UDP_Client_RequestCmd(CMD_START_RESTART_ROS2);
         s_joy_stream_live = false;
+        return;
+    }
+
+    if (cmd_id == JOY_CMD_FOCUS)
+    {
+        if (arg == NULL || arg_len < 1u)
+        {
+            CMD_Send("focus cmd ignored: arg must be 0 or 1\r\n");
+            return;
+        }
+
+        uint8_t focus_now = 0u;
+        taskENTER_CRITICAL();
+        point_focus_mode = (arg[0] != 0u) ? 1u : 0u;
+        focus_now = point_focus_mode;
+        taskEXIT_CRITICAL();
+        CMD_Send(focus_now ? "focus: on\r\n" : "focus: off\r\n");
         return;
     }
 

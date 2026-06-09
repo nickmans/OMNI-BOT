@@ -1298,6 +1298,7 @@ void remote(void *argument)
 	const TickType_t yawKickTime = pdMS_TO_TICKS(520);
 	const double wheelStallRpmThreshold = 3.0;
   const double requestedMotionThreshold = 1e-3;
+  const double pointFocusDistanceM = 1.0;
 	TickType_t lastWakeTime = xTaskGetTickCount();
   const TickType_t posePeriod = pdMS_TO_TICKS(100); // 10 Hz pose heartbeat
   TickType_t lastPoseTick = xTaskGetTickCount();
@@ -1307,6 +1308,10 @@ void remote(void *argument)
   TickType_t yawKickEndTick = 0;
   uint8_t yawKickActive = 0u;
   double yawrateBeforeKick = 0.0;
+  uint8_t last_point_focus_mode = 0u;
+  uint8_t point_focus_target_valid = 0u;
+  double point_focus_target_x_m = 0.0;
+  double point_focus_target_y_m = 0.0;
   uint16_t current_adc_raw[3] = {0u, 0u, 0u};
   float current_a[3] = {0.0f, 0.0f, 0.0f};
 
@@ -1317,9 +1322,10 @@ void remote(void *argument)
     CalibrateMotorCurrentBiasA(1000u);
   uint16_t current_sample_count = 0u;
   float current_sum_a[3] = {0.0f, 0.0f, 0.0f};
-  // Boot in manual mode (traj 0).
+  // Boot in autonomous blank-map mode (traj 3).
   UDP_Client_InvalidateLatestTraj();
-  traj_mode = 0u;
+  traj_mode = 1u;
+  UDP_Client_RequestCmd(CMD_START_TRAJ_LOCAL);
 	for (;;)
 	{
 	    vTaskDelayUntil(&lastWakeTime, period);
@@ -1361,6 +1367,7 @@ void remote(void *argument)
 	    
       static uint8_t last_traj_mode = 0u;
       const uint8_t cur_traj_mode = traj_mode;
+      const uint8_t cur_point_focus_mode = point_focus_mode;
 
       if (yawKickActive)
       {
@@ -1398,7 +1405,7 @@ void remote(void *argument)
       }
       last_traj_mode = cur_traj_mode;
 
-      if (yaw_kick_enabled && (cur_traj_mode == 0u) && !wheel_test_mode && !pwm_test_mode && !yawKickActive)
+      if (yaw_kick_enabled && (cur_traj_mode == 0u) && (cur_point_focus_mode == 0u) && !wheel_test_mode && !pwm_test_mode && !yawKickActive)
       {
         const uint8_t moving =
           (fabs(vxd) > requestedMotionThreshold) ||
@@ -1443,6 +1450,29 @@ void remote(void *argument)
       w_rad_s[1] = rpm[1] * twopion60;
       w_rad_s[2] = rpm[2] * twopion60;
       StateEstimator_Update(w_rad_s, (double)dt, yaw_rad, ax, ay, x);
+
+      if ((last_point_focus_mode == 0u) && (cur_point_focus_mode == 1u))
+      {
+        point_focus_target_x_m = x[0] + (pointFocusDistanceM * cos(x[2]));
+        point_focus_target_y_m = x[1] + (pointFocusDistanceM * sin(x[2]));
+        point_focus_target_valid = 1u;
+      }
+      else if (cur_point_focus_mode == 0u)
+      {
+        point_focus_target_valid = 0u;
+      }
+      last_point_focus_mode = cur_point_focus_mode;
+
+      double point_focus_yaw_des = x[2];
+      if (cur_point_focus_mode && point_focus_target_valid)
+      {
+        const double dx = point_focus_target_x_m - x[0];
+        const double dy = point_focus_target_y_m - x[1];
+        if ((fabs(dx) > 1e-6) || (fabs(dy) > 1e-6))
+        {
+          point_focus_yaw_des = atan2(dy, dx);
+        }
+      }
 
       /*{
         static int slip_dbg_counter = 0;
@@ -1522,10 +1552,23 @@ void remote(void *argument)
           // =====================
           // traj 0: remote/manual
           // =====================
-          vd[0] = vxd;
-          vd[1] = vyd;
-          vd[2] = yawrated;
-          Controller_Step(x, xd, vd, 0, dt);  // selector=0 for velocity control
+          if (cur_point_focus_mode)
+          {
+            // Keep manual translation commands, but close yaw to the locked world point.
+            xd[0] = x[0];
+            xd[1] = x[1];
+            xd[2] = point_focus_yaw_des;
+            xd[3] = vxd;
+            xd[4] = vyd;
+            Controller_Step(x, xd, vd, 1, dt);
+          }
+          else
+          {
+            vd[0] = vxd;
+            vd[1] = vyd;
+            vd[2] = yawrated;
+            Controller_Step(x, xd, vd, 0, dt);  // selector=0 for velocity control
+          }
       }
       else
       {
@@ -1607,6 +1650,11 @@ void remote(void *argument)
               // Use feedforward velocities directly from Pi5 trajectory planner
               xd[3] = lerp((double)k0->vx, (double)k1->vx, (double)alpha);
               xd[4] = lerp((double)k0->vy, (double)k1->vy, (double)alpha);
+          }
+
+          if (cur_point_focus_mode)
+          {
+            xd[2] = point_focus_yaw_des;
           }
 
           // Use trajectory mode selector=1
