@@ -91,6 +91,9 @@ static double du_prev[3] = {0};       // previous wheel delta (for jerk limiting
 static double yawrate_prev = 0.0;     // previous omega (yaw rate)
 static double u_prev[3] = {0};        // previous wheel command u
 static double u_trans_prev[3] = {0};  // previous translational wheel component
+static double yaw_prev_meas = 0.0;    // previous measured yaw for damping
+static uint8_t yaw_prev_valid = 0u;
+static uint8_t yaw_deadband_latched = 0u;
 
 void Controller_Step(const double           x[3],
                      const double           xd[5],
@@ -173,28 +176,45 @@ void Controller_Step(const double           x[3],
     // ================================
     // 3) YAW CONTROL
     // ================================
+    const double dt_safe = (dt > 1e-4) ? dt : 1e-3;
+    if (!yaw_prev_valid) {
+        yaw_prev_meas = yaw;
+        yaw_prev_valid = 1u;
+    }
+    const double yaw_rate_meas = wrapPi(yaw - yaw_prev_meas) / dt_safe;
+    yaw_prev_meas = yaw;
+
     double omega = 0;
     if (selector)
     {
 		const double e = wrapPi(yaw_d - yaw);
 
-		const double yaw_dead = (1.0 * M_PI / 180.0);  // 1 deg
-		const double yaw_lin  = (6.0 * M_PI / 180.0);  // 6 deg
+        const double yaw_dead_enter = (1.0 * M_PI / 180.0);  // latch in at 1 deg
+        const double yaw_dead_exit  = (2.0 * M_PI / 180.0);  // latch out at 2 deg
+        const double yaw_kp = 1.8;   // rad/s per rad
+        const double yaw_kd = 0.35;  // rad/s damping via measured yaw rate
 
-		const double ae = fabs(e);
-		if (ae < yaw_dead) {
-			omega = 0.0;
-		} else if (ae < yaw_lin) {
-			const double k_small = wmax / yaw_lin;
-			omega = k_small * e;
-		} else {
-			omega = wmax * signum(e);
-		}
+        const double ae = fabs(e);
+        if (yaw_deadband_latched) {
+            if (ae > yaw_dead_exit) {
+                yaw_deadband_latched = 0u;
+            }
+        } else {
+            if (ae < yaw_dead_enter) {
+                yaw_deadband_latched = 1u;
+            }
+        }
 
-		omega = clampd(omega, -wmax, wmax);
+        if (yaw_deadband_latched) {
+            omega = 0.0;
+        } else {
+            omega = (yaw_kp * e) - (yaw_kd * yaw_rate_meas);
+            omega = clampd(omega, -wmax, wmax);
+        }
     }
     else if (!selector)
     {
+        yaw_deadband_latched = 0u;
         omega = clampd(vd[2], -wmax, wmax);
     }
     // yaw accel limit
@@ -339,8 +359,10 @@ void Controller_Step(const double           x[3],
     u_prev[1]  = u_cmd[1];
     u_prev[2]  = u_cmd[2];
 
-    // Keep translational state aligned with what was actually commanded.
-    u_trans_prev[0] = u_cmd[0] - u_rot[0];
-    u_trans_prev[1] = u_cmd[1] - u_rot[1];
-    u_trans_prev[2] = u_cmd[2] - u_rot[2];
+    // Keep translational history tied to the intended translational component.
+    // Using (u_cmd - u_rot) leaks yaw accel/jerk lag into translation, which can
+    // create left-right dithering in focus/yaw-hold when commanded translation is zero.
+    u_trans_prev[0] = s_scale * u_trans[0];
+    u_trans_prev[1] = s_scale * u_trans[1];
+    u_trans_prev[2] = s_scale * u_trans[2];
 }

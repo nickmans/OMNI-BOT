@@ -129,6 +129,7 @@ static void cmd_wp(const char *args);
 static void cmd_joy(const char *args);
 static void cmd_yawkick(const char *args);
 static void cmd_focus(const char *args);
+static void cmd_face(const char *args);
 
 /* -------------------------- Command table ----------------------------- */
 /*
@@ -157,6 +158,7 @@ static const cmd_entry_t s_cmdTable[] =
     { 17, "joy", "Toggle Pi joystick stream bridge", cmd_joy },
     { 18, "yawkick", "yawkick <0|1> disables/enables yaw kick", cmd_yawkick },
     { 19, "focus", "focus <0|1> sets point-focus mode; focus status prints current state", cmd_focus },
+    { 20, "face", "face <0|1> sets face-forward mode; face status prints current state", cmd_face },
 
 };
 static const size_t s_cmdTableCount = sizeof(s_cmdTable) / sizeof(s_cmdTable[0]);
@@ -526,6 +528,7 @@ volatile double pwm_test_ratio[3] = {0.0, 0.0, 0.0};
 volatile uint8_t joystick_mode = 0;
 volatile uint8_t yaw_kick_enabled = 0;
 volatile uint8_t point_focus_mode = 0;
+volatile uint8_t face_forward_mode = 0;
 double vdes = 0;
 static double s_cmd_slow_speed_mps = 0.4;
 
@@ -549,7 +552,7 @@ static void cmd_dir(const char *args)
 
     if (end == args) return;
 
-    direction = deg * pion180 + 0.261799;   // radians + 15deg offset
+    direction = deg * pion180;
     vxd = vdes * cos(direction);
     vyd = vdes * sin(direction);
 }
@@ -1048,7 +1051,53 @@ static void cmd_focus(const char *args)
     }
 
     point_focus_mode = (uint8_t)value;
+    if (point_focus_mode)
+    {
+        face_forward_mode = 0u;
+    }
     CMD_Printf("focus: %s\r\n", point_focus_mode ? "on" : "off");
+}
+
+static void cmd_face(const char *args)
+{
+    if (args)
+    {
+        while (isspace((unsigned char)*args)) { args++; }
+    }
+
+    if (!args || *args == '\0')
+    {
+        CMD_Send("face usage: face <0|1>\r\n");
+        return;
+    }
+
+    if ((strcmp(args, "?") == 0) || (strcmp(args, "status") == 0))
+    {
+        CMD_Printf("face: %s\r\n", face_forward_mode ? "on" : "off");
+        return;
+    }
+
+    char *end = NULL;
+    long value = strtol(args, &end, 10);
+    if (end == args)
+    {
+        CMD_Send("face usage: face <0|1>\r\n");
+        return;
+    }
+
+    while (isspace((unsigned char)*end)) { end++; }
+    if ((*end != '\0') || ((value != 0) && (value != 1)))
+    {
+        CMD_Send("face arg must be 0 or 1\r\n");
+        return;
+    }
+
+    face_forward_mode = (uint8_t)value;
+    if (face_forward_mode)
+    {
+        point_focus_mode = 0u;
+    }
+    CMD_Printf("face: %s\r\n", face_forward_mode ? "on" : "off");
 }
 
 static void cmd_speed(const char *args)

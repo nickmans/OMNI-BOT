@@ -65,6 +65,7 @@ extern volatile uint8_t pwm_test_mode;
 extern volatile double pwm_test_ratio[3];
 extern volatile uint8_t yaw_kick_enabled;
 extern volatile uint8_t point_focus_mode;
+extern volatile uint8_t face_forward_mode;
 
 // 0 = remote/manual velocity control, 1 = follow incoming Pi5 trajectory
 extern volatile uint8_t traj_mode;

@@ -1298,7 +1298,7 @@ void remote(void *argument)
 	const TickType_t yawKickTime = pdMS_TO_TICKS(520);
 	const double wheelStallRpmThreshold = 3.0;
   const double requestedMotionThreshold = 1e-3;
-  const double pointFocusDistanceM = 1.0;
+  const double pointFocusDistanceM = 0.5;
 	TickType_t lastWakeTime = xTaskGetTickCount();
   const TickType_t posePeriod = pdMS_TO_TICKS(100); // 10 Hz pose heartbeat
   TickType_t lastPoseTick = xTaskGetTickCount();
@@ -1309,9 +1309,11 @@ void remote(void *argument)
   uint8_t yawKickActive = 0u;
   double yawrateBeforeKick = 0.0;
   uint8_t last_point_focus_mode = 0u;
+  uint8_t last_face_forward_mode = 0u;
   uint8_t point_focus_target_valid = 0u;
   double point_focus_target_x_m = 0.0;
   double point_focus_target_y_m = 0.0;
+  double face_forward_yaw_des = 0.0;
   uint16_t current_adc_raw[3] = {0u, 0u, 0u};
   float current_a[3] = {0.0f, 0.0f, 0.0f};
 
@@ -1368,6 +1370,7 @@ void remote(void *argument)
       static uint8_t last_traj_mode = 0u;
       const uint8_t cur_traj_mode = traj_mode;
       const uint8_t cur_point_focus_mode = point_focus_mode;
+      const uint8_t cur_face_forward_mode = face_forward_mode;
 
       if (yawKickActive)
       {
@@ -1462,6 +1465,20 @@ void remote(void *argument)
         point_focus_target_valid = 0u;
       }
       last_point_focus_mode = cur_point_focus_mode;
+
+      if ((last_face_forward_mode == 0u) && (cur_face_forward_mode == 1u))
+      {
+        face_forward_yaw_des = x[2];
+      }
+      last_face_forward_mode = cur_face_forward_mode;
+
+      if (cur_face_forward_mode)
+      {
+        if ((fabs(vxd) > 1e-6) || (fabs(vyd) > 1e-6))
+        {
+          face_forward_yaw_des = atan2(vyd, vxd);
+        }
+      }
 
       double point_focus_yaw_des = x[2];
       if (cur_point_focus_mode && point_focus_target_valid)
@@ -1558,6 +1575,16 @@ void remote(void *argument)
             xd[0] = x[0];
             xd[1] = x[1];
             xd[2] = point_focus_yaw_des;
+            xd[3] = vxd;
+            xd[4] = vyd;
+            Controller_Step(x, xd, vd, 1, dt);
+          }
+          else if (cur_face_forward_mode)
+          {
+            // Keep manual translation commands and align heading to command direction.
+            xd[0] = x[0];
+            xd[1] = x[1];
+            xd[2] = face_forward_yaw_des;
             xd[3] = vxd;
             xd[4] = vyd;
             Controller_Step(x, xd, vd, 1, dt);

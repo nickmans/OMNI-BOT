@@ -23,7 +23,7 @@ extern struct netif gnetif;
 #endif
 
 #define UDP_TASK_DELAY_MS           5u
-#define UDP_POSE_PERIOD_MS          1000u
+#define UDP_POSE_PERIOD_MS          100u
 #define UDP_SOCKET_RETRY_MIN_MS     100u
 #define UDP_SOCKET_RETRY_MAX_MS     5000u
 #define UDP_CMD_RETRY_COUNT         120u
@@ -53,11 +53,12 @@ extern struct netif gnetif;
 #define JOY_CMD_VECTOR              102u
 #define JOY_CMD_SPIN                103u
 #define JOY_CMD_FOCUS               104u
+#define JOY_CMD_FACE_FORWARD        105u
 #define JOY_VECTOR_ARG_LEN          3u
 #define JOY_SPIN_ARG_LEN            1u
 #define JOY_STREAM_TIMEOUT_MS       300u
 #define JOY_MAX_SPEED_MPS           0.90
-#define JOY_DIR_OFFSET_RAD          0.2617993877991494
+#define JOY_DIR_OFFSET_RAD          0.0
 
 typedef struct __attribute__((packed))
 {
@@ -108,6 +109,7 @@ extern volatile uint8_t wheel_test_mode;
 extern volatile uint8_t pwm_test_mode;
 extern volatile uint8_t joystick_mode;
 extern volatile uint8_t point_focus_mode;
+extern volatile uint8_t face_forward_mode;
 extern double direction;
 extern double vdes;
 extern const double pion180;
@@ -195,6 +197,7 @@ static void handle_joy_stream_cmd(uint16_t cmd_id,
         taskENTER_CRITICAL();
         joystick_mode = 0u;
         point_focus_mode = 0u;
+        face_forward_mode = 0u;
         s_joy_spin_level = 0u;
         traj_mode = 1u;
         wheel_test_mode = 0u;
@@ -212,6 +215,7 @@ static void handle_joy_stream_cmd(uint16_t cmd_id,
         taskENTER_CRITICAL();
         joystick_mode = 1u;
         point_focus_mode = 0u;
+        face_forward_mode = 0u;
         s_joy_spin_level = 0u;
         traj_mode = 0u;
         wheel_test_mode = 0u;
@@ -238,9 +242,34 @@ static void handle_joy_stream_cmd(uint16_t cmd_id,
         uint8_t focus_now = 0u;
         taskENTER_CRITICAL();
         point_focus_mode = (arg[0] != 0u) ? 1u : 0u;
+        if (point_focus_mode)
+        {
+            face_forward_mode = 0u;
+        }
         focus_now = point_focus_mode;
         taskEXIT_CRITICAL();
         CMD_Send(focus_now ? "focus: on\r\n" : "focus: off\r\n");
+        return;
+    }
+
+    if (cmd_id == JOY_CMD_FACE_FORWARD)
+    {
+        if (arg == NULL || arg_len < 1u)
+        {
+            CMD_Send("face cmd ignored: arg must be 0 or 1\r\n");
+            return;
+        }
+
+        uint8_t face_now = 0u;
+        taskENTER_CRITICAL();
+        face_forward_mode = (arg[0] != 0u) ? 1u : 0u;
+        if (face_forward_mode)
+        {
+            point_focus_mode = 0u;
+        }
+        face_now = face_forward_mode;
+        taskEXIT_CRITICAL();
+        CMD_Send(face_now ? "face: on\r\n" : "face: off\r\n");
         return;
     }
 
